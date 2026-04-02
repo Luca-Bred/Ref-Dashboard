@@ -978,6 +978,93 @@ footer {
 .modal-link.amber { background: var(--amber-dim); border-color: rgba(243,156,18,0.3);  color: var(--amber); }
 .modal-link.amber:hover { background: rgba(243,156,18,0.2); }
 
+  /* ===== Modal Upgrade ===== */
+.modal {
+  max-width: 1100px;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.modal-body {
+  padding: 1.25rem 1.5rem;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.modal-main,
+.modal-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.team-links-box,
+.info-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px;
+}
+
+.info-card-title,
+.team-links-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+
+.team-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-link {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--surface3);
+  border: 1px solid var(--border-med);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-weight: 600;
+  transition: all .15s ease;
+}
+
+.team-link:hover {
+  border-color: var(--border-hi);
+  background: rgba(46,204,113,0.08);
+  color: #fff;
+}
+
+.next-game-trigger {
+  cursor: pointer;
+}
+
+.next-game-trigger:hover .hstat-val,
+.next-game-trigger:hover .ov-val,
+.next-game-trigger:hover .ov-sub {
+  opacity: .92;
+}
+
+.modal-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+@media (max-width: 900px) {
+  .modal-body {
+    grid-template-columns: 1fr;
+  }
+}
+  
 /* clickable calendar cards */
 .kal-card { cursor: pointer; }
 
@@ -1057,7 +1144,8 @@ footer {
       <div class="header-stats">
         <div class="hstat"><div class="hstat-val">10</div><div class="hstat-label">Spiele</div></div>
         <div class="hstat"><div class="hstat-val">4</div><div class="hstat-label">Schulungen</div></div>
-        <div class="hstat" id="hstat-naechstes"><div class="hstat-val" style="color:var(--grass);font-size:14px">TSV Heimerdingen</div><div class="hstat-label">Nächstes Spiel · Heute 19:00</div></div>
+       <div class="hstat next-game-trigger" id="hstat-naechstes" data-idx="0"><div class="hstat-val" style="color:var(--grass);font-size:14px">TSV Heimerdingen</div><div class="hstat-label">Nächstes Spiel · Heute 19:00</div></div>
+        
       </div>
     </div>
   </div>
@@ -1065,7 +1153,7 @@ footer {
 
 <!-- OVERVIEW BAR -->
 <div class="overview-bar">
-  <div class="overview-inner">
+  <div class="ov-section next-game-trigger" id="overview-next-game" data-idx="0">
     <div class="ov-section">
       <div class="ov-label">Nächstes Spiel</div>
       <div class="ov-val green">Heute · 19:00 Uhr</div>
@@ -1962,6 +2050,76 @@ footer {
         <div class="md-time-col">
           <div class="md-dot"></div>
           <div class="md-time-label">0–20 Min<br>nach Abpfiff</div>
+          <div id="modal-backdrop" class="modal-backdrop" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModal()" aria-label="Schließen">×</button>
+      <div id="modal-date-badge" class="modal-date-badge"></div>
+      <div id="modal-title" class="modal-title"></div>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-main">
+        <div class="modal-row">
+          <div class="modal-row-icon">🕒</div>
+          <div class="modal-row-content">
+            <div class="modal-row-label">Anstoß</div>
+            <div id="modal-time" class="modal-row-val"></div>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-row-icon">📍</div>
+          <div class="modal-row-content">
+            <div class="modal-row-label">Adresse</div>
+            <div id="modal-addr" class="modal-row-val"></div>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-row-icon">🏟️</div>
+          <div class="modal-row-content">
+            <div class="modal-row-label">Spielort</div>
+            <div id="modal-venue" class="modal-row-val"></div>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-row-icon">⚽</div>
+          <div class="modal-row-content">
+            <div class="modal-row-label">Untergrund</div>
+            <div id="modal-surface" class="modal-row-val"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-side">
+        <div class="team-links-box">
+          <div class="team-links-title">Mannschaften</div>
+          <div class="team-links">
+            <a id="modal-home-team" class="team-link" href="#" target="_blank" rel="noopener noreferrer">Heimmannschaft</a>
+            <a id="modal-away-team" class="team-link" href="#" target="_blank" rel="noopener noreferrer">Gastmannschaft</a>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-title">Hinweis</div>
+          <div class="modal-note">
+            Route öffnet direkt von deinem Zuhause zum Spielort.  
+            Der Button <b>fussball.de</b> sucht nur die Heimmannschaft.  
+            Die Team-Links führen direkt zur FuPa-Clubseite.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-links">
+      <a id="modal-maps" class="modal-link green" href="#" target="_blank" rel="noopener noreferrer">Route von Zuhause</a>
+      <a id="modal-fussball" class="modal-link blue" href="#" target="_blank" rel="noopener noreferrer">fussball.de Heimteam</a>
+      <a id="modal-weather" class="modal-link amber" href="#" target="_blank" rel="noopener noreferrer">Wetter</a>
+    </div>
+  </div>
+</div>
           <div class="md-time-tag" style="background:var(--purple-bg);color:var(--purple-text);">Sofort</div>
         </div>
         <div class="md-content-col">
@@ -2157,28 +2315,95 @@ footer {
     });
   }
 
-  var MONTHS = ['Jan','Feb','Mar','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    var MONTHS = ['Jan','Feb','Mar','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   var WDAYS  = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+
+  var HOME_ADDRESS = 'Pfeilhofstrasse 5, 71364 Winnenden';
+
+  function cleanTeamName(team) {
+    return team
+      .replace(/\s*\(.*?\)\s*/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function splitTeams(title) {
+    var cleanTitle = title.replace(/\s*\(.*?\)\s*/g, '').trim();
+    var parts = cleanTitle.split(' – ');
+    return {
+      home: cleanTeamName(parts[0] || ''),
+      away: cleanTeamName(parts[1] || '')
+    };
+  }
+
+  function teamToFupaSlug(team) {
+    return cleanTeamName(team)
+      .toLowerCase()
+      .replace(/ä/g, 'ae')
+      .replace(/ö/g, 'oe')
+      .replace(/ü/g, 'ue')
+      .replace(/ß/g, 'ss')
+      .replace(/[.'&,/]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  }
+
+  function buildFupaClubUrl(team) {
+    return 'https://www.fupa.net/club/' + teamToFupaSlug(team);
+  }
+
+  function buildMapsRouteUrl(destination) {
+    return 'https://www.google.com/maps/dir/?api=1'
+      + '&origin=' + encodeURIComponent(HOME_ADDRESS)
+      + '&destination=' + encodeURIComponent(destination)
+      + '&travelmode=driving';
+  }
+
+  function buildWeatherUrl(venue, addr) {
+    return 'https://www.google.com/search?q=' + encodeURIComponent('Wetter ' + venue + ' ' + addr);
+  }
 
   function openModal(idx) {
     var g = GAMES[idx];
     if (!g) return;
-    var date = g[0], title = g[1], time = g[2], addr = g[3], venue = g[4], surface = g[5];
+
+    var date = g[0],
+        title = g[1],
+        time = g[2],
+        addr = g[3],
+        venue = g[4],
+        surface = g[5];
+
+    var teams = splitTeams(title);
+    var homeTeam = teams.home;
+    var awayTeam = teams.away;
+
     var d = new Date(date);
+
     document.getElementById('modal-date-badge').textContent =
       WDAYS[d.getDay()] + ', ' + d.getDate() + '. ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+
     document.getElementById('modal-title').textContent = title;
     document.getElementById('modal-time').textContent = time + ' Uhr';
     document.getElementById('modal-addr').textContent = addr;
     document.getElementById('modal-venue').textContent = venue;
     document.getElementById('modal-surface').textContent = surface;
-    document.getElementById('modal-maps').href =
-      'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr);
+
+    document.getElementById('modal-maps').href = buildMapsRouteUrl(addr);
     document.getElementById('modal-fussball').href =
-      'https://www.fussball.de/suche/-/query/' + encodeURIComponent(title);
-    var city = addr.split(',').pop().replace(/[0-9]/g,'').trim();
-    document.getElementById('modal-weather').href =
-      'https://www.wetter.de/suche/?q=' + encodeURIComponent(city);
+      'https://www.fussball.de/suche/-/query/' + encodeURIComponent(homeTeam);
+    document.getElementById('modal-weather').href = buildWeatherUrl(venue, addr);
+
+    var homeLink = document.getElementById('modal-home-team');
+    var awayLink = document.getElementById('modal-away-team');
+
+    homeLink.textContent = 'Heim: ' + homeTeam;
+    awayLink.textContent = 'Gast: ' + awayTeam;
+
+    homeLink.href = buildFupaClubUrl(homeTeam);
+    awayLink.href = buildFupaClubUrl(awayTeam);
+
     document.getElementById('modal-backdrop').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -2195,9 +2420,20 @@ footer {
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.kal-card[data-idx]').forEach(function(card) {
       card.addEventListener('click', function() {
-        openModal(parseInt(card.getAttribute('data-idx')));
+        openModal(parseInt(card.getAttribute('data-idx'), 10));
       });
     });
+
+    document.querySelectorAll('.next-game-trigger[data-idx]').forEach(function(el) {
+      el.addEventListener('click', function() {
+        openModal(parseInt(el.getAttribute('data-idx'), 10));
+      });
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+  });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeModal();
     });
