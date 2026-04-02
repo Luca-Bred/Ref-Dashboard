@@ -2050,7 +2050,57 @@ footer {
   Supplement & Ernährungs-Guide · Fußball-Schiedsrichter · Saison 2025/26<br>
   NAMEDSPORT via paul-lange.de · Externe Produkte: Sunday Natural / Naturtreu
 </footer>
+  
+<div id="modal-backdrop" class="modal-backdrop" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModal()" aria-label="Schließen">×</button>
+      <div id="modal-date-badge" class="modal-date-badge"></div>
+      <div id="modal-title" class="modal-title"></div>
+    </div>
 
+    <div class="modal-body">
+      <div class="modal-row">
+        <div class="modal-row-icon">🕒</div>
+        <div class="modal-row-content">
+          <div class="modal-row-label">Zeit</div>
+          <div id="modal-time" class="modal-row-val"></div>
+        </div>
+      </div>
+
+      <div class="modal-row">
+        <div class="modal-row-icon">📍</div>
+        <div class="modal-row-content">
+          <div class="modal-row-label">Adresse</div>
+          <div id="modal-addr" class="modal-row-val"></div>
+        </div>
+      </div>
+
+      <div class="modal-row">
+        <div class="modal-row-icon">🏟️</div>
+        <div class="modal-row-content">
+          <div class="modal-row-label">Spielort</div>
+          <div id="modal-venue" class="modal-row-val"></div>
+        </div>
+      </div>
+
+      <div class="modal-row">
+        <div class="modal-row-icon">⚽</div>
+        <div class="modal-row-content">
+          <div class="modal-row-label">Untergrund</div>
+          <div id="modal-surface" class="modal-row-val"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-links">
+      <a id="modal-maps" class="modal-link green" href="#" target="_blank" rel="noopener noreferrer">Google Maps</a>
+      <a id="modal-fussball" class="modal-link blue" href="#" target="_blank" rel="noopener noreferrer">fussball.de</a>
+      <a id="modal-weather" class="modal-link amber" href="#" target="_blank" rel="noopener noreferrer">Wetter</a>
+    </div>
+  </div>
+</div>
+  
 <script>
   var GAMES = [
     ["2026-04-02","TSV Heimerdingen – TSV Ilshofen (Herren)","19:00","Weissacher Str., 71254 Ditzingen","Rasen Weissacherstrasse","Rasenplatz"],
