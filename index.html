@@ -996,9 +996,9 @@ footer {
   <div class="next-game-trigger" data-idx="0" style="background:linear-gradient(135deg,rgba(46,204,113,0.12),rgba(46,204,113,0.04));border:1px solid rgba(46,204,113,0.3);border-radius:var(--r);overflow:hidden;margin-bottom:1rem;cursor:pointer;transition:border-color .2s;display:flex;align-items:stretch;">
     <div style="padding:1.5rem;flex:1">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:.4rem">Nächstes Spiel · Tippen für Details, Route &amp; Wetter</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem">TSV Heimerdingen – TSV Ilshofen</div>
-      <div style="font-size:13px;color:var(--text-2);margin-bottom:.875rem">Heute · 19:00 Uhr · Ditzingen · Rasenplatz</div>
-      <span style="background:var(--grass);color:#0a1f0e;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;font-family:'Barlow',sans-serif">Heute</span>
+      <div id="hero-title" style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem">TSV Heimerdingen – TSV Ilshofen</div>
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:.875rem"><span id="naechstes-datum">…</span> · Rasenplatz</div>
+      <span id="hero-badge" style="background:var(--grass);color:#0a1f0e;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;font-family:'Barlow',sans-serif">…</span>
     </div>
     <div style="width:160px;flex-shrink:0;position:relative;overflow:hidden">
       <img id="img-nextgame" src="img/sub7.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 35%">
@@ -1095,7 +1095,7 @@ footer {
           <div style="background:linear-gradient(135deg,rgba(46,204,113,0.1),rgba(46,204,113,0.03));border:1px solid rgba(46,204,113,0.35);border-radius:var(--r);padding:1.25rem">
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:.5rem">Nächster Einsatz</div>
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem">TSV Heimerdingen &ndash; TSV Ilshofen</div>
-            <div style="font-size:12px;color:var(--text-2)">Heute &middot; 19:00 Uhr &middot; Ditzingen</div>
+            <div style="font-size:12px;color:var(--text-2)"><span id="sr-datum">…</span></div>
             <div style="margin-top:.875rem;display:flex;gap:6px;flex-wrap:wrap">
               <a href="https://www.google.com/maps/dir/?api=1&origin=Backnang%2C+Deutschland&destination=Weissacher+Str.%2C+71254+Ditzingen&travelmode=driving" target="_blank" class="mlink mlink-green" style="font-size:11px;padding:5px 12px">&#x1F4CD; Route</a>
               <a href="https://www.fussball.de/suche/-/query/TSV+Heimerdingen" target="_blank" class="mlink mlink-blue" style="font-size:11px;padding:5px 12px">fussball.de</a>
@@ -1270,13 +1270,13 @@ footer {
           <button class="kal-filter" onclick="filterKal('spiel',this)">Spiele</button>
           <button class="kal-filter" onclick="filterKal('schulung',this)">Schulungen</button>
         </div>
-        <span class="kal-updated">Stand: 03.04.2026</span>
+        <span class="kal-updated" id="stand-datum">Stand: …</span>
       </div>
       <div class="kal-list" id="kal-list">
-      <div class="kal-card today-card" data-type="spiel" data-date="2026-04-02" data-idx="0">
+      <div class="kal-card" data-type="spiel" data-date="2026-04-02" data-idx="0">
         <div class="kal-date-col"><div class="kal-day">02</div><div class="kal-month">Apr</div><div class="kal-weekday">Do</div></div>
         <div class="kal-info"><div class="kal-title">TSV Heimerdingen – TSV Ilshofen (Herren)</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 20:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Rasen Weissacherstrasse &middot; Weissacher Str., 71254 Ditzingen</span></span></div></div>
-        <span class="kal-badge kb-heute">Heute</span>
+        <span class="kal-badge kb-spiel">Spiel</span>
       </div>
       <div class="kal-card" data-type="spiel" data-date="2026-04-04" data-idx="1">
         <div class="kal-date-col"><div class="kal-day">04</div><div class="kal-month">Apr</div><div class="kal-weekday">Sa</div></div>
@@ -2413,7 +2413,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   //  GOOGLE SHEETS SYNC
   //  Trage deine Web App URL hier ein nach dem Einrichten:
   // ══════════════════════════════════════════════════════════════
-  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwPV7_twk45P3OdkH5HAr4V3IXAy_j9c4njVWlPkAzxTz8M2-3UtkkT4jC4ZWHVIxLg/exec';  // <-- HIER deine Apps Script URL eintragen
+  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwPV7_twk45P3OdkH5HAr4V3IXAy_j9c4njVWlPkAzxTz8M2-3UtkkT4jC4ZWHVIxLg/exec';
 
   var _cache = {};  // lokaler Cache für offline-Betrieb
 
@@ -2826,6 +2826,92 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   document.addEventListener('DOMContentLoaded', function(){ srLoadNotes(); });
+
+  // ── DYNAMISCHES DATUM ────────────────────────────────────────
+  (function() {
+    var MONTHS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    var MONTHS_LONG = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var WDAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+    var WDAYS_LONG = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+
+    var now = new Date();
+    var todayStr = now.toISOString().slice(0,10);  // YYYY-MM-DD
+
+    // Stand-Datum
+    var standEl = document.getElementById('stand-datum');
+    if (standEl) {
+      standEl.textContent = 'Stand: '
+        + ('0'+now.getDate()).slice(-2) + '.'
+        + ('0'+(now.getMonth()+1)).slice(-2) + '.'
+        + now.getFullYear();
+    }
+
+    // Nächstes Spiel finden (erstes Spiel >= heute)
+    var nextGame = null;
+    var nextIdx  = -1;
+    if (typeof GAMES !== 'undefined') {
+      for (var i = 0; i < GAMES.length; i++) {
+        if (GAMES[i][0] >= todayStr) {
+          nextGame = GAMES[i];
+          nextIdx  = i;
+          break;
+        }
+      }
+    }
+
+    if (nextGame) {
+      var gd = new Date(nextGame[0]);
+      var isToday = (nextGame[0] === todayStr);
+      var dayLabel = isToday ? 'Heute' : (WDAYS[gd.getDay()] + ', ' + gd.getDate() + '. ' + MONTHS_LONG[gd.getMonth()]);
+      var city = nextGame[3].split(',').pop().replace(/[0-9]/g,'').trim();
+
+      // Hero badge
+      var badge = document.getElementById('hero-badge');
+      if (badge) badge.textContent = isToday ? 'Heute' : dayLabel;
+
+      // Hero date line
+      var heroDl = document.getElementById('hero-date-line');
+      if (heroDl) heroDl.textContent = (isToday ? 'Heute · ' : dayLabel + ' · ') + nextGame[2] + ' Uhr · ' + city;
+
+      // Übersicht next-game-trigger
+      var nd = document.getElementById('naechstes-datum');
+      if (nd) nd.textContent = (isToday ? 'Heute' : dayLabel) + ' · ' + nextGame[2] + ' Uhr · ' + city;
+
+      // SR tab
+      var srd = document.getElementById('sr-datum');
+      if (srd) srd.textContent = (isToday ? 'Heute' : dayLabel) + ' · ' + nextGame[2] + ' Uhr · ' + city;
+
+      // Update the next-game-trigger data-idx to point to correct game
+      document.querySelectorAll('.next-game-trigger').forEach(function(el){
+        el.setAttribute('data-idx', nextIdx);
+      });
+
+      // Update Übersicht game title
+      var heroTitle = document.getElementById('hero-title');
+      if (heroTitle && nextGame[1]) {
+        heroTitle.textContent = nextGame[1].replace(/ *\(.*?\) */g,'').trim();
+      }
+    }
+
+    // Mark today's card in kal-list
+    document.querySelectorAll('.kal-card').forEach(function(card) {
+      var cardDate = card.getAttribute('data-date');
+      if (cardDate === todayStr) {
+        card.classList.add('today-card');
+        var badge = card.querySelector('.kal-badge');
+        if (badge) { badge.className = 'kal-badge kb-heute'; badge.textContent = 'Heute'; }
+        var dateCol = card.querySelector('.kal-date-col');
+        if (dateCol) dateCol.style.background = 'var(--grass-dim)';
+      } else if (cardDate < todayStr) {
+        card.style.opacity = '0.55';
+      }
+    });
+
+    // Run default filter (upcoming)
+    var firstFilter = document.querySelector('.kal-filter');
+    if (firstFilter) filterKal('upcoming', firstFilter);
+  })();
+
 </script>
 </body>
 </html>
