@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""
+SR Dashboard – Kalender-Update-Script
+Liest den Google Calendar via iCal, filtert SR Training heraus,
+und aktualisiert die HTML-Datei automatisch.
+"""
+
+import os
+import re
+import json
+import requests
+from datetime import datetime, timezone, timedelta
+from icalendar import Calendar
+
+# ── Konfiguration ─────────────────────────────────────────────
+ICAL_URL   = os.environ.get('ICAL_URL', '')
+SHEETS_URL = os.environ.get('SHEETS_URL',
+    'https://script.google.com/macros/s/AKfycbwPV7_twk45P3OdkH5HAr4V3IXAy_j9c4njVWlPkAzxTz8M2-3UtkkT4jC4ZWHVIxLg/exec')
+HTML_FILE  = 'supplement-dashboard-schiedsrichter.html'
+
+MONTHS_DE = ['Jan','Feb','Mär','Apr','Mai','Jun',
+             'Jul','Aug','Sep','Okt','Nov','Dez']
+WDAYS_DE  = ['So','Mo','Di','Mi','Do','Fr','Sa']
+
+def fetch_events():
+    """Alle SR-Termine aus dem iCal laden, SR Training herausfiltern."""
+    if not ICAL_URL:
+        raise SystemExit('ICAL_URL nicht gesetzt! Als GitHub Secret hinterlegen.')
+
+    resp = requests.get(ICAL_URL, timeout=20)
+    resp.raise_for_status()
+    cal = Calendar.from_ical(resp.content)
+
+    events = []
+    now = datetime.now(timezone.utc).date()
+
+    for component in cal.walk():
+        if component.name != 'VEVENT':
+            continue
+
+        summary = str(component.get('SUMMARY', '')).strip()
+
+        # SR Training immer überspringen
+        if 'SR Training' in summary:
+            continue
+
+        # Datum ermitteln
+        start = component.get('DTSTART').dt
+        if hasattr(start, 'date'):
+            start = start.date()
+
+        # Vergangene Termine max. 2 Monate zurück behalten
+        cutoff_past = now - timedelta(days=60)
+        if start < cutoff_past:
+            continue
+
+        location = str(component.get('LOCATION', '')).strip()
+        description = str(component.get('DESCRIPTION', '')).strip()
+
+        # Venue und Untergrund aus description parsen
+        desc_lines = [l.strip() for l in description.replace('\\n', '\n').split('\n') if l.strip()]
+        venue   = desc_lines[0] if len(desc_lines) > 0 else ''
+        surface = desc_lines[1] if len(desc_lines) > 1 else ''
+
+        # Uhrzeit
+        dt = component.get('DTSTART').dt
+        if hasattr(dt, 'hour'):
+            berlin_offset = timedelta(hours=2)  # CEST
+            time_str = (dt + berlin_offset).strftime('%H:%M') if dt.tzinfo else dt.strftime('%H:%M')
+        else:
+            time_str = ''
+
+        dt_end = component.get('DTEND').dt
+        if hasattr(dt_end, 'hour'):
+            berlin_offset = timedelta(hours=2)
+            end_str = (dt_end + berlin_offset).strftime('%H:%M') if dt_end.tzinfo else dt_end.strftime('%H:%M')
+        else:
+            end_str = ''
+
+        # Typ bestimmen
+        if 'Schulung' in summary:
+            evt_type = 'schulung'
+        else:
+            evt_type = 'spiel'
+
+        events.append({
+            'type':    evt_type,
+            'date':    start.isoformat(),
+            'title':   summary,
+            'time':    time_str,
+            'end':     end_str,
+            'addr':    location,
+            'venue':   venue,
+            'surface': surface,
+        })
+
+    # Aufsteigend sortieren
+    events.sort(key=lambda e: e['date'])
+    return events
+
+
+def build_kal_cards(events):
+    """HTML für alle kal-cards erzeugen."""
+    cards = ''
+    game_idx = 0
+
+    for e in events:
+        d    = datetime.strptime(e['date'], '%Y-%m-%d')
+        day  = d.day
+        month = MONTHS_DE[d.month - 1]
+        wd   = WDAYS_DE[d.weekday() + 1 if d.weekday() < 6 else 0]
+
+        if e['type'] == 'spiel':
+            loc_html = ''
+            if e['addr']:
+                loc_html = (
+                    '<span class="kal-detail-item">'
+                    '<svg width="11" height="11" viewBox="0 0 16 16" fill="none">'
+                    '<path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s'
+                    '4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" '
+                    'stroke-width="1.5" fill="none"/>'
+                    '<circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg>'
+                    f'<span class="kal-location">{e["venue"]} &middot; {e["addr"]}</span>'
+                    '</span>'
+                )
+            cards += f'''
+      <div class="kal-card" data-type="spiel" data-date="{e['date']}" data-idx="{game_idx}">
+        <div class="kal-date-col"><div class="kal-day">{day:02d}</div><div class="kal-month">{month}</div><div class="kal-weekday">{wd}</div></div>
+        <div class="kal-info"><div class="kal-title">{e['title']}</div><div class="kal-details"><span class="kal-time">{e['time']} &ndash; {e['end']}</span> {loc_html}</div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
+      </div>'''
+            game_idx += 1
+
+        else:  # schulung
+            cards += f'''
+      <div class="kal-card" data-type="schulung" data-date="{e['date']}">
+        <div class="kal-date-col"><div class="kal-day">{day:02d}</div><div class="kal-month">{month}</div><div class="kal-weekday">{wd}</div></div>
+        <div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">{e['time']} &ndash; {e['end']} Uhr</span></div></div>
+        <span class="kal-badge kb-schulung">Schulung</span>
+      </div>'''
+
+    return cards
+
+
+def build_games_js(events):
+    """GAMES und GAMES_DATES JavaScript-Arrays erzeugen."""
+    spiele = [e for e in events if e['type'] == 'spiel']
+    rows = []
+    for g in spiele:
+        rows.append('    ' + json.dumps(
+            [g['date'], g['title'], g['time'], g['addr'], g['venue'], g['surface']],
+            ensure_ascii=False
+        ))
+    games_js    = 'var GAMES = [\n' + ',\n'.join(rows) + '\n  ];'
+    dates_js    = 'var GAMES_DATES = ' + json.dumps([g['date'] for g in spiele]) + ';'
+    return games_js, dates_js
+
+
+def count_events(events):
+    spiele    = sum(1 for e in events if e['type'] == 'spiel')
+    schulungen = sum(1 for e in events if e['type'] == 'schulung')
+    return spiele, schulungen
+
+
+def update_html(events):
+    """HTML-Datei mit neuen Kalenderdaten aktualisieren."""
+    with open(HTML_FILE, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    spiele, schulungen = count_events(events)
+    today_str = datetime.now().strftime('%d.%m.%Y')
+
+    # ── 1. kal-list ersetzen ──────────────────────────────────
+    new_cards    = build_kal_cards(events)
+    new_kal_list = f'<div class="kal-list" id="kal-list">{new_cards}\n      </div>'
+    content      = re.sub(
+        r'<div class="kal-list" id="kal-list">.*?</div>(?=\s*\n\s*</div>)',
+        new_kal_list,
+        content, flags=re.DOTALL, count=1
+    )
+
+    # ── 2. GAMES-Array ersetzen ───────────────────────────────
+    games_js, dates_js = build_games_js(events)
+    content = re.sub(
+        r'var GAMES = \[.*?\];',
+        games_js,
+        content, flags=re.DOTALL, count=1
+    )
+    content = re.sub(
+        r'var GAMES_DATES = \[.*?\];',
+        dates_js,
+        content, count=1
+    )
+
+    # ── 3. SHEETS_URL sicherstellen ───────────────────────────
+    if SHEETS_URL and "var SHEETS_URL = '';" in content:
+        content = content.replace(
+            "var SHEETS_URL = '';",
+            f"var SHEETS_URL = '{SHEETS_URL}';"
+        )
+
+    with open(HTML_FILE, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    print(f'✓ {HTML_FILE} aktualisiert: {spiele} Spiele, {schulungen} Schulungen ({today_str})')
+
+
+if __name__ == '__main__':
+    print('Lade Kalender...')
+    events = fetch_events()
+    print(f'  {len(events)} Termine geladen (SR Training herausgefiltert)')
+    update_html(events)
