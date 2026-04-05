@@ -1246,7 +1246,7 @@ footer {
           </div>
           <div style="margin-top:1rem;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
             <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">Entwicklungsfelder</div>
-            <textarea id="beob-entwicklung" class="analysis-ta" style="min-height:80px" placeholder="Persönliche Entwicklungsfelder und Lernziele aus den Beobachtungen..." onchange="localStorage.setItem('sr-entwicklung',this.value)"></textarea>
+            <textarea id="beob-entwicklung" class="analysis-ta" style="min-height:80px" placeholder="Persönliche Entwicklungsfelder und Lernziele aus den Beobachtungen..." onchange="dbSave({'sr-entwicklung':this.value})"></textarea>
           </div>
           <div style="margin-top:8px;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
             <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">Notenschnitt manuell aktualisieren</div>
@@ -2408,6 +2408,51 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     ["2026-05-23", "Spfr Untergriesheim – FSV Schwaigern (Herren)", "15:30", "Austr., 74177 Bad Friedrichshall", "Untergriesheim Rasen", "Rasenplatz"]
   ];
   var GAMES_DATES = ["2026-04-02", "2026-04-04", "2026-04-12", "2026-04-19", "2026-04-26", "2026-04-27", "2026-05-03", "2026-05-17", "2026-05-23"];
+
+  // ══════════════════════════════════════════════════════════════
+  //  GOOGLE SHEETS SYNC
+  //  Trage deine Web App URL hier ein nach dem Einrichten:
+  // ══════════════════════════════════════════════════════════════
+  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwPV7_twk45P3OdkH5HAr4V3IXAy_j9c4njVWlPkAzxTz8M2-3UtkkT4jC4ZWHVIxLg/exec';  // <-- HIER deine Apps Script URL eintragen
+
+  var _cache = {};  // lokaler Cache für offline-Betrieb
+
+  function dbLoad(callback) {
+    if (!SHEETS_URL) { callback({}); return; }
+    fetch(SHEETS_URL)
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (res.ok && res.data) {
+          _cache = res.data;
+          callback(res.data);
+        }
+      })
+      .catch(function(){ callback({}); });
+  }
+
+  function dbSave(payload) {
+    // Immer lokal speichern (offline-Fallback)
+    Object.keys(payload).forEach(function(k){
+      localStorage.setItem(k, typeof payload[k] === 'object' ? JSON.stringify(payload[k]) : payload[k]);
+    });
+    // Wenn URL hinterlegt: auch in Sheets speichern
+    if (!SHEETS_URL) return;
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }).catch(function(){});  // still ok if offline
+  }
+
+  function dbGet(key, fallback) {
+    // Erst aus Sheets-Cache, dann localStorage
+    if (_cache[key]) {
+      try { return JSON.parse(_cache[key]); } catch(e) { return _cache[key]; }
+    }
+    var v = localStorage.getItem(key);
+    if (!v) return fallback;
+    try { return JSON.parse(v); } catch(e) { return v; }
+  }
+
   var HOME_ADDR = 'Backnang, Deutschland';
   var MONTHS = ['Jan','Feb','Mar','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   var WDAYS  = ['So','Mo','Di','Mi','Do','Fr','Sa'];
@@ -2536,8 +2581,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     document.getElementById('gm-fupa-home').href = 'https://www.fupa.net/club/' + teamSlug(teams.home);
     document.getElementById('gm-fupa-away').href = 'https://www.fupa.net/club/' + teamSlug(teams.away);
     // Load analysis
-    var raw = localStorage.getItem('sr-analysis-' + idx);
-    var data = raw ? JSON.parse(raw) : {};
+    var data = dbGet('sr-analysis-' + idx, {});
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch(e) { data = {}; } }
     document.getElementById('gm-note-gen').value  = data.gen  || '';
     document.getElementById('gm-note-home').value = data.home || '';
     document.getElementById('gm-note-away').value = data.away || '';
@@ -2559,7 +2604,9 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       away: document.getElementById('gm-note-away').value,
       savedAt: new Date().toISOString()
     };
-    localStorage.setItem('sr-analysis-' + currentGameIdx, JSON.stringify(data));
+    var key = 'sr-analysis-' + currentGameIdx;
+    var p = {}; p[key] = data;
+    dbSave(p);
     document.getElementById('gm-save-status').textContent = '\u2713 Gespeichert';
     setTimeout(function(){ document.getElementById('gm-save-status').textContent = ''; }, 2000);
   }
@@ -2567,9 +2614,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   // ── LEISTUNGSPROFIL ─────────────────────────────────────────
   var LP_MAP = {km:'lp-km',puls:'lp-puls',sprints:'lp-sprints',topspeed:'lp-topspeed',time:'lp-time',updated:'lp-updated'};
   function lpLoad() {
-    var raw = localStorage.getItem('sr-leistung');
-    if (!raw) return;
-    var data = JSON.parse(raw);
+    var data = dbGet('sr-leistung', {});
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch(e) { data = {}; } }
     Object.keys(LP_MAP).forEach(function(k){
       if (data[k]) {
         var prev = document.getElementById(LP_MAP[k]);
@@ -2594,7 +2640,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       var inp = document.getElementById('lp-inp-' + k);
       if (inp) data[k] = inp.value;
     });
-    localStorage.setItem('sr-leistung', JSON.stringify(data));
+    dbSave({'sr-leistung': data});
     Object.keys(LP_MAP).forEach(function(k){
       var prev = document.getElementById(LP_MAP[k]);
       if (prev && data[k]) prev.textContent = data[k];
@@ -2603,11 +2649,11 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   // ── MEAL PLAN ────────────────────────────────────────────────
-  function saveMeal(d,m,v){ localStorage.setItem('sr-meal-'+d+'-'+m, v); }
+  function saveMeal(d,m,v){ var key='sr-meal-'+d+'-'+m; var p={}; p[key]=v; dbSave(p); }
   function loadMeals() {
     ['mo','di','mi','do','fr','sa','so'].forEach(function(d){
       ['fr','mi','pw','ab'].forEach(function(m){
-        var v = localStorage.getItem('sr-meal-'+d+'-'+m);
+        var v = dbGet('sr-meal-'+d+'-'+m, '');
         var el = document.getElementById('meal-'+d+'-'+m);
         if (v && el) el.value = v;
       });
@@ -2663,6 +2709,12 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
   // ── INIT ─────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function() {
+    // Load from Google Sheets first, then populate UI
+    dbLoad(function() {
+      srLoadNotes();
+      loadMeals();
+      lpLoad();
+    });
     // Wire up game cards in SR
     document.querySelectorAll('.kal-card[data-idx]').forEach(function(card){
       card.addEventListener('click', function(){
@@ -2686,8 +2738,6 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var upBtn = document.querySelector('.kal-filter');
     if (upBtn) filterKal('upcoming', upBtn);
     // Load persisted data
-    lpLoad();
-    loadMeals();
   });
 
   // ── IMAGE ROTATION ──────────────────────────────────────────
@@ -2716,9 +2766,10 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
   // ── SR SUB-TAB FUNCTIONS ─────────────────────────────────────
   function srSaveNote(key, val) {
-    var data = JSON.parse(localStorage.getItem('sr-nextgame-notes') || '{}');
+    var data = dbGet('sr-nextgame-notes', {});
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch(e) { data = {}; } }
     data[key] = val;
-    localStorage.setItem('sr-nextgame-notes', JSON.stringify(data));
+    dbSave({'sr-nextgame-notes': data});
   }
   function srSaveAllNotes() {
     var data = {
@@ -2727,20 +2778,21 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       away: document.getElementById('sr-note-away').value,
       savedAt: new Date().toISOString()
     };
-    localStorage.setItem('sr-nextgame-notes', JSON.stringify(data));
+    dbSave({'sr-nextgame-notes': data});
     var s = document.getElementById('sr-save-status');
     s.textContent = '\u2713 Gespeichert';
     setTimeout(function(){ s.textContent = ''; }, 2000);
   }
   function srLoadNotes() {
-    var data = JSON.parse(localStorage.getItem('sr-nextgame-notes') || '{}');
+    var data = dbGet('sr-nextgame-notes', {});
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch(e) { data = {}; } }
     if (data.gen  && document.getElementById('sr-note-gen'))  document.getElementById('sr-note-gen').value  = data.gen;
     if (data.home && document.getElementById('sr-note-home')) document.getElementById('sr-note-home').value = data.home;
     if (data.away && document.getElementById('sr-note-away')) document.getElementById('sr-note-away').value = data.away;
-    // Load Beobachtungen
-    var ent = localStorage.getItem('sr-entwicklung');
+    var ent = dbGet('sr-entwicklung', '');
     if (ent && document.getElementById('beob-entwicklung')) document.getElementById('beob-entwicklung').value = ent;
-    var stats = JSON.parse(localStorage.getItem('sr-beob-stats') || '{}');
+    var stats = dbGet('sr-beob-stats', {});
+    if (typeof stats === 'string') { try { stats = JSON.parse(stats); } catch(e) { stats = {}; } }
     if (stats.schnitt && document.getElementById('beob-schnitt')) document.getElementById('beob-schnitt').textContent = stats.schnitt;
     if (stats.anzahl  && document.getElementById('beob-anzahl'))  document.getElementById('beob-anzahl').textContent  = stats.anzahl;
   }
@@ -2749,7 +2801,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var n = parseInt(document.getElementById('beob-anzahl-input').value);
     if (!isNaN(s)) { document.getElementById('beob-schnitt').textContent = s.toFixed(1); }
     if (!isNaN(n)) { document.getElementById('beob-anzahl').textContent  = n; }
-    localStorage.setItem('sr-beob-stats', JSON.stringify({ schnitt: s.toFixed(1), anzahl: n }));
+    dbSave({'sr-beob-stats': { schnitt: s.toFixed(1), anzahl: n }});
   }
   var beobSlotCount = 2;
   function beobAddSlot() {
