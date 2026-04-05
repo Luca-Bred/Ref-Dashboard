@@ -1062,131 +1062,221 @@ footer {
 </div>
 
   <div id="sr" class="top-section">
+
+    <!-- SR Banner (fixed sub3) -->
     <div style="width:100%;height:160px;overflow:hidden;border-radius:var(--r);margin-bottom:1rem;position:relative;">
       <img id="img-sr" src="img/sub3.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%">
       <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.65) 0%,transparent 55%);display:flex;align-items:flex-end;padding:1rem 1.25rem;">
         <div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.5)">SR · Spielkalender</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px">Alle Einsätze der Saison 2025/26</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.5)">SR</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px">Nächstes Spiel &middot; Beobachtungen &middot; Termine</div>
         </div>
       </div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:1.25rem 0 .75rem">
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="kal-filter active" onclick="filterKal('upcoming',this)">Nächste 4 Wochen</button>
-        <button class="kal-filter" onclick="filterKal('alle',this)">Alle (13)</button>
-        <button class="kal-filter" onclick="filterKal('spiel',this)">Spiele</button>
-        <button class="kal-filter" onclick="filterKal('schulung',this)">Schulungen</button>
+
+    <!-- SR Sub-Navigation -->
+    <div class="subnav">
+      <div class="nav-group">
+        <span class="nav-group-label">SR</span>
+        <button class="sub-tab active" onclick="showSlot('sr-naechstes',this)">Nächstes Spiel</button>
+        <button class="sub-tab" onclick="showSlot('sr-beobachtungen',this)">Beobachtungen</button>
+        <button class="sub-tab" onclick="showSlot('sr-termine',this)">Termine</button>
       </div>
-      <span class="kal-updated">Stand: 03.04.2026</span>
     </div>
-    <div class="kal-list" id="kal-list">
+
+    <!-- ── 1. NÄCHSTES SPIEL ─────────────────────────────── -->
+    <div id="sr-naechstes" class="slot-section active">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:.25rem">
+
+        <!-- Left: Spielinfos -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+
+          <!-- Match card -->
+          <div style="background:linear-gradient(135deg,rgba(46,204,113,0.1),rgba(46,204,113,0.03));border:1px solid rgba(46,204,113,0.35);border-radius:var(--r);padding:1.25rem">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:.5rem">Nächster Einsatz</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem">TSV Heimerdingen &ndash; TSV Ilshofen</div>
+            <div style="font-size:12px;color:var(--text-2)">Heute &middot; 19:00 Uhr &middot; Ditzingen</div>
+            <div style="margin-top:.875rem;display:flex;gap:6px;flex-wrap:wrap">
+              <a href="https://www.google.com/maps/dir/?api=1&origin=Backnang%2C+Deutschland&destination=Weissacher+Str.%2C+71254+Ditzingen&travelmode=driving" target="_blank" class="mlink mlink-green" style="font-size:11px;padding:5px 12px">&#x1F4CD; Route</a>
+              <a href="https://www.fussball.de/suche/-/query/TSV+Heimerdingen" target="_blank" class="mlink mlink-blue" style="font-size:11px;padding:5px 12px">fussball.de</a>
+              <a href="https://www.wetter.de/suche/?q=Ditzingen" target="_blank" class="mlink mlink-amber" style="font-size:11px;padding:5px 12px">&#x2600; Wetter</a>
+            </div>
+          </div>
+
+          <!-- Info rows -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;display:flex;flex-direction:column;gap:8px">
+            <div class="gm-info-row"><div class="gm-icon">&#x1F550;</div><div><div class="gm-label">Ansto&szlig;</div><div class="gm-val">19:00 Uhr</div></div></div>
+            <div style="height:1px;background:var(--border)"></div>
+            <div class="gm-info-row"><div class="gm-icon">&#x1F4CD;</div><div><div class="gm-label">Adresse</div><div class="gm-val">Weissacher Str., 71254 Ditzingen</div></div></div>
+            <div style="height:1px;background:var(--border)"></div>
+            <div class="gm-info-row"><div class="gm-icon">&#x1F3DF;</div><div><div class="gm-label">Spielstätte</div><div class="gm-val">Rasen Weissacherstrasse</div></div></div>
+            <div style="height:1px;background:var(--border)"></div>
+            <div class="gm-info-row"><div class="gm-icon">&#x1F33F;</div><div><div class="gm-label">Untergrund</div><div class="gm-val">Rasenplatz</div></div></div>
+          </div>
+
+          <!-- FuPA Team Links -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem">
+            <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px">Mannschaften</div>
+            <a href="https://www.fupa.net/club/tsv-heimerdingen" target="_blank" class="team-link-m">TSV Heimerdingen</a>
+            <a href="https://www.fupa.net/club/tsv-ilshofen" target="_blank" class="team-link-m" style="margin-top:6px">TSV Ilshofen</a>
+          </div>
+        </div>
+
+        <!-- Right: Spielanalyse -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem">
+            <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-family:'Barlow Condensed',sans-serif;margin-bottom:10px">Spielanalyse</div>
+            <div class="analysis-box-m">
+              <div class="analysis-lbl">Allgemeine Notizen</div>
+              <textarea id="sr-note-gen" class="analysis-ta" placeholder="Allgemeine Spielnotizen..." onchange="srSaveNote('gen',this.value)"></textarea>
+            </div>
+            <div class="analysis-box-m" style="margin-top:8px">
+              <div class="analysis-lbl">Heimmannschaft &middot; TSV Heimerdingen</div>
+              <textarea id="sr-note-home" class="analysis-ta" placeholder="Taktik, Besonderheiten, Spieler..." onchange="srSaveNote('home',this.value)"></textarea>
+            </div>
+            <div class="analysis-box-m" style="margin-top:8px">
+              <div class="analysis-lbl">Gastmannschaft &middot; TSV Ilshofen</div>
+              <textarea id="sr-note-away" class="analysis-ta" placeholder="Taktik, Besonderheiten, Spieler..." onchange="srSaveNote('away',this.value)"></textarea>
+            </div>
+            <button onclick="srSaveAllNotes()" class="save-btn" style="margin-top:10px">Analyse speichern</button>
+            <span id="sr-save-status" style="font-size:11px;color:var(--grass);margin-left:8px"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 2. BEOBACHTUNGEN ──────────────────────────────── -->
+    <div id="sr-beobachtungen" class="slot-section">
+      <div style="margin-top:.25rem;display:flex;flex-direction:column;gap:10px">
+
+        <!-- Notenschnitt -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:var(--grass);line-height:1" id="beob-schnitt">3.2</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Notenschnitt</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:#fff;line-height:1" id="beob-anzahl">4</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Beobachtungen</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:var(--amber);line-height:1" id="beob-trend">&#x2197;</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Tendenz</div>
+          </div>
+        </div>
+
+        <!-- Beobachtungsbögen -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Beobachtungsbögen</div>
+          <div style="display:flex;flex-direction:column;gap:6px" id="beob-list">
+            <!-- Sample entries - will be replaced when PDFs are uploaded -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Beobachtung #1</div>
+                <div style="font-size:11px;color:var(--text-3);margin-top:2px">Noch kein Bogen hinterlegt</div>
+              </div>
+              <label style="background:var(--grass-dim);border:1px solid rgba(46,204,113,0.3);color:var(--grass);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;font-family:'Barlow',sans-serif">
+                PDF hochladen
+                <input type="file" accept=".pdf" style="display:none" onchange="beobUpload(this,1)">
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Beobachtung #2</div>
+                <div style="font-size:11px;color:var(--text-3);margin-top:2px">Noch kein Bogen hinterlegt</div>
+              </div>
+              <label style="background:var(--grass-dim);border:1px solid rgba(46,204,113,0.3);color:var(--grass);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;font-family:'Barlow',sans-serif">
+                PDF hochladen
+                <input type="file" accept=".pdf" style="display:none" onchange="beobUpload(this,2)">
+              </label>
+            </div>
+          </div>
+          <button onclick="beobAddSlot()" style="margin-top:10px;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:7px 16px;border-radius:var(--r-sm);cursor:pointer;font-family:'Barlow',sans-serif">+ Beobachtung hinzufügen</button>
+        </div>
+
+        <!-- Bewertungsauswertung -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Bewertungsbereiche</div>
+          <div style="display:flex;flex-direction:column;gap:10px" id="beob-bereiche">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:12px;color:var(--text-2)">Spielleitung & Auftreten</span>
+                <span style="font-size:12px;font-weight:600;color:var(--grass)" id="beob-auftreten">3.0</span>
+              </div>
+              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:75%;background:var(--grass);border-radius:3px;transition:width .4s ease"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:12px;color:var(--text-2)">Regelkenntnis & Entscheidungen</span>
+                <span style="font-size:12px;font-weight:600;color:var(--grass)" id="beob-regelkenntnis">3.2</span>
+              </div>
+              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:70%;background:var(--grass);border-radius:3px;transition:width .4s ease"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:12px;color:var(--text-2)">Positionsspiel & Fitness</span>
+                <span style="font-size:12px;font-weight:600;color:var(--amber)" id="beob-position">3.5</span>
+              </div>
+              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:60%;background:var(--amber);border-radius:3px;transition:width .4s ease"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:12px;color:var(--text-2)">Kommunikation</span>
+                <span style="font-size:12px;font-weight:600;color:var(--grass)" id="beob-kommunikation">2.8</span>
+              </div>
+              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:80%;background:var(--grass);border-radius:3px;transition:width .4s ease"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:12px;color:var(--text-2)">Teamwork (AsR)</span>
+                <span style="font-size:12px;font-weight:600;color:var(--grass)" id="beob-teamwork">3.0</span>
+              </div>
+              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:75%;background:var(--grass);border-radius:3px;transition:width .4s ease"></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">Entwicklungsfelder</div>
+            <textarea id="beob-entwicklung" class="analysis-ta" style="min-height:80px" placeholder="Persönliche Entwicklungsfelder und Lernziele aus den Beobachtungen..." onchange="localStorage.setItem('sr-entwicklung',this.value)"></textarea>
+          </div>
+          <div style="margin-top:8px;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">Notenschnitt manuell aktualisieren</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="beob-schnitt-input" type="number" min="1" max="6" step="0.1" placeholder="z.B. 3.2" style="width:100px;background:var(--surface3);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:7px 10px;color:var(--text);font-size:13px;outline:none">
+              <input id="beob-anzahl-input" type="number" min="0" placeholder="Anz. Beob." style="width:110px;background:var(--surface3);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:7px 10px;color:var(--text);font-size:13px;outline:none">
+              <button onclick="beobSaveStats()" class="save-btn">Speichern</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── 3. TERMINE ────────────────────────────────────── -->
+    <div id="sr-termine" class="slot-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:.75rem 0">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="kal-filter active" onclick="filterKal('upcoming',this)">Nächste 4 Wochen</button>
+          <button class="kal-filter" onclick="filterKal('alle',this)">Alle</button>
+          <button class="kal-filter" onclick="filterKal('spiel',this)">Spiele</button>
+          <button class="kal-filter" onclick="filterKal('schulung',this)">Schulungen</button>
+        </div>
+        <span class="kal-updated">Stand: 03.04.2026</span>
+      </div>
+      <div class="kal-list" id="kal-list">
       <div class="kal-card today-card" data-type="spiel" data-date="2026-04-02" data-idx="0">
-        <div class="kal-date-col"><div class="kal-day">02</div><div class="kal-month">Apr</div><div class="kal-weekday">Do</div></div>
-        <div class="kal-info">
-          <div class="kal-title">TSV Heimerdingen – TSV Ilshofen (Herren)</div>
-          <div class="kal-details"><span class="kal-time">19:00 &ndash; 20:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Rasen Weissacherstrasse &middot; Weissacher Str., 71254 Ditzingen</span></span></div>
-        </div>
-        <span class="kal-badge kb-heute">Heute</span>
-      </div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-04" data-idx="1">
-        <div class="kal-date-col"><div class="kal-day">04</div><div class="kal-month">Apr</div><div class="kal-weekday">Sa</div></div>
-        <div class="kal-info">
-          <div class="kal-title">VfL Sindelfingen – GSV Maichingen (Herren)</div>
-          <div class="kal-details"><span class="kal-time">15:30 &ndash; 17:15</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Floschenstadion &middot; Rosenstr., 71063 Sindelfingen</span></span></div>
-        </div>
-        <span class="kal-badge kb-spiel">Spiel</span>
-      </div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-12" data-idx="2">
-        <div class="kal-date-col"><div class="kal-day">12</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div>
-        <div class="kal-info">
-          <div class="kal-title">FV Kirchheim – FC Mezopotamya Bietigheim (Herren)</div>
-          <div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportpark Fronberg &middot; Hohensteiner Str., 74366 Kirchheim am Neckar</span></span></div>
-        </div>
-        <span class="kal-badge kb-spiel">Spiel</span>
-      </div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-19" data-idx="3">
-        <div class="kal-date-col"><div class="kal-day">19</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div>
-        <div class="kal-info">
-          <div class="kal-title">VfL Mainhardt – TSV Rudersberg (Herren)</div>
-          <div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportplatz 1 an Steinbühlhalle &middot; Steinbühl, 74535 Mainhardt</span></span></div>
-        </div>
-        <span class="kal-badge kb-spiel">Spiel</span>
-      </div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-26" data-idx="4">
-        <div class="kal-date-col"><div class="kal-day">26</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div>
-        <div class="kal-info">
-          <div class="kal-title">SGM Krumme Ebene am Neckar – SG Schorndorf (Herren)</div>
-          <div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Obergriesheim Rasen &middot; Mühlweg, 74831 Gundelsheim</span></span></div>
-        </div>
-        <span class="kal-badge kb-spiel">Spiel</span>
-      </div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-27" data-idx="5">
-        <div class="kal-date-col"><div class="kal-day">27</div><div class="kal-month">Apr</div><div class="kal-weekday">Mo</div></div>
-        <div class="kal-info">
-          <div class="kal-title">PSG Fellbach – 1. FC Adler Weilimdorf (Freizeitsport Herren)</div>
-          <div class="kal-details"><span class="kal-time">20:30 &ndash; 22:10</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen 2 Schmiden &middot; Tournonstr., 70736 Fellbach</span></span></div>
-        </div>
-        <span class="kal-badge kb-spiel">Spiel</span>
-      </div>
-      <div class="kal-card" data-type="spiel" data-date="2026-05-03" data-idx="6">
-        <div class="kal-date-col"><div class="kal-day">03</div><div class="kal-month">Mai</div><div class="kal-weekday">So</div></div>
-        <div class="kal-info">
-          <div class="kal-title">FC Marbach – TV Pflugfelden (Herren)</div>
-          <div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Hainbuch Stadion &middot; Sportgelände Leiselstein, 71672 Marbach</span></span></div>
-        </div>
-        <span class="kal-badge kb-spiel">Spiel</span>
-      </div>
-      <div class="kal-card" data-type="spiel" data-date="2026-05-17" data-idx="7">
-        <div class="kal-date-col"><div class="kal-day">17</div><div class="kal-month">Mai</div><div class="kal-weekday">So</div></div>
-        <div class="kal-info">
-          <div class="kal-title">TSV Schornbach – TSV Gaildorf (Herren)</div>
-          <div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen Schornbach &middot; Weißbucher Str. 45, 73614 Schorndorf</span></span></div>
-        </div>
-        <span class="kal-badge kb-spiel">Spiel</span>
-      </div>
-      <div class="kal-card" data-type="spiel" data-date="2026-05-23" data-idx="8">
-        <div class="kal-date-col"><div class="kal-day">23</div><div class="kal-month">Mai</div><div class="kal-weekday">Sa</div></div>
-        <div class="kal-info">
-          <div class="kal-title">Spfr Untergriesheim – FSV Schwaigern (Herren)</div>
-          <div class="kal-details"><span class="kal-time">15:30 &ndash; 17:15</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Untergriesheim Rasen &middot; Austr., 74177 Bad Friedrichshall</span></span></div>
-        </div>
-        <span class="kal-badge kb-spiel">Spiel</span>
-      </div>
-      <div class="kal-card" data-type="schulung" data-date="2026-05-12">
-        <div class="kal-date-col"><div class="kal-day">12</div><div class="kal-month">Mai</div><div class="kal-weekday">Di</div></div>
-        <div class="kal-info">
-          <div class="kal-title">Schulung</div>
-          <div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div>
-        </div>
-        <span class="kal-badge kb-schulung">Schulung</span>
-      </div>
-      <div class="kal-card" data-type="schulung" data-date="2026-06-16">
-        <div class="kal-date-col"><div class="kal-day">16</div><div class="kal-month">Jun</div><div class="kal-weekday">Di</div></div>
-        <div class="kal-info">
-          <div class="kal-title">Schulung</div>
-          <div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div>
-        </div>
-        <span class="kal-badge kb-schulung">Schulung</span>
-      </div>
-      <div class="kal-card" data-type="schulung" data-date="2026-09-15">
-        <div class="kal-date-col"><div class="kal-day">15</div><div class="kal-month">Sep</div><div class="kal-weekday">Di</div></div>
-        <div class="kal-info">
-          <div class="kal-title">Schulung</div>
-          <div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div>
-        </div>
-        <span class="kal-badge kb-schulung">Schulung</span>
-      </div>
-      <div class="kal-card" data-type="schulung" data-date="2026-10-20">
-        <div class="kal-date-col"><div class="kal-day">20</div><div class="kal-month">Okt</div><div class="kal-weekday">Di</div></div>
-        <div class="kal-info">
-          <div class="kal-title">Schulung</div>
-          <div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div>
-        </div>
-        <span class="kal-badge kb-schulung">Schulung</span>
-      </div>
+        <div class="kal-date-col"><div class="kal-day">02</div>
     </div>
-    
+
   </div>
 
   <div id="trainingsplan" class="top-section">
@@ -2569,6 +2659,68 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     // Ernährung: fixed sub1
     // (already set in HTML)
   })();
+
+  // ── SR SUB-TAB FUNCTIONS ─────────────────────────────────────
+  function srSaveNote(key, val) {
+    var data = JSON.parse(localStorage.getItem('sr-nextgame-notes') || '{}');
+    data[key] = val;
+    localStorage.setItem('sr-nextgame-notes', JSON.stringify(data));
+  }
+  function srSaveAllNotes() {
+    var data = {
+      gen:  document.getElementById('sr-note-gen').value,
+      home: document.getElementById('sr-note-home').value,
+      away: document.getElementById('sr-note-away').value,
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem('sr-nextgame-notes', JSON.stringify(data));
+    var s = document.getElementById('sr-save-status');
+    s.textContent = '\u2713 Gespeichert';
+    setTimeout(function(){ s.textContent = ''; }, 2000);
+  }
+  function srLoadNotes() {
+    var data = JSON.parse(localStorage.getItem('sr-nextgame-notes') || '{}');
+    if (data.gen  && document.getElementById('sr-note-gen'))  document.getElementById('sr-note-gen').value  = data.gen;
+    if (data.home && document.getElementById('sr-note-home')) document.getElementById('sr-note-home').value = data.home;
+    if (data.away && document.getElementById('sr-note-away')) document.getElementById('sr-note-away').value = data.away;
+    // Load Beobachtungen
+    var ent = localStorage.getItem('sr-entwicklung');
+    if (ent && document.getElementById('beob-entwicklung')) document.getElementById('beob-entwicklung').value = ent;
+    var stats = JSON.parse(localStorage.getItem('sr-beob-stats') || '{}');
+    if (stats.schnitt && document.getElementById('beob-schnitt')) document.getElementById('beob-schnitt').textContent = stats.schnitt;
+    if (stats.anzahl  && document.getElementById('beob-anzahl'))  document.getElementById('beob-anzahl').textContent  = stats.anzahl;
+  }
+  function beobSaveStats() {
+    var s = parseFloat(document.getElementById('beob-schnitt-input').value);
+    var n = parseInt(document.getElementById('beob-anzahl-input').value);
+    if (!isNaN(s)) { document.getElementById('beob-schnitt').textContent = s.toFixed(1); }
+    if (!isNaN(n)) { document.getElementById('beob-anzahl').textContent  = n; }
+    localStorage.setItem('sr-beob-stats', JSON.stringify({ schnitt: s.toFixed(1), anzahl: n }));
+  }
+  var beobSlotCount = 2;
+  function beobAddSlot() {
+    beobSlotCount++;
+    var list = document.getElementById('beob-list');
+    if (!list) return;
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)';
+    div.innerHTML = '<div><div style="font-size:13px;font-weight:600;color:var(--text)">Beobachtung #' + beobSlotCount + '</div>'
+      + '<div style="font-size:11px;color:var(--text-3);margin-top:2px">Noch kein Bogen hinterlegt</div></div>'
+      + '<label style="background:var(--grass-dim);border:1px solid rgba(46,204,113,0.3);color:var(--grass);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;font-family:Barlow,sans-serif">'
+      + 'PDF hochladen<input type="file" accept=".pdf" style="display:none" onchange="beobUpload(this,' + beobSlotCount + ')"></label>';
+    list.appendChild(div);
+  }
+  function beobUpload(input, idx) {
+    var file = input.files[0];
+    if (!file) return;
+    var label = input.closest('div').querySelector('div div:first-child');
+    if (label) label.textContent = file.name;
+    // Store file name reference
+    localStorage.setItem('sr-beob-file-' + idx, file.name);
+  }
+
+  // Load SR notes on init
+  document.addEventListener('DOMContentLoaded', function(){ srLoadNotes(); });
 </script>
 </body>
 </html>
