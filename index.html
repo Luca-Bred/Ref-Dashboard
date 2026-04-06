@@ -2747,8 +2747,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         <a id="bcbDownloadLink" href="#" download style="text-decoration:none">
           <button class="bcb-btn" style="font-size:11px">&#x2B07; Download</button>
         </a>
-        <button class="bcb-btn" onclick="bcbResetApiKey()" title="API-Key \u00e4ndern" style="font-size:11px">&#x1F511; API-Key</button>
-        <button class="bcb-btn bcb-btn-green" id="bcbAnalyzeBtn" onclick="bcbStartAnalysis()">&#x1F916; Analysieren</button>
+        <button class="bcb-btn bcb-btn-green" id="bcbAnalyzeBtn" onclick="bcbShowPasteDialog()">&#x1F4CB; Analyse einf&uuml;gen</button>
         <button class="bcb-modal-close" onclick="bcbCloseModal()" title="Schlie&szlig;en">&#x2715;</button>
       </div>
     </div>
@@ -3569,174 +3568,67 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (el) el.classList.toggle('bcb-collapsed');
   }
 
-  // ── AI ANALYSIS ──────────────────────────────────────────────
-  function bcbStartAnalysis() {
+  // ── ANALYSE EINFÜGEN (manueller Workflow) ────────────────────
+  function bcbShowPasteDialog() {
     var id = bcbActiveBogen;
-    if (!id) return;
-    var b = bcbBoegen.find(function(x){ return x.id === id; });
-    if (!b) return;
-    bcbAnalyses[id] = 'analyzing';
-    bcbSaveStore();
-    bcbRenderList();
-    bcbRenderModalAnalysis(id);
-    var btn = document.getElementById('bcbAnalyzeBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '&#x23F3; L\u00e4uft...'; }
-    var bogenName = b.name;
-
-    var PROMPT = 'Du bist ein Experte f\u00fcr den DFB-Beobachtungs- und Coachingbogen (BCB) im Schiedsrichterwesen.\n\n'
-      + 'Grundlogik BCB:\n'
-      + '- Skala 1\u20136: 6=deutlich \u00fcber Erwartung, 5=\u00fcber, 4=Baseline (fehlerfrei), 3=leicht darunter, 2=deutlich darunter, 1=gravierender Fehler\n'
-      + '- Ausgangswert IMMER 4. Abweichungen entstehen NUR durch konkrete Szenen im Bogen: +1/+2 bei Aufwertung, -1/-2/-3 bei Fehler\n'
-      + '- Spielentscheidende Szene kann mehrere Rubriken gleichzeitig beeinflussen\n'
-      + '- Nicht vorhandene Situationen bleiben bei 4 \u2013 das ist kein Mangel\n\n'
-      + 'WICHTIGE HINWEISE zur Formulierung:\n'
-      + '- Der Schiedsrichter ist Le Bre (22 Jahre), du-Form, entwicklungsorientiert\n'
-      + '- Szenen, die im Bogen konkret beschrieben sind, als Referenz nutzen\n'
-      + '- NIEMALS schreiben, er solle "komplexere Spiele" oder "h\u00f6heren Schwierigkeitsgrad" anstreben \u2013 das w\u00e4hlt man sich nicht aus\n'
-      + '- NIEMALS schreiben, er solle "Szenen aktiv suchen" \u2013 Szenen passieren, man reagiert darauf\n'
-      + '- Verbesserungen m\u00fcssen umsetzbar und konkret sein (z.B. Vorteilsgew\u00e4hrung, Kommunikation, Laufwege)\n\n'
-      + 'Die 7 Rubriken (lies die genauen Werte aus dem Bogen heraus, alle stehen explizit als Zahlenwert drin):\n'
-      + '1. Spielrelevante Einzelszenen (Tore, Strafst\u00f6\u00dfe, Platzverweis)\n'
-      + '2. Spielverst\u00e4ndnis (Spielcharakter, Antizipation, Vorteil, Regelkonformit\u00e4t, etc.)\n'
-      + '3. Zweikampfbewertung (Fu\u00df, Oberk\u00f6rper, Handspiel, etc.)\n'
-      + '4. Disziplinarkontrolle (Verwarnungen, Feldverweise, Linie)\n'
-      + '5. Pers\u00f6nl. Auftreten (Akzeptanz, Kommunikation, K\u00f6rpersprache)\n'
-      + '6. Fitness & Stellungsspiel (Ausdauer, Sprint, Positionierung)\n'
-      + '7. Teamarbeit (Zusammenarbeit AsR, Kommunikation)\n\n'
-      + 'Antworte NUR mit einem validen JSON-Objekt ohne Markdown-Bl\u00f6cke:\n'
-      + '{\n'
-      + '  "totalScore": <Zahl aus Bogen oder null>,\n'
-      + '  "gesamtEinordnung": "<sehr gut|gut|erwartungsgem\u00e4\u00df|unterdurchschnittlich>",\n'
-      + '  "rubriken": [\n'
-      + '    {"name":"Einzelszenen","wert":<1-6>,"abweichung":"<leer wenn 4, sonst: was genau wurde auf- oder abgewertet und warum>"},\n'
-      + '    {"name":"Spielverst\u00e4ndnis","wert":<1-6>,"abweichung":"<...>"},\n'
-      + '    {"name":"Zweikampfbewertung","wert":<1-6>,"abweichung":"<...>"},\n'
-      + '    {"name":"Disziplinarkontrolle","wert":<1-6>,"abweichung":"<...>"},\n'
-      + '    {"name":"Pers\u00f6nl. Auftreten","wert":<1-6>,"abweichung":"<...>"},\n'
-      + '    {"name":"Fitness & Stellungsspiel","wert":<1-6>,"abweichung":"<...>"},\n'
-      + '    {"name":"Teamarbeit","wert":<1-6>,"abweichung":"<...>"}\n'
-      + '  ],\n'
-      + '  "gesamtbewertung": "<A: Gesamtbewertung \u2013 Einordnung der Punktzahl, Spielkontext, ob Erwartung erf\u00fcllt, 3-4 S\u00e4tze, du-Form>",\n'
-      + '  "positiv": "<B: Positive Aspekte \u2013 was hat konkret gut funktioniert, gerne mit Szenenbezug, 3-5 S\u00e4tze>",\n'
-      + '  "negativ": "<C: Negative Aspekte bzw. Entwicklungsfelder \u2013 was hat nicht funktioniert oder wo ist Potenzial, konkret und umsetzbar, 3-5 S\u00e4tze>",\n'
-      + '  "leistungsprofil": "<2-3 S\u00e4tze Kurzprofil f\u00fcr die \u00dcbersicht: Stil, St\u00e4rken, Tendenz>",\n'
-      + '  "entwicklungsfelder": ["<konkretes Feld 1>","<konkretes Feld 2>","<konkretes Feld 3>"]\n'
-      + '}';
-
-    // ── Gemini API-Key holen ──────────────────────────────────
-    var apiKey = localStorage.getItem('bcb_gemini_key') || '';
-    if (!apiKey) {
-      bcbAnalyses[id] = null;
-      bcbSaveStore();
-      var btn0 = document.getElementById('bcbAnalyzeBtn');
-      if (btn0) { btn0.disabled = false; btn0.innerHTML = '&#x1F916; Analysieren'; }
-      bcbShowKeyDialog(id);
-      return;
-    }
-
-    // ── Gemini 2.0 Flash (kostenlos) ─────────────────────────
-    var endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey);
-
-    fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { inline_data: { mime_type: 'application/pdf', data: b.base64 } },
-            { text: PROMPT }
-          ]
-        }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
-      })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.error) {
-        if (data.error.code === 400 || data.error.code === 403) {
-          localStorage.removeItem('bcb_gemini_key');
-        }
-        throw new Error(data.error.message || JSON.stringify(data.error));
-      }
-      var raw = '';
-      try { raw = data.candidates[0].content.parts[0].text.trim(); } catch(e) {}
-      var parsed;
-      try {
-        var clean = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
-        parsed = JSON.parse(clean);
-      } catch(e) { parsed = { raw: raw }; }
-      bcbAnalyses[id] = parsed;
-      bcbSaveStore(); bcbRenderList(); bcbUpdateStats();
-      if (bcbActiveBogen === id) {
-        bcbRenderModalAnalysis(id);
-        var btn2 = document.getElementById('bcbAnalyzeBtn');
-        if (btn2) { btn2.disabled = false; btn2.innerHTML = '&#x1F504; Neu analysieren'; }
-      }
-    })
-    .catch(function(err) {
-      console.error('BCB Gemini error:', err);
-      bcbAnalyses[id] = 'error';
-      bcbSaveStore(); bcbRenderList();
-      if (bcbActiveBogen === id) {
-        var cont = document.getElementById('bcbAnalysisContent');
-        if (cont) cont.innerHTML = '<div style="padding:14px"><div class="bcb-error-box">'
-          + '<strong>&#x26A0; Fehler:</strong><br>' + bcbEsc(err.message || String(err))
-          + '<br><br><small>Falscher Key? \u2192 &#x1F511; API-Key oben klicken.</small></div></div>';
-        var btn3 = document.getElementById('bcbAnalyzeBtn');
-        if (btn3) { btn3.disabled = false; btn3.innerHTML = '&#x1F916; Analysieren'; }
-        var stat = document.getElementById('bcbAnalysisStatus');
-        if (stat) stat.textContent = '';
-      }
-    });
-  }
-
-  // ── API-Key Dialog ───────────────────────────────────────────
-  function bcbShowKeyDialog(pendingId) {
-    var existing = document.getElementById('bcbKeyDialog');
+    var existing = document.getElementById('bcbPasteDialog');
     if (existing) existing.remove();
+
     var overlay = document.createElement('div');
-    overlay.id = 'bcbKeyDialog';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem';
-    overlay.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border-med);border-radius:var(--r);padding:1.75rem;max-width:440px;width:100%;animation:slideUp .2s ease">'
-      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:6px">Google Gemini API &middot; Kostenlos</div>'
-      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px">Gemini API-Key eingeben</div>'
-      + '<div style="font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:6px">So bekommst du deinen kostenlosen Key:</div>'
-      + '<ol style="font-size:12px;color:var(--text-2);line-height:1.8;margin:0 0 14px 18px">'
-      +   '<li><strong style="color:var(--text)">aistudio.google.com</strong> aufrufen</li>'
-      +   '<li>Mit Google-Konto anmelden</li>'
-      +   '<li><strong style="color:var(--text)">Get API key</strong> klicken \u2192 Key kopieren</li>'
-      + '</ol>'
-      + '<input id="bcbKeyInput" type="password" placeholder="AIza..." style="width:100%;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:13px;font-family:\'JetBrains Mono\',monospace;outline:none;margin-bottom:12px">'
-      + '<div style="font-size:11px;color:var(--text-3);margin-bottom:14px">&#x1F512; Wird nur lokal in deinem Browser gespeichert, nie \u00fcbertragen.</div>'
-      + '<div style="display:flex;gap:8px;justify-content:flex-end">'
-      +   '<button onclick="document.getElementById(\'bcbKeyDialog\').remove()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Abbrechen</button>'
-      +   '<button onclick="bcbSaveKey()" style="background:var(--grass);border:none;color:#0a1f0e;font-size:12px;font-weight:700;padding:8px 18px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Speichern &amp; Analysieren</button>'
-      + '</div>'
+    overlay.id = 'bcbPasteDialog';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;padding:1rem';
+    overlay.innerHTML = ''
+      + '<div style="background:var(--surface);border:1px solid var(--border-med);border-radius:var(--r);padding:1.75rem;max-width:520px;width:100%;animation:slideUp .2s ease">'
+      +   '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:6px">Manuelle BCB-Analyse</div>'
+      +   '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:12px">Analyse von Claude einfügen</div>'
+      +   '<div style="font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:14px">'
+      +     '1. Schicke den BCB-Bogen als PDF an Claude im Chat<br>'
+      +     '2. Claude liefert dir ein JSON-Objekt als Analyse<br>'
+      +     '3. Das JSON hier einfügen und auf <strong style="color:var(--grass)">Speichern</strong> klicken'
+      +   '</div>'
+      +   '<textarea id="bcbPasteInput" placeholder=\'{"totalScore": 240, "gesamtEinordnung": "erwartungsgemäß", ...}\' '
+      +     'style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:11px;font-family:\'JetBrains Mono\',monospace;outline:none;resize:vertical;margin-bottom:10px;line-height:1.5"></textarea>'
+      +   '<div id="bcbPasteError" style="font-size:11px;color:var(--red);margin-bottom:8px;display:none">⚠ Ungültiges JSON – bitte nochmal prüfen.</div>'
+      +   '<div style="display:flex;gap:8px;justify-content:flex-end">'
+      +     '<button onclick="document.getElementById(\'bcbPasteDialog\').remove()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Abbrechen</button>'
+      +     '<button onclick="bcbSavePaste(\'' + (id||'') + '\')" style="background:var(--grass);border:none;color:#0a1f0e;font-size:12px;font-weight:700;padding:8px 18px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">&#x2713; Speichern</button>'
+      +   '</div>'
       + '</div>';
     document.body.appendChild(overlay);
-    overlay.setAttribute('data-pending', pendingId || '');
-    setTimeout(function(){ var inp = document.getElementById('bcbKeyInput'); if(inp) inp.focus(); }, 100);
+    setTimeout(function(){ var t = document.getElementById('bcbPasteInput'); if(t) t.focus(); }, 100);
   }
 
-  function bcbSaveKey() {
-    var inp = document.getElementById('bcbKeyInput');
-    var key = inp ? inp.value.trim() : '';
-    if (!key) { if(inp) inp.style.border = '1px solid var(--red)'; return; }
-    localStorage.setItem('bcb_gemini_key', key);
-    var dialog = document.getElementById('bcbKeyDialog');
-    var pendingId = dialog ? dialog.getAttribute('data-pending') : '';
+  function bcbSavePaste(id) {
+    var ta = document.getElementById('bcbPasteInput');
+    var errEl = document.getElementById('bcbPasteError');
+    var raw = ta ? ta.value.trim() : '';
+    if (!raw) { if(errEl) errEl.style.display=''; return; }
+    var parsed;
+    try {
+      var clean = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      if(errEl) errEl.style.display='';
+      return;
+    }
+    bcbAnalyses[id] = parsed;
+    bcbSaveStore();
+    bcbRenderList();
+    bcbUpdateStats();
+    var dialog = document.getElementById('bcbPasteDialog');
     if (dialog) dialog.remove();
-    if (pendingId) {
-      bcbActiveBogen = pendingId;
-      bcbOpenModal(pendingId);
-      setTimeout(bcbStartAnalysis, 200);
+    if (bcbActiveBogen === id) {
+      bcbRenderModalAnalysis(id);
+      var btn = document.getElementById('bcbAnalyzeBtn');
+      if (btn) btn.innerHTML = '&#x1F504; Analyse aktualisieren';
+      var stat = document.getElementById('bcbAnalysisStatus');
+      if (stat) stat.textContent = '\u2713 Geladen';
     }
   }
 
-  function bcbResetApiKey() {
-    localStorage.removeItem('bcb_gemini_key');
-    bcbShowKeyDialog(bcbActiveBogen);
-  }
+  // Placeholder – nicht mehr genutzt, aber referenziert
+  function bcbStartAnalysis() { bcbShowPasteDialog(); }
+  function bcbResetApiKey()   { bcbShowPasteDialog(); }
 
   function bcbEsc(s) {
     if (typeof s !== 'string') return '';
