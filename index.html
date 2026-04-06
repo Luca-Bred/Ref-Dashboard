@@ -1322,6 +1322,34 @@ footer {
   .bcb-modal-body { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; }
   .bcb-pdf-pane { border-right: none; border-bottom: 1px solid var(--border); }
 }
+/* BCB editable list items */
+.bcb-list-item {
+  display:flex;align-items:flex-start;gap:8px;
+  padding:6px 0;border-bottom:1px solid var(--border);
+}
+.bcb-list-item:last-child{border-bottom:none;}
+.bcb-list-num{
+  width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;flex-shrink:0;margin-top:2px;font-family:'Barlow Condensed',sans-serif;
+}
+.bcb-list-text{flex:1;font-size:12px;color:var(--text-2);line-height:1.6;}
+.bcb-list-text.positiv{color:var(--grass);}
+.bcb-list-actions{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .15s;}
+.bcb-list-item:hover .bcb-list-actions{opacity:1;}
+.bcb-item-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:11px;padding:2px 5px;border-radius:4px;
+  color:var(--text-3);transition:all .12s;
+}
+.bcb-item-btn:hover{background:var(--surface3);color:var(--text);}
+.bcb-item-btn.del:hover{background:var(--red-dim);color:var(--red);}
+.bcb-item-btn.up:hover,.bcb-item-btn.dn:hover{background:var(--grass-dim);color:var(--grass);}
+.bcb-positiv-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;
+  background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25);
+  margin-left:4px;vertical-align:middle;white-space:nowrap;
+}
 </style>
 </head>
 <body>
@@ -1584,16 +1612,12 @@ footer {
           </div>
         </div>
 
-        <!-- Rubrik-Durchschnitte (auto aus Analysen) -->
+
+        <!-- Leistungsübersicht (auto aus Analysen) -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Leistungsübersicht <span style="font-weight:400;color:var(--text-3);font-family:'Barlow',sans-serif;font-size:10px;text-transform:none;letter-spacing:0">(aus analysierten Bögen)</span></div>
           <div style="display:flex;flex-direction:column;gap:10px" id="beob-bereiche">
-            <!-- auto-filled by bcbUpdateStats() -->
             <div id="bcb-bereiche-placeholder" style="font-size:12px;color:var(--text-3);font-style:italic">Werden automatisch aus den KI-Analysen berechnet.</div>
-          </div>
-          <div style="margin-top:1rem;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
-            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">Entwicklungsfelder</div>
-            <textarea id="beob-entwicklung" class="analysis-ta" style="min-height:80px" placeholder="Persönliche Entwicklungsfelder und Lernziele aus den Beobachtungen..." onchange="dbSave({'sr-entwicklung':this.value})"></textarea>
           </div>
         </div>
 
@@ -3168,7 +3192,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (data.home && document.getElementById('sr-note-home')) document.getElementById('sr-note-home').value = data.home;
     if (data.away && document.getElementById('sr-note-away')) document.getElementById('sr-note-away').value = data.away;
     var ent = dbGet('sr-entwicklung', '');
-    if (ent && document.getElementById('beob-entwicklung')) document.getElementById('beob-entwicklung').value = ent;
+    // beob-entwicklung textarea removed – EF now managed via bcbLoadEF()
   }
   // ── BCB SYSTEM ───────────────────────────────────────────────
   var BCB_STORE_KEY     = 'bcb_boegen_v3';
@@ -3315,99 +3339,135 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
   function bcbUpdateBereiche() {
     var bereiche = document.getElementById('beob-bereiche');
-    var placeholder = document.getElementById('bcb-bereiche-placeholder');
     if (!bereiche) return;
 
     var allA = bcbBoegen.map(function(b){ return bcbAnalyses[b.id]; })
       .filter(function(a){ return a && typeof a === 'object' && a.rubriken; });
 
-    if (allA.length === 0) {
-      if (placeholder) placeholder.style.display = '';
+    var lp = bcbLoadLP();
+    var ef = bcbLoadEF();
+    var hasData = allA.length > 0 || lp.aspekte.length > 0 || ef.length > 0;
+
+    if (!hasData) {
       bereiche.innerHTML = '<div id="bcb-bereiche-placeholder" style="font-size:12px;color:var(--text-3);font-style:italic">Werden automatisch aus den KI-Analysen berechnet.</div>';
       return;
     }
-    if (placeholder) placeholder.style.display = 'none';
 
-    var RUBRIK_NAMES = ['Einzelszenen','Spielverst\u00e4ndnis','Zweikampfbewertung','Disziplinarkontrolle','Pers\u00f6nl. Auftreten','Fitness & Stellungsspiel','Teamarbeit'];
-
-    // ── Leistungsprofil (letzter analysierter Bogen) ───────────
-    var latestLP = '';
-    for (var i = 0; i < bcbBoegen.length; i++) {
-      var la = bcbAnalyses[bcbBoegen[i].id];
-      if (la && typeof la === 'object' && la.leistungsprofil) { latestLP = la.leistungsprofil; break; }
-    }
     var html = '';
-    if (latestLP) {
-      html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--grass);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
-        + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--grass);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:6px">Leistungsprofil</div>'
-        + '<div style="font-size:12px;color:var(--text-2);line-height:1.7">' + bcbEsc(latestLP) + '</div>'
-        + '</div>';
+
+    // ── 1. LEISTUNGSPROFIL ────────────────────────────────────
+    html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--grass);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      +   '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--grass);font-family:\'Barlow Condensed\',sans-serif">Leistungsprofil</div>'
+      + '</div>'
+      + (lp.summary
+          ? '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:10px;font-weight:500;cursor:pointer" onclick="bcbEditLPSummary()" title="Klicken zum Bearbeiten">'
+            + bcbEsc(lp.summary) + ' <span style="font-size:10px;color:var(--text-3)">✎</span></div>'
+          : '<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-style:italic">Zusammenfassung (aus Analyse) <span style="cursor:pointer;color:var(--grass)" onclick="bcbEditLPSummary()">+ hinzufügen</span></div>'
+        );
+
+    if (lp.aspekte.length) {
+      lp.aspekte.forEach(function(item, i) {
+        html += '<div class="bcb-list-item">'
+          + '<div class="bcb-list-num" style="background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25)">' + (i+1) + '</div>'
+          + '<div class="bcb-list-text">' + bcbEsc(item.text) + '</div>'
+          + '<div class="bcb-list-actions">'
+          +   '<button class="bcb-item-btn" onclick="bcbEditLP(' + i + ')" title="Bearbeiten">✎</button>'
+          +   '<button class="bcb-item-btn del" onclick="bcbDeleteLP(' + i + ')" title="Löschen">✕</button>'
+          + '</div>'
+          + '</div>';
+      });
     }
-
-    // ── Entwicklungsfelder (aus allen Analysen gesammelt, dedupliziert) ──
-    var allEF = [];
-    allA.forEach(function(a){ (a.entwicklungsfelder || []).forEach(function(ef){ if (ef && allEF.indexOf(ef) === -1) allEF.push(ef); }); });
-    if (allEF.length) {
-      html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
-        + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:8px">Entwicklungsfelder</div>'
-        + allEF.map(function(ef, i){
-            return '<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;' + (i < allEF.length-1 ? 'border-bottom:1px solid var(--border);' : '') + '">'
-              + '<div style="width:18px;height:18px;background:var(--amber-dim);border:1px solid rgba(243,156,18,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--amber);flex-shrink:0;margin-top:1px;font-family:\'Barlow Condensed\',sans-serif">' + (i+1) + '</div>'
-              + '<div style="font-size:12px;color:var(--text-2);line-height:1.6">' + bcbEsc(ef) + '</div>'
-              + '</div>';
-          }).join('')
-        + '</div>';
-    }
-
-    // ── Ø Rubrik-Balken mit Abweichungsnotizen ────────────────
-    html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px">'
-      + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:10px">'
-      + '\u00d8 Rubrik-Bewertungen (1\u20136) &middot; <span style="color:var(--blue)">&#x2015;</span> Baseline = 4</div>';
-
-    RUBRIK_NAMES.forEach(function(name, ni) {
-      // Alle Werte dieser Rubrik über alle Analysen
-      var entries = allA.map(function(a, ai) {
-        var r = a.rubriken && a.rubriken[ni];
-        if (!r) return null;
-        var bogen = bcbBoegen[bcbBoegen.length - 1 - ai]; // neueste zuerst
-        var bName = bogen ? bogen.name : 'Bogen ' + (ai+1);
-        return { wert: r.wert || 4, abw: r.abweichung || '', bogen: bName };
-      }).filter(Boolean);
-
-      if (!entries.length) return;
-      var avg = entries.reduce(function(s,e){return s+e.wert;},0) / entries.length;
-      var pct = ((avg - 1) / 5) * 100;
-      var col = avg >= 5 ? 'var(--grass)' : avg === 4 ? 'var(--blue)' : avg >= 3 ? 'var(--amber)' : 'var(--red)';
-      var delta = avg - 4;
-      var deltaStr = delta > 0 ? '+' + delta.toFixed(1) : delta < 0 ? delta.toFixed(1) : '';
-      var deltaCol = delta > 0 ? 'var(--grass)' : delta < 0 ? 'var(--red)' : '';
-
-      // Abweichungen zusammensammeln (nur wenn wert ≠ 4)
-      var abwNotes = entries.filter(function(e){ return e.wert !== 4 && e.abw; });
-
-      html += '<div style="margin-bottom:10px">'
-        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
-        +   '<span style="font-size:12px;color:var(--text-2);flex:1">' + bcbEsc(name) + '</span>'
-        +   (deltaStr ? '<span style="font-size:10px;font-weight:700;color:' + deltaCol + '">' + deltaStr + '</span>' : '')
-        +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:' + col + '">' + avg.toFixed(1) + '</span>'
-        + '</div>'
-        + '<div style="position:relative;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:' + (abwNotes.length ? '6px' : '0') + '">'
-        +   '<div style="position:absolute;left:' + (((4-1)/5)*100).toFixed(1) + '%;width:2px;height:100%;background:var(--blue);opacity:.5"></div>'
-        +   '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:3px;transition:width .5s ease"></div>'
-        + '</div>'
-        + abwNotes.map(function(e){
-            var eCol = e.wert > 4 ? 'var(--grass)' : 'var(--red)';
-            var arrow = e.wert > 4 ? '&#x2197;' : '&#x2198;';
-            return '<div style="font-size:11px;color:var(--text-3);line-height:1.5;padding:3px 6px;background:var(--surface3);border-radius:4px;border-left:2px solid ' + eCol + ';margin-bottom:3px">'
-              + '<span style="color:' + eCol + ';font-weight:700;margin-right:4px">' + arrow + ' ' + e.wert + '</span>'
-              + '<span style="color:var(--text-3);font-size:10px;margin-right:6px">(' + bcbEsc(e.bogen) + ')</span>'
-              + bcbEsc(e.abw)
-              + '</div>';
-          }).join('')
-        + '</div>';
-    });
-
     html += '</div>';
+
+    // ── 2. ENTWICKLUNGSFELDER ─────────────────────────────────
+    html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
+      + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:8px">Entwicklungsfelder</div>';
+
+    if (ef.length === 0) {
+      html += '<div style="font-size:12px;color:var(--text-3);font-style:italic">Keine Entwicklungsfelder aus den Bögen.</div>';
+    } else {
+      ef.forEach(function(item, i) {
+        var countBadge = item.count > 1
+          ? '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3);margin-left:4px">'+(item.count)+'×</span>'
+          : '';
+        var positivBadge = item.positiv
+          ? '<span class="bcb-positiv-badge">✓ Positive Entwicklung</span>'
+          : '';
+        html += '<div class="bcb-list-item">'
+          + '<div class="bcb-list-num" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3)">' + (i+1) + '</div>'
+          + '<div class="bcb-list-text' + (item.positiv ? ' positiv' : '') + '">'
+          +   bcbEsc(item.text) + countBadge + positivBadge
+          + '</div>'
+          + '<div class="bcb-list-actions">'
+          +   (i > 0 ? '<button class="bcb-item-btn up" onclick="bcbMoveEF(' + i + ',-1)" title="Nach oben">↑</button>' : '')
+          +   (i < ef.length-1 ? '<button class="bcb-item-btn dn" onclick="bcbMoveEF(' + i + ',1)" title="Nach unten">↓</button>' : '')
+          +   '<button class="bcb-item-btn" onclick="bcbEditEF(' + i + ')" title="Bearbeiten">✎</button>'
+          +   '<button class="bcb-item-btn del" onclick="bcbDeleteEF(' + i + ')" title="Löschen">✕</button>'
+          + '</div>'
+          + '</div>';
+      });
+    }
+    html += '</div>';
+
+    // ── 3. RUBRIK-BALKEN (9 Unterkategorien) ─────────────────
+    var RUBRIK_NAMES = [
+      '1. Einzelsituationen',
+      '2.1 Spielverständnis',
+      '2.2 Zweikampfbewertung',
+      '3. Disziplinarkontrolle',
+      '4.1 Verhaltensmerkmale',
+      '4.2 Kommunikation & Körpersprache',
+      '5.1 Fitness',
+      '5.2 Stellungsspiel',
+      '6. Teamarbeit / Abseits'
+    ];
+
+    if (allA.length > 0) {
+      html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px">'
+        + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:10px">'
+        + '\u00d8 Rubrik-Bewertungen (1\u20136) \u00b7 <span style="color:var(--blue)">&#x2015;</span> Baseline = 4</div>';
+
+      RUBRIK_NAMES.forEach(function(label, ni) {
+        var entries = allA.map(function(a, ai) {
+          var r = a.rubriken && a.rubriken[ni];
+          if (!r) return null;
+          var bogen = bcbBoegen[ai] ? bcbBoegen[ai].name : 'Bogen '+(ai+1);
+          return { wert: r.wert || 4, abw: r.abweichung || '', bogen: bogen };
+        }).filter(Boolean);
+
+        if (!entries.length) return;
+        var avg = entries.reduce(function(s,e){return s+e.wert;},0) / entries.length;
+        var pct = ((avg-1)/5)*100;
+        var col = avg >= 5 ? 'var(--grass)' : avg === 4 ? 'var(--blue)' : avg >= 3 ? 'var(--amber)' : 'var(--red)';
+        var delta = avg - 4;
+        var deltaStr = delta > 0 ? '+'+delta.toFixed(1) : delta < 0 ? delta.toFixed(1) : '';
+        var deltaCol = delta > 0 ? 'var(--grass)' : delta < 0 ? 'var(--red)' : '';
+        var abwNotes = entries.filter(function(e){ return e.wert !== 4 && e.abw; });
+
+        html += '<div style="margin-bottom:10px">'
+          + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+          +   '<span style="font-size:12px;color:var(--text-2);flex:1">' + bcbEsc(label) + '</span>'
+          +   (deltaStr ? '<span style="font-size:10px;font-weight:700;color:'+deltaCol+'">'+deltaStr+'</span>' : '')
+          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+col+'">'+avg.toFixed(1)+'</span>'
+          + '</div>'
+          + '<div style="position:relative;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:'+(abwNotes.length?'6px':'0')+'">'
+          +   '<div style="position:absolute;left:'+(((4-1)/5)*100).toFixed(1)+'%;width:2px;height:100%;background:var(--blue);opacity:.5"></div>'
+          +   '<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+col+';border-radius:3px;transition:width .5s ease"></div>'
+          + '</div>'
+          + abwNotes.map(function(e){
+              var c = e.wert > 4 ? 'var(--grass)' : 'var(--red)';
+              var arr = e.wert > 4 ? '&#x2197;' : '&#x2198;';
+              return '<div style="font-size:11px;line-height:1.5;padding:3px 6px;background:var(--surface3);border-radius:4px;border-left:2px solid '+c+';margin-bottom:3px">'
+                + '<span style="color:'+c+';font-weight:700;margin-right:4px">'+arr+' '+e.wert+'</span>'
+                + '<span style="color:var(--text-3);font-size:10px;margin-right:6px">('+bcbEsc(e.bogen)+')</span>'
+                + bcbEsc(e.abw)+'</div>';
+            }).join('')
+          + '</div>';
+      });
+      html += '</div>';
+    }
+
     bereiche.innerHTML = html;
   }
 
@@ -3607,14 +3667,53 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     try {
       var clean = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
       parsed = JSON.parse(clean);
-    } catch(e) {
-      if(errEl) errEl.style.display='';
-      return;
-    }
+    } catch(e) { if(errEl) errEl.style.display=''; return; }
+
     bcbAnalyses[id] = parsed;
     bcbSaveStore();
-    bcbRenderList();
-    bcbUpdateStats();
+
+    // ── Leistungsprofil mergen ─────────────────────────────────
+    if (parsed.leistungsprofil) {
+      var lp = bcbLoadLP();
+      // Split into sentences
+      var sentences = parsed.leistungsprofil.replace(/([.!?])\s+/g,'$1|').split('|').map(function(s){return s.trim();}).filter(Boolean);
+      if (!lp.summary && sentences.length) lp.summary = sentences[0];
+      sentences.forEach(function(s) {
+        var already = lp.aspekte.some(function(a){ return a.text === s; });
+        if (!already) lp.aspekte.push({ id: 'lp_'+Date.now()+'_'+Math.random().toString(36).slice(2,4), text: s, positiv: false });
+      });
+      bcbSaveLP(lp);
+    }
+
+    // ── Entwicklungsfelder mergen ──────────────────────────────
+    var newEF = (parsed.entwicklungsfelder || []).filter(function(f){ return f && f !== 'keine'; });
+    if (newEF.length) {
+      var ef = bcbLoadEF();
+      newEF.forEach(function(text) {
+        var existing = ef.find(function(e){ return bcbSimilar(e.text, text); });
+        if (existing) { existing.count = (existing.count || 1) + 1; }
+        else { ef.push({ id: 'ef_'+Date.now()+'_'+Math.random().toString(36).slice(2,4), text: text, count: 1, positiv: '' }); }
+      });
+      // Auto-sort by count desc
+      ef.sort(function(a,b){ return (b.count||1)-(a.count||1); });
+      bcbSaveEF(ef);
+    }
+
+    // ── Positive Entwicklung prüfen ────────────────────────────
+    if (parsed.positiv) {
+      var ef2 = bcbLoadEF();
+      var changed = false;
+      ef2.forEach(function(item) {
+        if (!item.positiv) {
+          var keywords = item.text.split(/\s+/).filter(function(w){ return w.length > 4; }).slice(0,3);
+          var hit = keywords.some(function(kw){ return parsed.positiv.toLowerCase().indexOf(kw.toLowerCase()) >= 0; });
+          if (hit) { item.positiv = parsed.positiv.slice(0,80) + (parsed.positiv.length > 80 ? '…' : ''); changed = true; }
+        }
+      });
+      if (changed) bcbSaveEF(ef2);
+    }
+
+    bcbRenderList(); bcbUpdateStats();
     var dialog = document.getElementById('bcbPasteDialog');
     if (dialog) dialog.remove();
     if (bcbActiveBogen === id) {
@@ -3624,6 +3723,56 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       var stat = document.getElementById('bcbAnalysisStatus');
       if (stat) stat.textContent = '\u2713 Geladen';
     }
+  }
+
+  // ── LP / EF STORAGE ──────────────────────────────────────────
+  var BCB_LP_KEY = 'bcb_lp_v1';
+  var BCB_EF_KEY = 'bcb_ef_v1';
+  function bcbLoadLP() { try { return JSON.parse(localStorage.getItem(BCB_LP_KEY)) || {summary:'',aspekte:[]}; } catch(e) { return {summary:'',aspekte:[]}; } }
+  function bcbSaveLP(d) { try { localStorage.setItem(BCB_LP_KEY, JSON.stringify(d)); } catch(e) {} }
+  function bcbLoadEF() { try { return JSON.parse(localStorage.getItem(BCB_EF_KEY)) || []; } catch(e) { return []; } }
+  function bcbSaveEF(d) { try { localStorage.setItem(BCB_EF_KEY, JSON.stringify(d)); } catch(e) {} }
+  function bcbSimilar(a, b) {
+    var wa = a.toLowerCase().split(/\s+/).filter(function(w){return w.length>4;}).slice(0,4);
+    return wa.some(function(w){ return b.toLowerCase().indexOf(w) >= 0; });
+  }
+
+  // ── LP EDIT FUNCTIONS ─────────────────────────────────────────
+  function bcbEditLPSummary() {
+    var lp = bcbLoadLP();
+    var val = window.prompt('Zusammenfassung bearbeiten:', lp.summary || '');
+    if (val !== null) { lp.summary = val.trim(); bcbSaveLP(lp); bcbUpdateBereiche(); }
+  }
+  function bcbEditLP(idx) {
+    var lp = bcbLoadLP();
+    if (!lp.aspekte[idx]) return;
+    var val = window.prompt('Aspekt bearbeiten:', lp.aspekte[idx].text);
+    if (val !== null) { lp.aspekte[idx].text = val.trim(); bcbSaveLP(lp); bcbUpdateBereiche(); }
+  }
+  function bcbDeleteLP(idx) {
+    var lp = bcbLoadLP();
+    lp.aspekte.splice(idx, 1);
+    bcbSaveLP(lp); bcbUpdateBereiche();
+  }
+
+  // ── EF EDIT FUNCTIONS ─────────────────────────────────────────
+  function bcbEditEF(idx) {
+    var ef = bcbLoadEF();
+    if (!ef[idx]) return;
+    var val = window.prompt('Entwicklungsfeld bearbeiten:', ef[idx].text);
+    if (val !== null) { ef[idx].text = val.trim(); bcbSaveEF(ef); bcbUpdateBereiche(); }
+  }
+  function bcbDeleteEF(idx) {
+    var ef = bcbLoadEF();
+    ef.splice(idx, 1);
+    bcbSaveEF(ef); bcbUpdateBereiche();
+  }
+  function bcbMoveEF(idx, dir) {
+    var ef = bcbLoadEF();
+    var to = idx + dir;
+    if (to < 0 || to >= ef.length) return;
+    var tmp = ef[idx]; ef[idx] = ef[to]; ef[to] = tmp;
+    bcbSaveEF(ef); bcbUpdateBereiche();
   }
 
   // Placeholder – nicht mehr genutzt, aber referenziert
