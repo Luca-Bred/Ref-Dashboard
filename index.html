@@ -3623,48 +3623,43 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       + '  "entwicklungsfelder": ["<konkretes Feld 1>","<konkretes Feld 2>","<konkretes Feld 3>"]\n'
       + '}';
 
-    // ── API-Key holen ─────────────────────────────────────────
-    var apiKey = localStorage.getItem('bcb_api_key') || '';
+    // ── Gemini API-Key holen ──────────────────────────────────
+    var apiKey = localStorage.getItem('bcb_gemini_key') || '';
     if (!apiKey) {
       bcbAnalyses[id] = null;
       bcbSaveStore();
-      // Key-Dialog anzeigen statt Analyse starten
       var btn0 = document.getElementById('bcbAnalyzeBtn');
       if (btn0) { btn0.disabled = false; btn0.innerHTML = '&#x1F916; Analysieren'; }
       bcbShowKeyDialog(id);
       return;
     }
 
-    // ── Direkter Anthropic API-Call ───────────────────────────
-    fetch('https://api.anthropic.com/v1/messages', {
+    // ── Gemini 2.0 Flash (kostenlos) ─────────────────────────
+    var endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey);
+
+    fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1200,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b.base64 } },
-            { type: 'text', text: PROMPT }
+        contents: [{
+          parts: [
+            { inline_data: { mime_type: 'application/pdf', data: b.base64 } },
+            { text: PROMPT }
           ]
-        }]
+        }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
       })
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.error) {
-        if (data.error.type === 'authentication_error') {
-          localStorage.removeItem('bcb_api_key');
+        if (data.error.code === 400 || data.error.code === 403) {
+          localStorage.removeItem('bcb_gemini_key');
         }
         throw new Error(data.error.message || JSON.stringify(data.error));
       }
-      var raw = (data.content || []).map(function(x){ return x.text || ''; }).join('').trim();
+      var raw = '';
+      try { raw = data.candidates[0].content.parts[0].text.trim(); } catch(e) {}
       var parsed;
       try {
         var clean = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
@@ -3679,15 +3674,14 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       }
     })
     .catch(function(err) {
-      console.error('BCB error:', err);
+      console.error('BCB Gemini error:', err);
       bcbAnalyses[id] = 'error';
       bcbSaveStore(); bcbRenderList();
       if (bcbActiveBogen === id) {
-        // Zeige konkreten Fehler im Analyse-Panel
         var cont = document.getElementById('bcbAnalysisContent');
         if (cont) cont.innerHTML = '<div style="padding:14px"><div class="bcb-error-box">'
           + '<strong>&#x26A0; Fehler:</strong><br>' + bcbEsc(err.message || String(err))
-          + '<br><br><small>Tipp: Falscher API-Key? \u2192 &#x1F511;-Button oben klicken.</small></div></div>';
+          + '<br><br><small>Falscher Key? \u2192 &#x1F511; API-Key oben klicken.</small></div></div>';
         var btn3 = document.getElementById('bcbAnalyzeBtn');
         if (btn3) { btn3.disabled = false; btn3.innerHTML = '&#x1F916; Analysieren'; }
         var stat = document.getElementById('bcbAnalysisStatus');
@@ -3698,24 +3692,28 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
   // ── API-Key Dialog ───────────────────────────────────────────
   function bcbShowKeyDialog(pendingId) {
-    var overlay = document.getElementById('bcbKeyDialog');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'bcbKeyDialog';
-      overlay.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem';
-      overlay.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border-med);border-radius:var(--r);padding:1.75rem;max-width:420px;width:100%;animation:slideUp .2s ease">'
-        + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:6px">API-Zugang</div>'
-        + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:12px">Anthropic API-Key eingeben</div>'
-        + '<div style="font-size:12px;color:var(--text-2);line-height:1.65;margin-bottom:16px">Der Key wird nur lokal in deinem Browser gespeichert (localStorage) und nie \u00fcbertragen. Du findest ihn unter <strong style="color:var(--text)">console.anthropic.com</strong> \u2192 API Keys.</div>'
-        + '<input id="bcbKeyInput" type="password" placeholder="sk-ant-api03-..." style="width:100%;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:13px;font-family:\'JetBrains Mono\',monospace;outline:none;margin-bottom:12px">'
-        + '<div style="display:flex;gap:8px;justify-content:flex-end">'
-        +   '<button onclick="document.getElementById(\'bcbKeyDialog\').remove()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Abbrechen</button>'
-        +   '<button onclick="bcbSaveKey()" style="background:var(--grass);border:none;color:#0a1f0e;font-size:12px;font-weight:700;padding:8px 18px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Speichern &amp; Analysieren</button>'
-        + '</div>'
-        + '</div>';
-      document.body.appendChild(overlay);
-    }
-    overlay.style.display = 'flex';
+    var existing = document.getElementById('bcbKeyDialog');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'bcbKeyDialog';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem';
+    overlay.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border-med);border-radius:var(--r);padding:1.75rem;max-width:440px;width:100%;animation:slideUp .2s ease">'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:6px">Google Gemini API &middot; Kostenlos</div>'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px">Gemini API-Key eingeben</div>'
+      + '<div style="font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:6px">So bekommst du deinen kostenlosen Key:</div>'
+      + '<ol style="font-size:12px;color:var(--text-2);line-height:1.8;margin:0 0 14px 18px">'
+      +   '<li><strong style="color:var(--text)">aistudio.google.com</strong> aufrufen</li>'
+      +   '<li>Mit Google-Konto anmelden</li>'
+      +   '<li><strong style="color:var(--text)">Get API key</strong> klicken \u2192 Key kopieren</li>'
+      + '</ol>'
+      + '<input id="bcbKeyInput" type="password" placeholder="AIza..." style="width:100%;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:13px;font-family:\'JetBrains Mono\',monospace;outline:none;margin-bottom:12px">'
+      + '<div style="font-size:11px;color:var(--text-3);margin-bottom:14px">&#x1F512; Wird nur lokal in deinem Browser gespeichert, nie \u00fcbertragen.</div>'
+      + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+      +   '<button onclick="document.getElementById(\'bcbKeyDialog\').remove()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Abbrechen</button>'
+      +   '<button onclick="bcbSaveKey()" style="background:var(--grass);border:none;color:#0a1f0e;font-size:12px;font-weight:700;padding:8px 18px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Speichern &amp; Analysieren</button>'
+      + '</div>'
+      + '</div>';
+    document.body.appendChild(overlay);
     overlay.setAttribute('data-pending', pendingId || '');
     setTimeout(function(){ var inp = document.getElementById('bcbKeyInput'); if(inp) inp.focus(); }, 100);
   }
@@ -3723,8 +3721,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   function bcbSaveKey() {
     var inp = document.getElementById('bcbKeyInput');
     var key = inp ? inp.value.trim() : '';
-    if (!key) { inp.style.border = '1px solid var(--red)'; return; }
-    localStorage.setItem('bcb_api_key', key);
+    if (!key) { if(inp) inp.style.border = '1px solid var(--red)'; return; }
+    localStorage.setItem('bcb_gemini_key', key);
     var dialog = document.getElementById('bcbKeyDialog');
     var pendingId = dialog ? dialog.getAttribute('data-pending') : '';
     if (dialog) dialog.remove();
@@ -3736,7 +3734,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function bcbResetApiKey() {
-    localStorage.removeItem('bcb_api_key');
+    localStorage.removeItem('bcb_gemini_key');
     bcbShowKeyDialog(bcbActiveBogen);
   }
 
