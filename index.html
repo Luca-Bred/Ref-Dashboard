@@ -3518,12 +3518,24 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--grass);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
       +   '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--grass);font-family:\'Barlow Condensed\',sans-serif">Leistungsprofil</div>'
-      + '</div>'
-      + (lp.summary
-          ? '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:10px;font-weight:500;cursor:pointer" onclick="bcbEditLPSummary()" title="Klicken zum Bearbeiten">'
-            + bcbEsc(lp.summary) + ' <span style="font-size:10px;color:var(--text-3)">✎</span></div>'
-          : '<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-style:italic">Zusammenfassung (aus Analyse) <span style="cursor:pointer;color:var(--grass)" onclick="bcbEditLPSummary()">+ hinzufügen</span></div>'
-        );
+      + '</div>';
+
+    // ── Summary sentence on top ──
+    var activeAspekte = lp.aspekte.filter(function(a){ return a.status !== 'removed'; });
+    var lpSummary = lp.summary || '';
+    if (!lpSummary && activeAspekte.length > 0) {
+      // Auto-build from first two aspekte if no manual summary
+      var kw = activeAspekte.slice(0,2).map(function(a){
+        return a.text.split(/\s+/).slice(0,3).join(' ');
+      });
+      lpSummary = kw.join(' · ') + '.';
+    }
+    if (lpSummary) {
+      html += '<div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.55;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--border);cursor:pointer" onclick="bcbEditLPSummary()" title="Klicken zum Bearbeiten">'
+        + bcbEsc(lpSummary) + ' <span style="font-size:10px;color:var(--text-3);font-weight:400">✎</span></div>';
+    } else {
+      html += '<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-style:italic;cursor:pointer" onclick="bcbEditLPSummary()">+ Zusammenfassung hinzufügen</div>';
+    }
 
     if (lp.aspekte.length) {
       lp.aspekte.forEach(function(item, i) {
@@ -3547,6 +3559,17 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
       + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:8px">Entwicklungsfelder</div>';
 
+    // ── EF summary sentence ──
+    var openEFforSummary = ef.filter(function(e){ return !e.archived && !e.sehrPositiv && !e.isPositive; });
+    if (openEFforSummary.length > 0) {
+      var efSumText = openEFforSummary.length === 1
+        ? 'Aktuell ein offenes Entwicklungsfeld: ' + openEFforSummary[0].text.split(':')[0] + '.'
+        : 'Aktuell ' + openEFforSummary.length + ' offene Entwicklungsfelder: '
+          + openEFforSummary.map(function(e){ return e.text.split(':')[0]; }).join(', ') + '.';
+      html += '<div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.55;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--border)">'
+        + bcbEsc(efSumText) + '</div>';
+    }
+
     if (ef.length === 0) {
       html += '<div style="font-size:12px;color:var(--text-3);font-style:italic">Keine Entwicklungsfelder aus den Bögen.</div>';
     } else {
@@ -3564,7 +3587,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
           ? '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3);margin-left:5px">' + item.count + '×</span>'
           : '';
         var typeBadge = item.type === 'abzug'
-          ? '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--red-dim);color:var(--red);border:1px solid rgba(231,76,60,0.25);margin-left:5px">−Pkt</span>'
+          ? ''
           : '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(74,144,217,0.25);margin-left:5px">Tipp</span>';
         html += '<div class="bcb-list-item">'
           + '<div class="bcb-list-num" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3)">' + (i+1) + '</div>'
@@ -4040,7 +4063,9 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         existing.archived = false; // re-activate if archived
       } else {
         // Determine type: Abzug if negativeText contains point-deduction language
-        var isAbzug = /(-1|-2|-3|abzug|abgewertet|fehler|falsch)/i.test(negativeText + ' ' + text);
+        // Abzug if text or negativ contains deduction indicators (incl. unicode minus −)
+        var combinedText = negativeText + ' ' + text;
+        var isAbzug = /[\-\u2212\u2013]\s*[123]\b|abzug|abgewertet|\bpkt\b|\bpunkte?\s+abzug/i.test(combinedText);
         ef.push({
           id: 'ef_'+Date.now()+'_'+Math.random().toString(36).slice(2,4),
           text: text,
