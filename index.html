@@ -1739,7 +1739,14 @@ footer {
 
         <!-- Leistungsübersicht (auto aus Analysen) -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Leistungsübersicht <span style="font-weight:400;color:var(--text-3);font-family:'Barlow',sans-serif;font-size:10px;text-transform:none;letter-spacing:0">(aus analysierten Bögen)</span></div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem;display:flex;align-items:center;justify-content:space-between">
+            <span>Leistungsübersicht <span style="font-weight:400;font-family:'Barlow',sans-serif;font-size:10px;text-transform:none;letter-spacing:0">(aus analysierten Bögen)</span></span>
+            <div style="display:flex;gap:5px">
+              <button onclick="bcbResetLP()" style="font-size:10px;padding:3px 8px;border-radius:5px;background:var(--surface3);border:1px solid var(--border-med);color:var(--text-3);cursor:pointer;font-family:'Barlow',sans-serif" title="Leistungsprofil zurücksetzen">↺ LP</button>
+              <button onclick="bcbResetEF()" style="font-size:10px;padding:3px 8px;border-radius:5px;background:var(--surface3);border:1px solid var(--border-med);color:var(--text-3);cursor:pointer;font-family:'Barlow',sans-serif" title="Entwicklungsfelder zurücksetzen">↺ EF</button>
+              <button onclick="bcbResetAll()" style="font-size:10px;padding:3px 8px;border-radius:5px;background:var(--red-dim);border:1px solid rgba(231,76,60,0.3);color:var(--red);cursor:pointer;font-family:'Barlow',sans-serif" title="Alles zurücksetzen">↺ Alles</button>
+            </div>
+          </div>
           <div style="display:flex;flex-direction:column;gap:10px" id="beob-bereiche">
             <div id="bcb-bereiche-placeholder" style="font-size:12px;color:var(--text-3);font-style:italic">Werden automatisch aus den KI-Analysen berechnet.</div>
           </div>
@@ -3657,9 +3664,32 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     delete bcbAnalyses[id];
     if (bcbBlobUrls[id]) { URL.revokeObjectURL(bcbBlobUrls[id]); delete bcbBlobUrls[id]; }
     bcbSaveStore();
+    // If no boegen left → auto-clear LP and EF for clean slate
+    if (bcbBoegen.length === 0) {
+      bcbSaveLP({summary:'', aspekte:[]});
+      bcbSaveEF([]);
+    }
     bcbRenderList();
     bcbUpdateStats();
     if (bcbActiveBogen === id) bcbCloseModal();
+  }
+
+  // Manual reset buttons accessible via browser console or future UI
+  function bcbResetLP() {
+    if (!confirm('Leistungsprofil komplett zur\u00fccksetzen?')) return;
+    bcbSaveLP({summary:'', aspekte:[]}); bcbUpdateBereiche();
+  }
+  function bcbResetEF() {
+    if (!confirm('Entwicklungsfelder komplett zur\u00fccksetzen?')) return;
+    bcbSaveEF([]); bcbUpdateBereiche();
+  }
+  function bcbResetAll() {
+    if (!confirm('Alle Analysen, Leistungsprofil und Entwicklungsfelder zur\u00fccksetzen?\nPDFs bleiben erhalten.')) return;
+    bcbAnalyses = {};
+    bcbSaveStore();
+    bcbSaveLP({summary:'', aspekte:[]});
+    bcbSaveEF([]);
+    bcbRenderList(); bcbUpdateStats();
   }
 
   // ── MODAL ────────────────────────────────────────────────────
