@@ -3367,9 +3367,19 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
           if (file.type !== 'application/pdf') { pending--; return; }
           var reader = new FileReader();
           reader.onload = function(ev) {
-            var b64 = ev.target.result.split(',')[1];
-            var id  = 'bcb_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
-            bcbBoegen.unshift({ id: id, name: file.name.replace(/\.pdf$/i,''), date: new Date().toISOString(), base64: b64, size: file.size });
+            var b64   = ev.target.result.split(',')[1];
+            var fname = file.name.replace(/\.pdf$/i,'');
+            // Use sanitized filename as stable ID so analyses survive re-uploads
+            var stableId = 'bcb_' + fname.toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0, 40);
+            // If same file already uploaded, update Base64 but keep everything else
+            var existing = bcbBoegen.find(function(b){ return b.id === stableId; });
+            if (existing) {
+              existing.base64 = b64;
+              existing.size   = file.size;
+              if (bcbBlobUrls[stableId]) { URL.revokeObjectURL(bcbBlobUrls[stableId]); delete bcbBlobUrls[stableId]; }
+            } else {
+              bcbBoegen.unshift({ id: stableId, name: fname, date: new Date().toISOString(), base64: b64, size: file.size });
+            }
             pending--;
             if (pending === 0) {
               bcbSaveStore();
@@ -3404,18 +3414,20 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       return;
     }
     list.innerHTML = bcbBoegen.map(function(b) {
-      var a        = bcbAnalyses[b.id];
-      var scoreHtml= bcbScorePill(a);
-      var statusHtml = bcbStatusMeta(b.id);
-      var dateStr  = new Date(b.date).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
+      var a           = bcbAnalyses[b.id];
+      var scoreHtml   = bcbScorePill(a);
+      var statusHtml  = bcbStatusMeta(b.id);
       var analyzeLabel = (!a || a === 'error') ? '&#x1F916; Analysieren' : (a === 'analyzing' ? '&#x23F3; L\u00e4uft...' : '&#x1F504; Neu');
+      // Show match info if available, else fall back to upload date
+      var topLine  = b.spielpaarung ? bcbEsc(b.spielpaarung) : bcbEsc(b.name);
+      var dateLine = b.spieldatum   ? '&#x1F4C5; ' + bcbEsc(b.spieldatum)
+                                    : '&#x1F4C5; ' + new Date(b.date).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
       return '<div class="bcb-card" id="bcbcard_' + b.id + '">'
         + '<div style="min-width:0">'
-        +   '<div class="bcb-card-name" title="' + bcbEsc(b.name) + '">' + bcbEsc(b.name) + '</div>'
+        +   '<div class="bcb-card-name" title="' + bcbEsc(b.name) + '">' + topLine + '</div>'
         +   '<div class="bcb-card-meta">'
-        +     '<span class="bcb-meta-date">&#x1F4C5; ' + dateStr + '</span>'
-        +     scoreHtml
-        +     statusHtml
+        +     '<span class="bcb-meta-date">' + dateLine + '</span>'
+        +     scoreHtml + statusHtml
         +   '</div>'
         + '</div>'
         + '<div class="bcb-card-actions">'
@@ -3508,9 +3520,13 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
     if (lp.aspekte.length) {
       lp.aspekte.forEach(function(item, i) {
+        if (item.status === 'removed') return; // hide removed
+        var badge = item.status === 'uncertain'
+          ? ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3)">⚠ Unsicher</span>'
+          : (item.count > 1 ? ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25)">' + item.count + '×</span>' : '');
         html += '<div class="bcb-list-item">'
           + '<div class="bcb-list-num" style="background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25)">' + (i+1) + '</div>'
-          + '<div class="bcb-list-text">' + bcbEsc(item.text) + '</div>'
+          + '<div class="bcb-list-text">' + bcbEsc(item.text) + badge + '</div>'
           + '<div class="bcb-list-actions">'
           +   '<button class="bcb-item-btn" onclick="bcbEditLP(' + i + ')" title="Bearbeiten">✎</button>'
           +   '<button class="bcb-item-btn del" onclick="bcbDeleteLP(' + i + ')" title="Löschen">✕</button>'
@@ -3807,7 +3823,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       +   '<div style="font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:14px">'
       +     '1. Schicke den BCB-Bogen als PDF an Claude im Chat<br>'
       +     '2. Claude liefert dir ein JSON-Objekt als Analyse<br>'
-      +     '3. Das JSON hier einfügen und auf <strong style="color:var(--grass)">Speichern</strong> klicken'
+      +     '3. Das JSON hier einf\u00fcgen und auf <strong style="color:var(--grass)">Speichern</strong> klicken<br>'
+      +     '<span style="font-size:11px;color:var(--text-3)">Das JSON muss <code>spielpaarung</code> und <code>spieldatum</code> enthalten.</span>'
       +   '</div>'
       +   '<textarea id="bcbPasteInput" placeholder=\'{"totalScore": 240, "gesamtEinordnung": "erwartungsgemäß", ...}\' '
       +     'style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:11px;font-family:\'JetBrains Mono\',monospace;outline:none;resize:vertical;margin-bottom:10px;line-height:1.5"></textarea>'
@@ -3835,30 +3852,86 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     bcbAnalyses[id] = parsed;
     bcbSaveStore();
 
-    var bogenName = (bcbBoegen.find(function(b){ return b.id === id; }) || {}).name || id;
+    // ── Store match info in the bogen object ──────────────────
+    var bogenIdx = bcbBoegen.findIndex(function(b){ return b.id === id; });
+    if (bogenIdx >= 0) {
+      if (parsed.spielpaarung) bcbBoegen[bogenIdx].spielpaarung = parsed.spielpaarung;
+      if (parsed.spieldatum)   bcbBoegen[bogenIdx].spieldatum   = parsed.spieldatum;
+      try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(bcbBoegen)); } catch(e) {}
+    }
 
-    // ── LEISTUNGSPROFIL mergen ────────────────────────────────
-    if (parsed.leistungsprofil) {
+    // ── LEISTUNGSPROFIL – neuer Algorithmus ──────────────────
+    // Kategorien die NICHT automatisch ins LP kommen (zu generisch / Baseline-Erwartung):
+    // Spielverständnis (2.1), Fitness (5.1), Teamarbeit/Abseits (6)
+    // Kategorien die INS LP kommen: Zweikampf (2.2), Disziplin (3), Auftreten (4.1), Komm. (4.2), Stellungsspiel (5.2)
+    if (parsed.leistungsprofil || parsed.positiv) {
       var lp = bcbLoadLP();
-      // Extract first sentence as summary if not set
-      var firstSent = parsed.leistungsprofil.split(/(?<=[.!?])\s+/)[0] || parsed.leistungsprofil;
-      if (!lp.summary) lp.summary = firstSent;
+      var lpSource = (parsed.leistungsprofil || '') + ' ' + (parsed.positiv || '');
 
-      // Split LP into individual strength statements, deduplicate aggressively
-      var sentences = parsed.leistungsprofil.replace(/([.!?])\s+/g,'$1|||').split('|||')
-        .map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 10; });
+      // Sentences: split on sentence boundaries
+      var rawSentences = lpSource.replace(/([.!?])\s+/g,'$1|||').split('|||')
+        .map(function(s){ return s.trim(); })
+        .filter(function(s){ return s.length > 12; });
 
-      sentences.forEach(function(s) {
-        // Skip score-only sentences (contain "240", "Punkte", "Baseline", "Erwartungsniveau")
-        if (/\b(240|239|238|241|Punkt|Punkte|Baseline|Erwartungsniveau|harmlos|fehlerfrei runterpfeifen)\b/i.test(s)) return;
-        // Check if semantically similar to existing aspekte
-        var similar = lp.aspekte.some(function(a) {
-          var kwA = a.text.toLowerCase().split(/\s+/).filter(function(w){ return w.length > 5; });
+      // Expand compound sentences: "A und B" → [A, B]
+      var expanded = [];
+      rawSentences.forEach(function(s) {
+        // Split only on " und " / " sowie " that connect two independent clauses
+        var parts = s.split(/\s+(?:und|sowie)\s+/i);
+        if (parts.length > 1 && parts.every(function(p){ return p.split(/\s+/).length >= 3; })) {
+          parts.forEach(function(p){ expanded.push(p.trim()); });
+        } else {
+          expanded.push(s);
+        }
+      });
+
+      expanded.forEach(function(s) {
+        // ── Filter out score/count sentences ──
+        if (/\b(23\d|24\d|Punkte?\b|Baseline|Erwartungsniveau|Erwartungsleistung|Schwierigkeitsgrad|harmlos|runterpfeifen|fehlerfrei\s+gemacht|\d+\s*[×xX]\s*\d|\bmal\s+\d|\d+\s*mal\b|konstant\s+solide|stabile\s+Basis|Basis\s+stimmt)/i.test(s)) return;
+        // ── Filter generic/baseline categories (unless rubriken show 5+) ──
+        if (/\b(Spielverst[äa]ndnis|Spielkontrolle|Fitness|Ausdauer|Sprint|Teamarbeit|Abseits\b)/i.test(s)) {
+          // Only allow if a rubrik for that category is rated 5 or 6
+          var allowed = (parsed.rubriken || []).some(function(r){
+            return r.wert >= 5 && /spielverst|fitness|ausdauer|team|abseits/i.test(r.name);
+          });
+          if (!allowed) return;
+        }
+        // ── Min word count ──
+        if (s.split(/\s+/).length < 4) return;
+
+        // ── Detect if this sentence was mentioned negatively ──
+        var negText = (parsed.negativ || '').toLowerCase();
+        var isNeg = bcbSimilar(s, negText) && negText.length > 10;
+
+        // ── Semantic dedup ──
+        var existIdx = lp.aspekte.findIndex(function(a) {
+          var kwA = a.text.toLowerCase().split(/\W+/).filter(function(w){ return w.length > 5; });
           var kwS = s.toLowerCase();
           return kwA.filter(function(w){ return kwS.indexOf(w) >= 0; }).length >= 2;
         });
-        if (!similar) {
-          lp.aspekte.push({ id: 'lp_'+Date.now()+'_'+Math.random().toString(36).slice(2,4), text: s });
+
+        if (existIdx >= 0) {
+          // Update existing
+          if (isNeg) {
+            lp.aspekte[existIdx].negCount = (lp.aspekte[existIdx].negCount || 0) + 1;
+            if (lp.aspekte[existIdx].negCount >= 2) lp.aspekte[existIdx].status = 'removed';
+            else lp.aspekte[existIdx].status = 'uncertain';
+          } else {
+            lp.aspekte[existIdx].count = (lp.aspekte[existIdx].count || 1) + 1;
+            if (lp.aspekte[existIdx].status === 'uncertain') lp.aspekte[existIdx].status = 'stable';
+          }
+        } else if (!isNeg) {
+          // Add new (max 8 active aspekte)
+          var activeCount = lp.aspekte.filter(function(a){ return a.status !== 'removed'; }).length;
+          if (activeCount < 8) {
+            lp.aspekte.push({
+              id: 'lp_' + Date.now() + '_' + Math.random().toString(36).slice(2,4),
+              text: s,
+              count: 1,
+              negCount: 0,
+              status: 'stable' // 'stable' | 'uncertain' | 'removed'
+            });
+          }
         }
       });
       bcbSaveLP(lp);
