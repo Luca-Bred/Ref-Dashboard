@@ -919,6 +919,409 @@ footer {
 ══════════════════════════════════════ */
 .inner-slot { display: none; }
 .inner-slot.active { display: block; animation: fadeUp .18s ease; }
+
+/* ══════════════════════════════════════
+   BCB – BEOBACHTUNGSBÖGEN SYSTEM
+══════════════════════════════════════ */
+/* Upload row */
+.bcb-upload-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: .875rem;
+}
+.bcb-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--grass-dim);
+  border: 1px solid rgba(46,204,113,0.3);
+  color: var(--grass);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-family: 'Barlow', sans-serif;
+  letter-spacing: .03em;
+  transition: background .15s;
+}
+.bcb-upload-btn:hover { background: rgba(46,204,113,0.22); }
+.bcb-upload-btn input { display: none; }
+
+/* BCB card list */
+.bcb-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 11px 14px;
+  transition: border-color .15s, background .15s;
+}
+.bcb-card:hover { border-color: var(--border-med); background: var(--surface3); }
+.bcb-card.bcb-active { border-color: rgba(46,204,113,0.4); background: rgba(46,204,113,0.04); }
+
+.bcb-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  font-family: 'Barlow', sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bcb-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.bcb-meta-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+}
+.bcb-score-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-family: 'Barlow', sans-serif;
+  letter-spacing: .02em;
+}
+.bcb-pill-none  { background: rgba(255,255,255,0.05); color: var(--text-3); border: 1px solid var(--border); }
+.bcb-pill-high  { background: var(--grass-dim); color: var(--grass); border: 1px solid rgba(46,204,113,0.3); }
+.bcb-pill-mid   { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(243,156,18,0.3); }
+.bcb-pill-low   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(231,76,60,0.3); }
+.bcb-status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.dot-pending  { background: var(--text-3); }
+.dot-loading  { background: var(--blue); animation: pulse .8s ease-in-out infinite alternate; }
+.dot-done     { background: var(--grass); }
+.dot-error    { background: var(--red); }
+@keyframes pulse { from { opacity: .4; } to { opacity: 1; } }
+
+.bcb-card-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.bcb-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--border-med);
+  background: var(--surface3);
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: 'Barlow', sans-serif;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.bcb-btn:hover { background: var(--surface); color: var(--text); border-color: var(--border-hi); }
+.bcb-btn-green { background: var(--grass-dim); color: var(--grass); border-color: rgba(46,204,113,0.3); }
+.bcb-btn-green:hover { background: rgba(46,204,113,0.22); }
+.bcb-btn-del { color: var(--text-3); border-color: transparent; background: transparent; padding: 6px 8px; }
+.bcb-btn-del:hover { color: var(--red); background: var(--red-dim); border-color: rgba(231,76,60,0.3); }
+.bcb-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* BCB MODAL */
+.bcb-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 10000;
+  align-items: stretch;
+}
+.bcb-modal-overlay.is-open { display: flex; }
+
+.bcb-modal-inner {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp .2s ease;
+}
+
+.bcb-modal-header {
+  background: #0a1f0e;
+  border-bottom: 1px solid rgba(46,204,113,0.2);
+  padding: .875rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.bcb-modal-title-wrap { min-width: 0; }
+.bcb-modal-eyebrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--grass);
+  margin-bottom: 2px;
+}
+.bcb-modal-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bcb-modal-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.bcb-modal-close {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: none; color: #fff; font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.bcb-modal-close:hover { background: rgba(255,255,255,0.2); }
+
+.bcb-modal-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+.bcb-pdf-pane {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  background: #111318;
+}
+.bcb-pane-label {
+  padding: 7px 14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.bcb-pdf-frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+  background: #1a1a1a;
+}
+
+.bcb-analysis-pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+}
+.bcb-analysis-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.bcb-analysis-scroll::-webkit-scrollbar { width: 4px; }
+.bcb-analysis-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* analysis content */
+.bcb-placeholder {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; gap: 10px;
+  color: var(--text-3); text-align: center; padding: 30px;
+}
+.bcb-placeholder-icon { font-size: 40px; opacity: .3; margin-bottom: 4px; }
+
+.bcb-spinner-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; gap: 14px;
+}
+.bcb-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--grass);
+  border-radius: 50%;
+  animation: bcbSpin .75s linear infinite;
+}
+@keyframes bcbSpin { to { transform: rotate(360deg); } }
+.bcb-spin-label { font-size: 13px; color: var(--text-2); }
+.bcb-spin-sub   { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+.bcb-error-box {
+  background: var(--red-dim);
+  border: 1px solid rgba(231,76,60,0.3);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  color: #e88;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* score overview */
+.bcb-score-overview {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.bcb-score-big {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+.bcb-score-big.s-high { color: var(--grass); }
+.bcb-score-big.s-mid  { color: var(--amber); }
+.bcb-score-big.s-low  { color: var(--red); }
+.bcb-score-meta { flex: 1; min-width: 0; }
+.bcb-score-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.bcb-score-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.bcb-tag-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.bcb-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-family: 'Barlow', sans-serif;
+}
+.bcb-tag-green { background: var(--grass-dim); color: var(--grass); border: 1px solid rgba(46,204,113,0.25); }
+.bcb-tag-red   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(231,76,60,0.25); }
+
+/* rubrik bars */
+.bcb-rubrik-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.bcb-rubrik-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+}
+.bcb-rubrik-name {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--text-3);
+  font-family: 'Barlow Condensed', sans-serif;
+  margin-bottom: 5px;
+}
+.bcb-rubrik-row { display: flex; align-items: center; gap: 7px; }
+.bcb-rubrik-bar { flex: 1; height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.bcb-rubrik-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
+.bcb-rubrik-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  width: 14px;
+  text-align: right;
+}
+
+/* analysis sections */
+.bcb-section {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  margin-bottom: 7px;
+  overflow: hidden;
+}
+.bcb-section-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .12s;
+}
+.bcb-section-hdr:hover { background: var(--surface3); }
+.bcb-section-icon { font-size: 13px; flex-shrink: 0; }
+.bcb-section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text);
+  flex: 1;
+}
+.bcb-section-chev {
+  font-size: 10px;
+  color: var(--text-3);
+  transition: transform .18s;
+  flex-shrink: 0;
+}
+.bcb-section.bcb-collapsed .bcb-section-chev { transform: rotate(-90deg); }
+.bcb-section-body {
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+.bcb-section.bcb-collapsed .bcb-section-body { display: none; }
+
+/* improvement list */
+.bcb-improve-list { list-style: none; margin: 0; padding: 0; }
+.bcb-improve-item { display: flex; gap: 9px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.bcb-improve-item:last-child { border-bottom: none; }
+.bcb-improve-num {
+  width: 20px; height: 20px;
+  background: var(--grass);
+  color: #0a1f0e;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+.bcb-improve-text { font-size: 12px; color: var(--text-2); line-height: 1.65; }
+
+@media (max-width: 700px) {
+  .bcb-modal-body { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; }
+  .bcb-pdf-pane { border-right: none; border-bottom: 1px solid var(--border); }
+}
 </style>
 </head>
 <body>
@@ -1149,112 +1552,48 @@ footer {
     <div id="sr-beobachtungen" class="slot-section">
       <div style="margin-top:.25rem;display:flex;flex-direction:column;gap:10px">
 
-        <!-- Notenschnitt -->
+        <!-- Stats row -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:var(--grass);line-height:1" id="beob-schnitt">3.2</div>
-            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Notenschnitt</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:var(--grass);line-height:1" id="beob-schnitt">—</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Ø Punkte BCB</div>
           </div>
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:#fff;line-height:1" id="beob-anzahl">4</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:#fff;line-height:1" id="beob-anzahl">0</div>
             <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Beobachtungen</div>
           </div>
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:var(--amber);line-height:1" id="beob-trend">&#x2197;</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:var(--text-3);line-height:1" id="beob-trend">—</div>
             <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Tendenz</div>
           </div>
         </div>
 
-        <!-- Beobachtungsbögen -->
+        <!-- BCB Bögen Upload + Liste -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Beobachtungsbögen</div>
-          <div style="display:flex;flex-direction:column;gap:6px" id="beob-list">
-            <!-- Sample entries - will be replaced when PDFs are uploaded -->
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)">
-              <div>
-                <div style="font-size:13px;font-weight:600;color:var(--text)">Beobachtung #1</div>
-                <div style="font-size:11px;color:var(--text-3);margin-top:2px">Noch kein Bogen hinterlegt</div>
-              </div>
-              <label style="background:var(--grass-dim);border:1px solid rgba(46,204,113,0.3);color:var(--grass);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;font-family:'Barlow',sans-serif">
-                PDF hochladen
-                <input type="file" accept=".pdf" style="display:none" onchange="beobUpload(this,1)">
-              </label>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)">
-              <div>
-                <div style="font-size:13px;font-weight:600;color:var(--text)">Beobachtung #2</div>
-                <div style="font-size:11px;color:var(--text-3);margin-top:2px">Noch kein Bogen hinterlegt</div>
-              </div>
-              <label style="background:var(--grass-dim);border:1px solid rgba(46,204,113,0.3);color:var(--grass);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;font-family:'Barlow',sans-serif">
-                PDF hochladen
-                <input type="file" accept=".pdf" style="display:none" onchange="beobUpload(this,2)">
-              </label>
+          <div class="bcb-upload-row">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3)">BCB Beobachtungsbögen</div>
+            <label class="bcb-upload-btn">
+              &#x2B06; PDF hochladen
+              <input type="file" accept=".pdf" multiple id="bcbFileInput">
+            </label>
+          </div>
+          <div id="bcb-list" style="display:flex;flex-direction:column;gap:6px">
+            <div id="bcb-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:12px;background:var(--surface2);border:1px dashed var(--border);border-radius:var(--r-sm)">
+              Noch keine Bögen hochgeladen · PDF-Datei hochladen um zu beginnen
             </div>
           </div>
-          <button onclick="beobAddSlot()" style="margin-top:10px;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:7px 16px;border-radius:var(--r-sm);cursor:pointer;font-family:'Barlow',sans-serif">+ Beobachtung hinzufügen</button>
         </div>
 
-        <!-- Bewertungsauswertung -->
+        <!-- Rubrik-Durchschnitte (auto aus Analysen) -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Bewertungsbereiche</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Ø Bewertungsbereiche <span style="font-weight:400;color:var(--text-3);font-family:'Barlow',sans-serif;font-size:10px;text-transform:none;letter-spacing:0">(aus analysierten Bögen)</span></div>
           <div style="display:flex;flex-direction:column;gap:10px" id="beob-bereiche">
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span style="font-size:12px;color:var(--text-2)">Spielleitung & Auftreten</span>
-                <span style="font-size:12px;font-weight:600;color:var(--grass)" id="beob-auftreten">3.0</span>
-              </div>
-              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:75%;background:var(--grass);border-radius:3px;transition:width .4s ease"></div>
-              </div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span style="font-size:12px;color:var(--text-2)">Regelkenntnis & Entscheidungen</span>
-                <span style="font-size:12px;font-weight:600;color:var(--grass)" id="beob-regelkenntnis">3.2</span>
-              </div>
-              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:70%;background:var(--grass);border-radius:3px;transition:width .4s ease"></div>
-              </div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span style="font-size:12px;color:var(--text-2)">Positionsspiel & Fitness</span>
-                <span style="font-size:12px;font-weight:600;color:var(--amber)" id="beob-position">3.5</span>
-              </div>
-              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:60%;background:var(--amber);border-radius:3px;transition:width .4s ease"></div>
-              </div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span style="font-size:12px;color:var(--text-2)">Kommunikation</span>
-                <span style="font-size:12px;font-weight:600;color:var(--grass)" id="beob-kommunikation">2.8</span>
-              </div>
-              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:80%;background:var(--grass);border-radius:3px;transition:width .4s ease"></div>
-              </div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span style="font-size:12px;color:var(--text-2)">Teamwork (AsR)</span>
-                <span style="font-size:12px;font-weight:600;color:var(--grass)" id="beob-teamwork">3.0</span>
-              </div>
-              <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:75%;background:var(--grass);border-radius:3px;transition:width .4s ease"></div>
-              </div>
-            </div>
+            <!-- auto-filled by bcbUpdateStats() -->
+            <div id="bcb-bereiche-placeholder" style="font-size:12px;color:var(--text-3);font-style:italic">Werden automatisch aus den KI-Analysen berechnet.</div>
           </div>
           <div style="margin-top:1rem;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
             <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">Entwicklungsfelder</div>
             <textarea id="beob-entwicklung" class="analysis-ta" style="min-height:80px" placeholder="Persönliche Entwicklungsfelder und Lernziele aus den Beobachtungen..." onchange="dbSave({'sr-entwicklung':this.value})"></textarea>
-          </div>
-          <div style="margin-top:8px;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
-            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">Notenschnitt manuell aktualisieren</div>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <input id="beob-schnitt-input" type="number" min="1" max="6" step="0.1" placeholder="z.B. 3.2" style="width:100px;background:var(--surface3);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:7px 10px;color:var(--text);font-size:13px;outline:none">
-              <input id="beob-anzahl-input" type="number" min="0" placeholder="Anz. Beob." style="width:110px;background:var(--surface3);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:7px 10px;color:var(--text);font-size:13px;outline:none">
-              <button onclick="beobSaveStats()" class="save-btn">Speichern</button>
-            </div>
           </div>
         </div>
 
@@ -2395,6 +2734,45 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   </div>
 </div>
 
+
+<!-- ══ BCB ANALYSE MODAL ══════════════════════════════════════ -->
+<div class="bcb-modal-overlay" id="bcbModal">
+  <div class="bcb-modal-inner">
+    <div class="bcb-modal-header">
+      <div class="bcb-modal-title-wrap">
+        <div class="bcb-modal-eyebrow">DFB BCB &middot; Beobachtungs- und Coachingbogen</div>
+        <div class="bcb-modal-title" id="bcbModalTitle">—</div>
+      </div>
+      <div class="bcb-modal-actions">
+        <a id="bcbDownloadLink" href="#" download style="text-decoration:none">
+          <button class="bcb-btn" style="font-size:11px">&#x2B07; Download</button>
+        </a>
+        <button class="bcb-btn bcb-btn-green" id="bcbAnalyzeBtn" onclick="bcbStartAnalysis()">&#x1F916; Analysieren</button>
+        <button class="bcb-modal-close" onclick="bcbCloseModal()" title="Schlie&szlig;en">&#x2715;</button>
+      </div>
+    </div>
+    <div class="bcb-modal-body">
+      <div class="bcb-pdf-pane">
+        <div class="bcb-pane-label"><span>&#x1F4C4; Beobachtungsbogen (PDF)</span></div>
+        <iframe class="bcb-pdf-frame" id="bcbPdfFrame" src="about:blank"></iframe>
+      </div>
+      <div class="bcb-analysis-pane">
+        <div class="bcb-pane-label">
+          <span>&#x1F916; KI-Analyse (BCB-Experte)</span>
+          <span id="bcbAnalysisStatus" style="font-size:10px;color:var(--grass)"></span>
+        </div>
+        <div class="bcb-analysis-scroll" id="bcbAnalysisContent">
+          <div class="bcb-placeholder">
+            <div class="bcb-placeholder-icon">&#x1F4CA;</div>
+            <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">Noch keine Analyse</div>
+            <div style="font-size:11px">Klicke auf <strong style="color:var(--grass)">Analysieren</strong> um den BCB-Bogen nach DFB-Kriterien auszuwerten.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   var GAMES = [
     ["2026-04-02", "TSV Heimerdingen – TSV Ilshofen (Herren)", "19:00", "Weissacher Str., 71254 Ditzingen", "Rasen Weissacherstrasse", "Rasenplatz"],
@@ -2732,7 +3110,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (lpCard) lpCard.addEventListener('click', lpOpen);
     // Escape key
     document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape') { gmClose(); lpClose(); }
+      if (e.key === 'Escape') { gmClose(); lpClose(); bcbCloseModal(); }
     });
     // Default filter
     var upBtn = document.querySelector('.kal-filter');
@@ -2791,38 +3169,418 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (data.away && document.getElementById('sr-note-away')) document.getElementById('sr-note-away').value = data.away;
     var ent = dbGet('sr-entwicklung', '');
     if (ent && document.getElementById('beob-entwicklung')) document.getElementById('beob-entwicklung').value = ent;
-    var stats = dbGet('sr-beob-stats', {});
-    if (typeof stats === 'string') { try { stats = JSON.parse(stats); } catch(e) { stats = {}; } }
-    if (stats.schnitt && document.getElementById('beob-schnitt')) document.getElementById('beob-schnitt').textContent = stats.schnitt;
-    if (stats.anzahl  && document.getElementById('beob-anzahl'))  document.getElementById('beob-anzahl').textContent  = stats.anzahl;
   }
-  function beobSaveStats() {
-    var s = parseFloat(document.getElementById('beob-schnitt-input').value);
-    var n = parseInt(document.getElementById('beob-anzahl-input').value);
-    if (!isNaN(s)) { document.getElementById('beob-schnitt').textContent = s.toFixed(1); }
-    if (!isNaN(n)) { document.getElementById('beob-anzahl').textContent  = n; }
-    dbSave({'sr-beob-stats': { schnitt: s.toFixed(1), anzahl: n }});
+  // ── BCB SYSTEM ───────────────────────────────────────────────
+  var BCB_STORE_KEY     = 'bcb_boegen_v3';
+  var BCB_ANALYSIS_KEY  = 'bcb_analyses_v3';
+  var bcbBoegen         = [];
+  var bcbAnalyses       = {};
+  var bcbActiveBogen    = null;
+  var bcbBlobUrls       = {};
+
+  function bcbLoadStore() {
+    try { bcbBoegen   = JSON.parse(localStorage.getItem(BCB_STORE_KEY))   || []; } catch(e) { bcbBoegen = []; }
+    try { bcbAnalyses = JSON.parse(localStorage.getItem(BCB_ANALYSIS_KEY)) || {}; } catch(e) { bcbAnalyses = {}; }
   }
-  var beobSlotCount = 2;
-  function beobAddSlot() {
-    beobSlotCount++;
-    var list = document.getElementById('beob-list');
+  function bcbSaveStore() {
+    try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(bcbBoegen)); } catch(e) {}
+    try { localStorage.setItem(BCB_ANALYSIS_KEY, JSON.stringify(bcbAnalyses)); } catch(e) {}
+  }
+
+  // File input handler
+  document.addEventListener('DOMContentLoaded', function() {
+    bcbLoadStore();
+    bcbRenderList();
+    bcbUpdateStats();
+
+    var inp = document.getElementById('bcbFileInput');
+    if (inp) {
+      inp.addEventListener('change', function(e) {
+        var files = Array.from(e.target.files);
+        var pending = files.length;
+        if (!pending) return;
+        files.forEach(function(file) {
+          if (file.type !== 'application/pdf') { pending--; return; }
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            var b64 = ev.target.result.split(',')[1];
+            var id  = 'bcb_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+            bcbBoegen.unshift({ id: id, name: file.name.replace(/\.pdf$/i,''), date: new Date().toISOString(), base64: b64, size: file.size });
+            pending--;
+            if (pending === 0) {
+              bcbSaveStore();
+              bcbRenderList();
+              bcbUpdateStats();
+              bcbOpenModal(bcbBoegen[0].id);
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+        e.target.value = '';
+      });
+    }
+  });
+
+  function bcbGetBlobUrl(id) {
+    if (bcbBlobUrls[id]) return bcbBlobUrls[id];
+    var b = bcbBoegen.find(function(x){ return x.id === id; });
+    if (!b) return '';
+    var bytes = atob(b.base64);
+    var ab = new Uint8Array(bytes.length);
+    for (var i = 0; i < bytes.length; i++) ab[i] = bytes.charCodeAt(i);
+    bcbBlobUrls[id] = URL.createObjectURL(new Blob([ab], { type: 'application/pdf' }));
+    return bcbBlobUrls[id];
+  }
+
+  function bcbRenderList() {
+    var list = document.getElementById('bcb-list');
     if (!list) return;
-    var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)';
-    div.innerHTML = '<div><div style="font-size:13px;font-weight:600;color:var(--text)">Beobachtung #' + beobSlotCount + '</div>'
-      + '<div style="font-size:11px;color:var(--text-3);margin-top:2px">Noch kein Bogen hinterlegt</div></div>'
-      + '<label style="background:var(--grass-dim);border:1px solid rgba(46,204,113,0.3);color:var(--grass);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--r-sm);cursor:pointer;font-family:Barlow,sans-serif">'
-      + 'PDF hochladen<input type="file" accept=".pdf" style="display:none" onchange="beobUpload(this,' + beobSlotCount + ')"></label>';
-    list.appendChild(div);
+    if (bcbBoegen.length === 0) {
+      list.innerHTML = '<div id="bcb-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:12px;background:var(--surface2);border:1px dashed var(--border);border-radius:var(--r-sm)">Noch keine B\u00f6gen hochgeladen \u00b7 PDF-Datei hochladen um zu beginnen</div>';
+      return;
+    }
+    list.innerHTML = bcbBoegen.map(function(b) {
+      var a        = bcbAnalyses[b.id];
+      var scoreHtml= bcbScorePill(a);
+      var statusHtml = bcbStatusMeta(b.id);
+      var dateStr  = new Date(b.date).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
+      var analyzeLabel = (!a || a === 'error') ? '&#x1F916; Analysieren' : (a === 'analyzing' ? '&#x23F3; L\u00e4uft...' : '&#x1F504; Neu');
+      return '<div class="bcb-card" id="bcbcard_' + b.id + '">'
+        + '<div style="min-width:0">'
+        +   '<div class="bcb-card-name" title="' + bcbEsc(b.name) + '">' + bcbEsc(b.name) + '</div>'
+        +   '<div class="bcb-card-meta">'
+        +     '<span class="bcb-meta-date">&#x1F4C5; ' + dateStr + '</span>'
+        +     scoreHtml
+        +     statusHtml
+        +   '</div>'
+        + '</div>'
+        + '<div class="bcb-card-actions">'
+        +   '<button class="bcb-btn" onclick="bcbOpenModal(\'' + b.id + '\')">&#x1F4C4; \u00d6ffnen</button>'
+        +   '<button class="bcb-btn bcb-btn-green" onclick="bcbOpenAndAnalyze(\'' + b.id + '\')" ' + (a === 'analyzing' ? 'disabled' : '') + '>' + analyzeLabel + '</button>'
+        +   '<button class="bcb-btn bcb-btn-del" onclick="bcbDelete(event,\'' + b.id + '\')" title="L\u00f6schen">&#x1F5D1;</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
   }
-  function beobUpload(input, idx) {
-    var file = input.files[0];
-    if (!file) return;
-    var label = input.closest('div').querySelector('div div:first-child');
-    if (label) label.textContent = file.name;
-    // Store file name reference
-    localStorage.setItem('sr-beob-file-' + idx, file.name);
+
+  function bcbScorePill(a) {
+    if (!a || a === 'error')      return '<span class="bcb-score-pill bcb-pill-none">— Pkt</span>';
+    if (a === 'analyzing')        return '<span class="bcb-score-pill bcb-pill-none">&#x23F3;</span>';
+    if (typeof a === 'object' && a.totalScore) {
+      var s = a.totalScore;
+      var cls = s >= 245 ? 'bcb-pill-high' : s >= 237 ? 'bcb-pill-mid' : 'bcb-pill-low';
+      return '<span class="bcb-score-pill ' + cls + '">' + s + ' Pkt</span>';
+    }
+    return '<span class="bcb-score-pill bcb-pill-high">&#x2713; Analysiert</span>';
+  }
+
+  function bcbStatusMeta(id) {
+    var a = bcbAnalyses[id];
+    if (!a)                 return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--text-3)"><span class="bcb-status-dot dot-pending"></span>Ausstehend</span>';
+    if (a === 'analyzing')  return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--blue)"><span class="bcb-status-dot dot-loading"></span>Analyse l\u00e4uft</span>';
+    if (a === 'error')      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--red)"><span class="bcb-status-dot dot-error"></span>Fehler</span>';
+    return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--grass)"><span class="bcb-status-dot dot-done"></span>Analysiert</span>';
+  }
+
+  function bcbUpdateStats() {
+    var n = bcbBoegen.length;
+    var scores = bcbBoegen.map(function(b){ var a = bcbAnalyses[b.id]; return (a && typeof a === 'object' && a.totalScore) ? a.totalScore : null; }).filter(function(x){ return x !== null; });
+    var schnittEl = document.getElementById('beob-schnitt');
+    var anzahlEl  = document.getElementById('beob-anzahl');
+    var trendEl   = document.getElementById('beob-trend');
+    if (anzahlEl) anzahlEl.textContent = n;
+    if (schnittEl) {
+      if (scores.length) {
+        var avg = Math.round(scores.reduce(function(a,b){return a+b;},0) / scores.length);
+        schnittEl.textContent = avg;
+        schnittEl.style.color = avg >= 245 ? 'var(--grass)' : avg >= 237 ? 'var(--amber)' : 'var(--red)';
+      } else {
+        schnittEl.textContent = '—';
+        schnittEl.style.color = 'var(--text-3)';
+      }
+    }
+    if (trendEl) {
+      if (scores.length >= 2) {
+        var diff = scores[0] - scores[scores.length - 1];
+        trendEl.textContent = diff > 0 ? '↗' : diff < 0 ? '↘' : '→';
+        trendEl.style.color = diff > 0 ? 'var(--grass)' : diff < 0 ? 'var(--red)' : 'var(--amber)';
+      } else {
+        trendEl.textContent = '—';
+        trendEl.style.color = 'var(--text-3)';
+      }
+    }
+    // Rubrik-Durchschnitte
+    bcbUpdateBereiche();
+  }
+
+  function bcbUpdateBereiche() {
+    var bereiche = document.getElementById('beob-bereiche');
+    var placeholder = document.getElementById('bcb-bereiche-placeholder');
+    if (!bereiche) return;
+    var allA = bcbBoegen.map(function(b){ return bcbAnalyses[b.id]; }).filter(function(a){ return a && typeof a === 'object' && a.rubriken; });
+    if (allA.length === 0) {
+      if (placeholder) placeholder.style.display = '';
+      return;
+    }
+    if (placeholder) placeholder.style.display = 'none';
+    var NAMES = ['Spielrel. Einzelszenen','Spielleitungsqualit\u00e4t','Disziplinarkontrolle','Pers\u00f6nl. Auftreten','Fitness & Stellungsspiel','Teamarbeit'];
+    var avgs = NAMES.map(function(name, ni) {
+      var vals = allA.map(function(a){ return a.rubriken[ni] ? a.rubriken[ni].wert : 4; });
+      return vals.reduce(function(s,v){return s+v;},0) / vals.length;
+    });
+    var html = NAMES.map(function(name, i) {
+      var v = avgs[i];
+      var pct = ((v - 1) / 5) * 100;
+      var col = v >= 5 ? 'var(--grass)' : v >= 4 ? 'var(--grass)' : v >= 3 ? 'var(--amber)' : 'var(--red)';
+      return '<div>'
+        + '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +   '<span style="font-size:12px;color:var(--text-2)">' + name + '</span>'
+        +   '<span style="font-size:12px;font-weight:600;color:' + col + ';font-family:\'JetBrains Mono\',monospace">' + v.toFixed(1) + '</span>'
+        + '</div>'
+        + '<div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">'
+        +   '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:3px;transition:width .4s ease"></div>'
+        + '</div></div>';
+    }).join('');
+    bereiche.innerHTML = html;
+  }
+
+  function bcbDelete(e, id) {
+    e.stopPropagation();
+    if (!confirm('Bogen wirklich l\u00f6schen?')) return;
+    bcbBoegen = bcbBoegen.filter(function(b){ return b.id !== id; });
+    delete bcbAnalyses[id];
+    if (bcbBlobUrls[id]) { URL.revokeObjectURL(bcbBlobUrls[id]); delete bcbBlobUrls[id]; }
+    bcbSaveStore();
+    bcbRenderList();
+    bcbUpdateStats();
+    if (bcbActiveBogen === id) bcbCloseModal();
+  }
+
+  // ── MODAL ────────────────────────────────────────────────────
+  function bcbOpenModal(id) {
+    bcbActiveBogen = id;
+    var b = bcbBoegen.find(function(x){ return x.id === id; });
+    if (!b) return;
+    var modal = document.getElementById('bcbModal');
+    if (!modal) return;
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    // Title
+    document.getElementById('bcbModalTitle').textContent = b.name;
+    // PDF
+    var url = bcbGetBlobUrl(id);
+    document.getElementById('bcbPdfFrame').src = url + '#toolbar=0';
+    // Download link
+    var dl = document.getElementById('bcbDownloadLink');
+    dl.href = url; dl.download = b.name + '.pdf';
+    // Analysis button state
+    var a = bcbAnalyses[id];
+    var btn = document.getElementById('bcbAnalyzeBtn');
+    if (btn) {
+      btn.disabled = (a === 'analyzing');
+      btn.innerHTML = (!a || a === 'error') ? '&#x1F916; Analysieren' : a === 'analyzing' ? '&#x23F3; L\u00e4uft...' : '&#x1F504; Neu analysieren';
+    }
+    // Analysis content
+    bcbRenderModalAnalysis(id);
+    // Highlight card
+    document.querySelectorAll('.bcb-card').forEach(function(c){ c.classList.remove('bcb-active'); });
+    var card = document.getElementById('bcbcard_' + id);
+    if (card) card.classList.add('bcb-active');
+  }
+
+  function bcbOpenAndAnalyze(id) {
+    bcbOpenModal(id);
+    setTimeout(function(){ bcbStartAnalysis(); }, 200);
+  }
+
+  function bcbCloseModal() {
+    var modal = document.getElementById('bcbModal');
+    if (modal) modal.classList.remove('is-open');
+    document.body.style.overflow = '';
+    document.querySelectorAll('.bcb-card').forEach(function(c){ c.classList.remove('bcb-active'); });
+    bcbActiveBogen = null;
+  }
+
+  function bcbRenderModalAnalysis(id) {
+    var cont = document.getElementById('bcbAnalysisContent');
+    var status = document.getElementById('bcbAnalysisStatus');
+    if (!cont) return;
+    var a = bcbAnalyses[id];
+    if (!a) {
+      if (status) status.textContent = '';
+      cont.innerHTML = '<div class="bcb-placeholder"><div class="bcb-placeholder-icon">&#x1F4CA;</div><div style="font-size:13px;color:var(--text-2);margin-bottom:4px">Noch keine Analyse</div><div style="font-size:11px">Klicke auf <strong style="color:var(--grass)">Analysieren</strong> um den BCB-Bogen nach DFB-Kriterien auszuwerten.</div></div>';
+      return;
+    }
+    if (a === 'analyzing') {
+      if (status) status.textContent = '';
+      cont.innerHTML = '<div class="bcb-spinner-wrap"><div class="bcb-spinner"></div><div class="bcb-spin-label">BCB-Analyse l\u00e4uft...</div><div class="bcb-spin-sub">Auswertung nach DFB-Kriterien</div></div>';
+      return;
+    }
+    if (a === 'error') {
+      if (status) status.textContent = '';
+      cont.innerHTML = '<div style="padding:14px"><div class="bcb-error-box">&#x26A0; Die Analyse ist fehlgeschlagen. Bitte erneut versuchen.</div></div>';
+      return;
+    }
+    if (status) status.textContent = '\u2713 Fertig';
+    if (typeof a === 'object') {
+      cont.innerHTML = bcbBuildAnalysisHtml(a);
+    } else {
+      cont.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--text-2);white-space:pre-wrap;line-height:1.75">' + bcbEsc(a) + '</div>';
+    }
+  }
+
+  function bcbBuildAnalysisHtml(a) {
+    // Score
+    var s = a.totalScore;
+    var sCls = s ? (s >= 245 ? 's-high' : s >= 237 ? 's-mid' : 's-low') : '';
+    var sLabel = a.gesamtEinordnung || (s >= 245 ? 'Sehr gut' : s >= 242 ? 'Gut' : s >= 237 ? 'Erwartungsgem\u00e4\u00df' : 'Unterdurchschnittlich');
+
+    // Score overview
+    var html = '<div class="bcb-score-overview">'
+      + '<div class="bcb-score-big ' + sCls + '">' + (s || '—') + '</div>'
+      + '<div class="bcb-score-meta">'
+      +   '<div class="bcb-score-label">' + bcbEsc(sLabel) + '</div>'
+      +   '<div class="bcb-score-sub">BCB Gesamtpunkte · Baseline 240</div>'
+      +   '<div class="bcb-tag-row">'
+      +     (a.staerken || []).map(function(t){ return '<span class="bcb-tag bcb-tag-green">&#x2713; ' + bcbEsc(t) + '</span>'; }).join('')
+      +     (a.schwaechen || []).map(function(t){ return '<span class="bcb-tag bcb-tag-red">&darr; ' + bcbEsc(t) + '</span>'; }).join('')
+      +   '</div>'
+      + '</div>'
+      + '</div>';
+
+    // Rubrik bars
+    var rubriken = a.rubriken || [];
+    if (rubriken.length) {
+      html += '<div class="bcb-rubrik-grid">';
+      rubriken.forEach(function(r) {
+        var pct = ((r.wert - 1) / 5) * 100;
+        var col = r.wert >= 5 ? 'var(--grass)' : r.wert >= 4 ? 'var(--grass)' : r.wert >= 3 ? 'var(--amber)' : 'var(--red)';
+        html += '<div class="bcb-rubrik-item">'
+          + '<div class="bcb-rubrik-name">' + bcbEsc(r.name) + '</div>'
+          + '<div class="bcb-rubrik-row">'
+          +   '<div class="bcb-rubrik-bar"><div class="bcb-rubrik-fill" style="width:' + pct.toFixed(1) + '%;background:' + col + '"></div></div>'
+          +   '<div class="bcb-rubrik-val" style="color:' + col + '">' + r.wert + '</div>'
+          + '</div>'
+          + '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Collapsible sections
+    var sections = [
+      { icon: '&#x1F4CA;', title: 'A &ndash; Gesamtbewertung', key: 'gesamtbewertung' },
+      { icon: '&#x1F50D;', title: 'B &ndash; Schl\u00fcsselereignisse', key: 'schluessel' },
+      { icon: '&#x1F517;', title: 'C &ndash; Kettenwirkungen', key: 'ketten' },
+      { icon: '&#x1F4C8;', title: 'D &ndash; Leistungsprofil', key: 'profil' },
+      { icon: '&#x1F3C5;', title: 'F &ndash; Einordnung der Note', key: 'einordnung' },
+      { icon: '&#x1F3AF;', title: 'G &ndash; Konkrete Verbesserungen', key: 'verbesserungen', list: true }
+    ];
+    sections.forEach(function(sec, si) {
+      var content = a[sec.key];
+      if (!content) return;
+      var bodyHtml = '';
+      if (sec.list && Array.isArray(content)) {
+        bodyHtml = '<ul class="bcb-improve-list">' + content.map(function(item, i){
+          return '<li class="bcb-improve-item"><div class="bcb-improve-num">' + (i+1) + '</div><div class="bcb-improve-text">' + bcbEsc(item) + '</div></li>';
+        }).join('') + '</ul>';
+      } else {
+        bodyHtml = '<div>' + bcbEsc(typeof content === 'string' ? content : JSON.stringify(content,null,2)) + '</div>';
+      }
+      html += '<div class="bcb-section" id="bcbsec_' + si + '">'
+        + '<div class="bcb-section-hdr" onclick="bcbToggleSec(\'bcbsec_' + si + '\')">'
+        +   '<span class="bcb-section-icon">' + sec.icon + '</span>'
+        +   '<span class="bcb-section-title">' + sec.title + '</span>'
+        +   '<span class="bcb-section-chev">&rsaquo;</span>'
+        + '</div>'
+        + '<div class="bcb-section-body">' + bodyHtml + '</div>'
+        + '</div>';
+    });
+    return html;
+  }
+
+  function bcbToggleSec(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('bcb-collapsed');
+  }
+
+  // ── AI ANALYSIS ──────────────────────────────────────────────
+  function bcbStartAnalysis() {
+    var id = bcbActiveBogen;
+    if (!id) return;
+    var b = bcbBoegen.find(function(x){ return x.id === id; });
+    if (!b) return;
+    bcbAnalyses[id] = 'analyzing';
+    bcbSaveStore();
+    bcbRenderList();
+    bcbRenderModalAnalysis(id);
+    var btn = document.getElementById('bcbAnalyzeBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '&#x23F3; L\u00e4uft...'; }
+    var bogenName = b.name;
+
+    var PROMPT = 'Du bist ein Experte f\u00fcr den DFB-Beobachtungs- und Coachingbogen (BCB) im Schiedsrichterwesen. Analysiere den beigef\u00fcgten Beobachtungsbogen strukturiert, regelbasiert und praxisnah.\n\n'
+      + 'Grundlogik BCB:\n'
+      + '- Skala 1\u20136: 6=deutlich \u00fcber Erwartung, 5=\u00fcber Erwartung, 4=Baseline (fehlerfrei), 3=leicht darunter, 2=deutlich darunter, 1=gravierender Fehler\n'
+      + '- Ausgangswert immer 4. Abweichungen durch Szenen: +1/+2 (korrekte komplexe Szene), -1/-2/-3 (kleiner/mittlerer/gro\u00dfer Fehler)\n'
+      + '- Spielentscheidende Szene kann mehrere Rubriken gleichzeitig beeinflussen\n'
+      + '- Nicht vorhandene Situationen bleiben bei 4\n\n'
+      + 'Rubriken: (1) Spielrelevante Einzelszenen, (2) Spielleitungsqualit\u00e4t, (3) Disziplinarkontrolle, (4) Pers\u00f6nliches Auftreten, (5) Fitness & Stellungsspiel, (6) Teamarbeit\n\n'
+      + 'WICHTIG zur Analyse:\n'
+      + '- Formuliere die Analyse ALLGEMEIN gehalten und auf Entwicklung ausgerichtet\n'
+      + '- Konkrete Spielsituationen aus dem Bogen gerne als Referenz bei St\u00e4rken oder Schw\u00e4chen erw\u00e4hnen (z.B. "Die korrekte Vorteilsentscheidung in Minute X zeigt...")\n'
+      + '- Keine reine Aufz\u00e4hlung, sondern kausale, erfahrungsorientierte Einsch\u00e4tzung\n'
+      + '- Der Schiedsrichter ist Le Bre (22 Jahre), du sprichst ihn in der Analyse direkt an (du-Form)\n\n'
+      + 'Antworte NUR mit einem validen JSON-Objekt ohne Markdown-Bl\u00f6cke:\n'
+      + '{"totalScore":<Zahl|null>,"gesamtEinordnung":"<sehr gut|gut|erwartungsgem\u00e4\u00df|unterdurchschnittlich>","rubriken":[{"name":"Spielrel. Einzelszenen","wert":<1-6>},{"name":"Spielleitungsqualit\u00e4t","wert":<1-6>},{"name":"Disziplinarkontrolle","wert":<1-6>},{"name":"Pers\u00f6nl. Auftreten","wert":<1-6>},{"name":"Fitness & Stellungsspiel","wert":<1-6>},{"name":"Teamarbeit","wert":<1-6>}],"staerken":["<2-4 W\u00f6rter, max 3>"],"schwaechen":["<2-4 W\u00f6rter, max 3>"],"gesamtbewertung":"<allgemeine Einordnung der Gesamtpunkte, 2-3 S\u00e4tze, du-Form>","schluessel":"<Schl\u00fcsselereignisse mit Klassifizierung klein/mittel/gro\u00df, Auf-/Abwertung, konkrete Szenen referenzieren, 3-5 S\u00e4tze>","ketten":"<Kettenwirkungsanalyse wo eine Szene mehrere Rubriken beeinflusste, 2-4 S\u00e4tze>","profil":"<allgemeines Leistungsprofil, St\u00e4rken und Schw\u00e4chen mit Spielreferenz wo passend, 3-5 S\u00e4tze, du-Form>","einordnung":"<war die Note unterdurchschnittlich/erwartungsgem\u00e4\u00df/gut/sehr gut, Kontexteinordnung Spielschwierigkeit, 2-3 S\u00e4tze>","verbesserungen":["<konkreter praxisnaher Hebel 1>","<konkreter praxisnaher Hebel 2>","<konkreter praxisnaher Hebel 3>"]}';
+
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b.base64 } },
+            { type: 'text', text: PROMPT }
+          ]
+        }]
+      })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.error) throw new Error(data.error.message);
+      var raw = (data.content || []).map(function(x){ return x.text || ''; }).join('').trim();
+      var parsed;
+      try {
+        var clean = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
+        parsed = JSON.parse(clean);
+      } catch(e) {
+        parsed = raw;
+      }
+      bcbAnalyses[id] = parsed;
+      bcbSaveStore();
+      bcbRenderList();
+      bcbUpdateStats();
+      if (bcbActiveBogen === id) {
+        bcbRenderModalAnalysis(id);
+        var btn2 = document.getElementById('bcbAnalyzeBtn');
+        if (btn2) { btn2.disabled = false; btn2.innerHTML = '&#x1F504; Neu analysieren'; }
+      }
+    }).catch(function(err) {
+      console.error('BCB Analysis error:', err);
+      bcbAnalyses[id] = 'error';
+      bcbSaveStore();
+      bcbRenderList();
+      if (bcbActiveBogen === id) {
+        bcbRenderModalAnalysis(id);
+        var btn3 = document.getElementById('bcbAnalyzeBtn');
+        if (btn3) { btn3.disabled = false; btn3.innerHTML = '&#x1F916; Analysieren'; }
+      }
+    });
+  }
+
+  function bcbEsc(s) {
+    if (typeof s !== 'string') return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   document.addEventListener('DOMContentLoaded', function(){ srLoadNotes(); });
