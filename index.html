@@ -2964,9 +2964,12 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function dbSave(payload) {
-    // Immer lokal speichern (offline-Fallback)
+    // Immer lokal speichern (offline-Fallback) UND _cache aktualisieren
+    // damit dbGet sofort die neuen Werte sieht (nicht erst nach Seiten-Reload)
     Object.keys(payload).forEach(function(k){
-      localStorage.setItem(k, typeof payload[k] === 'object' ? JSON.stringify(payload[k]) : payload[k]);
+      var val = typeof payload[k] === 'object' ? JSON.stringify(payload[k]) : payload[k];
+      localStorage.setItem(k, val);
+      _cache[k] = val; // ← sofort im In-Memory-Cache aktualisieren
     });
     // Wenn URL hinterlegt: auch in Sheets speichern
     if (!SHEETS_URL) return;
@@ -3342,6 +3345,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   var BCB_META_KEY = 'bcb_meta_v1'; // lightweight bogen metadata in Sheets (no base64)
 
   function bcbLoadStore() {
+    bcbReloadLPEF();   // LP/EF Modul-Cache zurücksetzen → nächste bcbLoadLP/EF liest frisch
     // Load local PDF store (has base64)
     var local = [];
     try { local = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) {}
@@ -3392,18 +3396,39 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; p[BCB_META_KEY] = meta;
     dbSave(p);
   }
+  // ── LP / EF: eigene Modul-Variablen statt dbGet/Cache ────────
+  // Diese werden beim Laden aus Sheets befüllt und beim Speichern
+  // SOFORT direkt aktualisiert – unabhängig vom Sheets-Cache-Layer.
+  var _lpState = null;
+  var _efState = null;
+
   function bcbLoadLP() {
+    if (_lpState !== null) return _lpState;
     var d = dbGet('bcb_lp_v1', {summary:'', aspekte:[]});
     if (!d || typeof d !== 'object') d = {summary:'', aspekte:[]};
     if (!Array.isArray(d.aspekte)) d.aspekte = [];
-    return d;
+    _lpState = d;
+    return _lpState;
   }
-  function bcbSaveLP(d) { dbSave({'bcb_lp_v1': d}); }
+  function bcbSaveLP(d) {
+    _lpState = d;                        // sofort im Speicher aktualisieren
+    dbSave({'bcb_lp_v1': d});           // async nach Sheets
+  }
   function bcbLoadEF() {
+    if (_efState !== null) return _efState;
     var d = dbGet('bcb_ef_v1', []);
-    return Array.isArray(d) ? d : [];
+    _efState = Array.isArray(d) ? d : [];
+    return _efState;
   }
-  function bcbSaveEF(d) { dbSave({'bcb_ef_v1': d}); }
+  function bcbSaveEF(d) {
+    _efState = d;                        // sofort im Speicher aktualisieren
+    dbSave({'bcb_ef_v1': d});           // async nach Sheets
+  }
+  function bcbReloadLPEF() {
+    // Beim Laden aus Sheets: Modul-Cache zurücksetzen damit neu gelesen wird
+    _lpState = null;
+    _efState = null;
+  }
 
   // File input handler
   // Wire up the file input (bcbLoadStore/Render handled by main dbLoad callback)
@@ -3741,25 +3766,27 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (bcbActiveBogen === id) bcbCloseModal();
   }
 
-  // Manual reset buttons accessible via browser console or future UI
   function bcbResetLP() {
     if (!confirm('Leistungsprofil komplett zur\u00fccksetzen?')) return;
-    bcbSaveLP({summary:'', aspekte:[]}); bcbUpdateBereiche();
+    bcbSaveLP({summary:'', aspekte:[]});   // setzt _lpState sofort auf leer
+    bcbUpdateBereiche();
   }
   function bcbResetEF() {
     if (!confirm('Entwicklungsfelder komplett zur\u00fccksetzen?')) return;
-    bcbSaveEF([]); bcbUpdateBereiche();
+    bcbSaveEF([]);                          // setzt _efState sofort auf leer
+    bcbUpdateBereiche();
   }
   function bcbResetAll() {
     if (!confirm('Alle Analysen, Leistungsprofil und Entwicklungsfelder zur\u00fccksetzen?\nPDFs bleiben erhalten.')) return;
     bcbAnalyses = {};
-    bcbBoegen = [];
+    bcbBoegen   = [];
     try { localStorage.removeItem(BCB_STORE_KEY); } catch(e) {}
     var p = {}; p[BCB_ANALYSIS_KEY] = {}; p[BCB_META_KEY] = [];
     dbSave(p);
-    bcbSaveLP({summary:'', aspekte:[]});
-    bcbSaveEF([]);
-    bcbRenderList(); bcbUpdateStats();
+    bcbSaveLP({summary:'', aspekte:[]});   // setzt _lpState sofort auf leer
+    bcbSaveEF([]);                          // setzt _efState sofort auf leer
+    bcbRenderList();
+    bcbUpdateStats();   // ruft bcbUpdateBereiche intern auf
   }
 
   // ── MODAL ────────────────────────────────────────────────────
@@ -3943,11 +3970,15 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       + '<div style="background:var(--surface);border:1px solid var(--border-med);border-radius:var(--r);padding:1.75rem;max-width:520px;width:100%;animation:slideUp .2s ease">'
       +   '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:6px">Manuelle BCB-Analyse</div>'
       +   '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:12px">Analyse von Claude einfügen</div>'
-      +   '<div style="font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:14px">'
+      +   '<div style="font-size:12px;color:var(--text-2);line-height:1.75;margin-bottom:14px">'
       +     '1. Schicke den BCB-Bogen als PDF an Claude im Chat<br>'
-      +     '2. Claude liefert dir ein JSON-Objekt als Analyse<br>'
-      +     '3. Das JSON hier einf\u00fcgen und auf <strong style="color:var(--grass)">Speichern</strong> klicken<br>'
-      +     '<span style="font-size:11px;color:var(--text-3)">Das JSON muss <code>spielpaarung</code> und <code>spieldatum</code> enthalten.</span>'
+      +     '2. Claude analysiert nach folgender Hierarchie:<br>'
+      +     '<span style="font-size:11px;color:var(--text-3);padding-left:10px;display:block;line-height:1.8">'
+      +       '&#x2022; <strong style="color:var(--text)">A</strong>: Gesamteindruck-Text + Punktzahl &amp; Kontext<br>'
+      +       '&#x2022; <strong style="color:var(--text)">B</strong>: Positive Erkenntnisse + Aufwertungen als Beleg<br>'
+      +       '&#x2022; <strong style="color:var(--text)">C</strong>: Zu optimierende Bereiche + Abwertungen als Beleg<br>'
+      +       '&#x2022; Keine Redundanzen zwischen A / B / C'
+      +     '</span>'
       +   '</div>'
       +   '<textarea id="bcbPasteInput" placeholder=\'{"totalScore": 240, "gesamtEinordnung": "erwartungsgemäß", ...}\' '
       +     'style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:11px;font-family:\'JetBrains Mono\',monospace;outline:none;resize:vertical;margin-bottom:10px;line-height:1.5"></textarea>'
