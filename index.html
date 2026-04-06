@@ -2747,6 +2747,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         <a id="bcbDownloadLink" href="#" download style="text-decoration:none">
           <button class="bcb-btn" style="font-size:11px">&#x2B07; Download</button>
         </a>
+        <button class="bcb-btn" onclick="bcbResetApiKey()" title="API-Key \u00e4ndern" style="font-size:11px">&#x1F511;</button>
         <button class="bcb-btn bcb-btn-green" id="bcbAnalyzeBtn" onclick="bcbStartAnalysis()">&#x1F916; Analysieren</button>
         <button class="bcb-modal-close" onclick="bcbCloseModal()" title="Schlie&szlig;en">&#x2715;</button>
       </div>
@@ -3532,12 +3533,35 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       + 'Antworte NUR mit einem validen JSON-Objekt ohne Markdown-Bl\u00f6cke:\n'
       + '{"totalScore":<Zahl|null>,"gesamtEinordnung":"<sehr gut|gut|erwartungsgem\u00e4\u00df|unterdurchschnittlich>","rubriken":[{"name":"Spielrel. Einzelszenen","wert":<1-6>},{"name":"Spielleitungsqualit\u00e4t","wert":<1-6>},{"name":"Disziplinarkontrolle","wert":<1-6>},{"name":"Pers\u00f6nl. Auftreten","wert":<1-6>},{"name":"Fitness & Stellungsspiel","wert":<1-6>},{"name":"Teamarbeit","wert":<1-6>}],"staerken":["<2-4 W\u00f6rter, max 3>"],"schwaechen":["<2-4 W\u00f6rter, max 3>"],"gesamtbewertung":"<allgemeine Einordnung der Gesamtpunkte, 2-3 S\u00e4tze, du-Form>","schluessel":"<Schl\u00fcsselereignisse mit Klassifizierung klein/mittel/gro\u00df, Auf-/Abwertung, konkrete Szenen referenzieren, 3-5 S\u00e4tze>","ketten":"<Kettenwirkungsanalyse wo eine Szene mehrere Rubriken beeinflusste, 2-4 S\u00e4tze>","profil":"<allgemeines Leistungsprofil, St\u00e4rken und Schw\u00e4chen mit Spielreferenz wo passend, 3-5 S\u00e4tze, du-Form>","einordnung":"<war die Note unterdurchschnittlich/erwartungsgem\u00e4\u00df/gut/sehr gut, Kontexteinordnung Spielschwierigkeit, 2-3 S\u00e4tze>","verbesserungen":["<konkreter praxisnaher Hebel 1>","<konkreter praxisnaher Hebel 2>","<konkreter praxisnaher Hebel 3>"]}';
 
+    // Get API key – stored in localStorage, prompt once if missing
+    var apiKey = localStorage.getItem('bcb_api_key') || '';
+    if (!apiKey) {
+      apiKey = (window.prompt('Anthropic API-Key eingeben (wird nur lokal gespeichert):') || '').trim();
+      if (!apiKey) {
+        bcbAnalyses[id] = 'error';
+        bcbSaveStore();
+        bcbRenderList();
+        if (bcbActiveBogen === id) {
+          bcbRenderModalAnalysis(id);
+          var btnX = document.getElementById('bcbAnalyzeBtn');
+          if (btnX) { btnX.disabled = false; btnX.innerHTML = '&#x1F916; Analysieren'; }
+        }
+        return;
+      }
+      localStorage.setItem('bcb_api_key', apiKey);
+    }
+
     fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1200,
         messages: [{
           role: 'user',
           content: [
@@ -3547,7 +3571,13 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         }]
       })
     }).then(function(r) { return r.json(); }).then(function(data) {
-      if (data.error) throw new Error(data.error.message);
+      if (data.error) {
+        // Invalid key? Reset so user can re-enter next time
+        if (data.error.type === 'authentication_error') {
+          localStorage.removeItem('bcb_api_key');
+        }
+        throw new Error(data.error.message);
+      }
       var raw = (data.content || []).map(function(x){ return x.text || ''; }).join('').trim();
       var parsed;
       try {
@@ -3576,6 +3606,11 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         if (btn3) { btn3.disabled = false; btn3.innerHTML = '&#x1F916; Analysieren'; }
       }
     });
+  }
+
+  function bcbResetApiKey() {
+    var key = (window.prompt('Neuen Anthropic API-Key eingeben:') || '').trim();
+    if (key) { localStorage.setItem('bcb_api_key', key); alert('API-Key gespeichert.'); }
   }
 
   function bcbEsc(s) {
