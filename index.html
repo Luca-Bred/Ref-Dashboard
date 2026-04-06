@@ -797,6 +797,7 @@ body {
   text-transform: uppercase;
 }
 .kb-spiel    { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(74,144,217,0.3); }
+.kb-training { background: var(--blue-dim);   color: var(--blue);  border: 1px solid rgba(74,144,217,0.3); }
 .kb-schulung { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(243,156,18,0.3); }
 .kb-heute    { background: var(--grass-dim); color: var(--grass); border: 1px solid rgba(46,204,113,0.4); }
 
@@ -1641,60 +1642,66 @@ footer {
 
     <!-- ── 1. NÄCHSTES SPIEL ─────────────────────────────── -->
     <div id="sr-naechstes" class="slot-section active">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:.25rem">
+      <!-- Navigation arrows -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:.5rem 0 .875rem">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3)" id="sn-game-counter">Spiel 1 von 9</div>
+        <div style="display:flex;gap:6px">
+          <button id="sn-prev" onclick="snNavigate(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s" title="Vorheriges Spiel">&#8592;</button>
+          <button id="sn-next" onclick="snNavigate(+1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s" title="Nächstes Spiel">&#8594;</button>
+        </div>
+      </div>
 
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <!-- Left: Spielinfos -->
         <div style="display:flex;flex-direction:column;gap:8px">
-
           <!-- Match card -->
-          <div style="background:linear-gradient(135deg,rgba(46,204,113,0.1),rgba(46,204,113,0.03));border:1px solid rgba(46,204,113,0.35);border-radius:var(--r);padding:1.25rem">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:.5rem">Nächster Einsatz</div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem">TSV Heimerdingen &ndash; TSV Ilshofen</div>
-            <div style="font-size:12px;color:var(--text-2)"><span id="sr-datum">…</span></div>
-            <div style="margin-top:.875rem;display:flex;gap:6px;flex-wrap:wrap">
-              <a href="https://www.google.com/maps/dir/?api=1&origin=Backnang%2C+Deutschland&destination=Weissacher+Str.%2C+71254+Ditzingen&travelmode=driving" target="_blank" class="mlink mlink-green" style="font-size:11px;padding:5px 12px">&#x1F4CD; Route</a>
-              <a href="https://www.fussball.de/suche/-/query/TSV+Heimerdingen" target="_blank" class="mlink mlink-blue" style="font-size:11px;padding:5px 12px">fussball.de</a>
-              <a href="https://www.wetter.de/suche/?q=Ditzingen" target="_blank" class="mlink mlink-amber" style="font-size:11px;padding:5px 12px">&#x2600; Wetter</a>
+          <div id="sn-hero" style="background:linear-gradient(135deg,rgba(46,204,113,0.1),rgba(46,204,113,0.03));border:1px solid rgba(46,204,113,0.35);border-radius:var(--r);padding:1.25rem">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:.5rem" id="sn-label">Nächster Einsatz</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem" id="sn-title">–</div>
+            <div style="font-size:12px;color:var(--text-2)" id="sn-meta">–</div>
+            <div style="margin-top:.875rem;display:flex;gap:6px;flex-wrap:wrap" id="sn-links">
+              <a id="sn-maps" href="#" target="_blank" class="mlink mlink-green" style="font-size:11px;padding:5px 12px">&#x1F4CD; Route</a>
+              <a id="sn-fussball" href="#" target="_blank" class="mlink mlink-blue" style="font-size:11px;padding:5px 12px">fussball.de</a>
+              <a id="sn-weather" href="#" target="_blank" class="mlink mlink-amber" style="font-size:11px;padding:5px 12px">&#x2600; Wetter</a>
+              <a href="https://www.dfbnet.org/spielplus/login.do" target="_blank" class="mlink mlink-gray" style="font-size:11px;padding:5px 12px">DFBnet</a>
+              <a href="https://my.refsix.com/#/ref/fixtures" target="_blank" class="mlink mlink-gray" style="font-size:11px;padding:5px 12px">RefSix</a>
             </div>
           </div>
-
           <!-- Info rows -->
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;display:flex;flex-direction:column;gap:8px">
-            <div class="gm-info-row"><div class="gm-icon">&#x1F550;</div><div><div class="gm-label">Ansto&szlig;</div><div class="gm-val">19:00 Uhr</div></div></div>
+            <div class="gm-info-row"><div class="gm-icon">&#x1F550;</div><div><div class="gm-label">Ansto&szlig;</div><div class="gm-val" id="sn-time">–</div></div></div>
             <div style="height:1px;background:var(--border)"></div>
-            <div class="gm-info-row"><div class="gm-icon">&#x1F4CD;</div><div><div class="gm-label">Adresse</div><div class="gm-val">Weissacher Str., 71254 Ditzingen</div></div></div>
+            <div class="gm-info-row"><div class="gm-icon">&#x1F4CD;</div><div><div class="gm-label">Adresse</div><div class="gm-val" id="sn-addr">–</div></div></div>
             <div style="height:1px;background:var(--border)"></div>
-            <div class="gm-info-row"><div class="gm-icon">&#x1F3DF;</div><div><div class="gm-label">Spielstätte</div><div class="gm-val">Rasen Weissacherstrasse</div></div></div>
+            <div class="gm-info-row"><div class="gm-icon">&#x1F3DF;</div><div><div class="gm-label">Spielst&auml;tte</div><div class="gm-val" id="sn-venue">–</div></div></div>
             <div style="height:1px;background:var(--border)"></div>
-            <div class="gm-info-row"><div class="gm-icon">&#x1F33F;</div><div><div class="gm-label">Untergrund</div><div class="gm-val">Rasenplatz</div></div></div>
+            <div class="gm-info-row"><div class="gm-icon">&#x1F33F;</div><div><div class="gm-label">Untergrund</div><div class="gm-val" id="sn-surface">–</div></div></div>
           </div>
-
-          <!-- FuPA Team Links -->
+          <!-- FuPA links -->
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem">
             <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px">Mannschaften</div>
-            <a href="https://www.fupa.net/club/tsv-heimerdingen" target="_blank" class="team-link-m">TSV Heimerdingen</a>
-            <a href="https://www.fupa.net/club/tsv-ilshofen" target="_blank" class="team-link-m" style="margin-top:6px">TSV Ilshofen</a>
+            <a id="sn-home-link" class="team-link-m" href="#" target="_blank">–</a>
+            <a id="sn-away-link" class="team-link-m" href="#" target="_blank" style="margin-top:6px">–</a>
           </div>
         </div>
-
         <!-- Right: Spielanalyse -->
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem">
             <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-family:'Barlow Condensed',sans-serif;margin-bottom:10px">Spielanalyse</div>
             <div class="analysis-box-m">
               <div class="analysis-lbl">Allgemeine Notizen</div>
-              <textarea id="sr-note-gen" class="analysis-ta" placeholder="Allgemeine Spielnotizen..." onchange="srSaveNote('gen',this.value)"></textarea>
+              <textarea id="sn-note-gen" class="analysis-ta" placeholder="Allgemeine Spielnotizen..."></textarea>
             </div>
             <div class="analysis-box-m" style="margin-top:8px">
-              <div class="analysis-lbl">Heimmannschaft &middot; TSV Heimerdingen</div>
-              <textarea id="sr-note-home" class="analysis-ta" placeholder="Taktik, Besonderheiten, Spieler..." onchange="srSaveNote('home',this.value)"></textarea>
+              <div class="analysis-lbl" id="sn-lbl-home">Heimmannschaft</div>
+              <textarea id="sn-note-home" class="analysis-ta" placeholder="Taktik, Besonderheiten..."></textarea>
             </div>
             <div class="analysis-box-m" style="margin-top:8px">
-              <div class="analysis-lbl">Gastmannschaft &middot; TSV Ilshofen</div>
-              <textarea id="sr-note-away" class="analysis-ta" placeholder="Taktik, Besonderheiten, Spieler..." onchange="srSaveNote('away',this.value)"></textarea>
+              <div class="analysis-lbl" id="sn-lbl-away">Gastmannschaft</div>
+              <textarea id="sn-note-away" class="analysis-ta" placeholder="Taktik, Besonderheiten..."></textarea>
             </div>
-            <button onclick="srSaveAllNotes()" class="save-btn" style="margin-top:10px">Analyse speichern</button>
-            <span id="sr-save-status" style="font-size:11px;color:var(--grass);margin-left:8px"></span>
+            <button onclick="snSave()" class="save-btn" style="margin-top:10px">Speichern</button>
+            <span id="sn-status" style="font-size:11px;color:var(--grass);margin-left:8px"></span>
           </div>
         </div>
       </div>
@@ -1760,9 +1767,10 @@ footer {
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:.75rem 0">
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="kal-filter active" onclick="filterKal('upcoming',this)">Nächste 4 Wochen</button>
-          <button class="kal-filter" onclick="filterKal('alle',this)">Alle</button>
           <button class="kal-filter" onclick="filterKal('spiel',this)">Spiele</button>
+          <button class="kal-filter" onclick="filterKal('training',this)">SR-Training</button>
           <button class="kal-filter" onclick="filterKal('schulung',this)">Schulungen</button>
+          <button class="kal-filter" onclick="filterKal('alle',this)">Alle</button>
         </div>
         <span class="kal-updated" id="stand-datum">Stand: …</span>
       </div>
@@ -1784,7 +1792,7 @@ footer {
       </div>
       <div class="kal-card" data-type="spiel" data-date="2026-04-19" data-idx="3">
         <div class="kal-date-col"><div class="kal-day">19</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div>
-        <div class="kal-info"><div class="kal-title">VfL Mainhardt – TSV Rudersberg (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportplatz 1 Steinbühlhalle &middot; Steinbühl, 74535 Mainhardt</span></span></div></div>
+        <div class="kal-info"><div class="kal-title">VfL Mainhardt – TSV Rudersberg (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportplatz 1 an Steinbühlhalle &middot; Steinbühl, 74535 Mainhardt</span></span></div></div>
         <span class="kal-badge kb-spiel">Spiel</span>
       </div>
       <div class="kal-card" data-type="spiel" data-date="2026-04-26" data-idx="4">
@@ -1812,6 +1820,46 @@ footer {
         <div class="kal-info"><div class="kal-title">Spfr Untergriesheim – FSV Schwaigern (Herren)</div><div class="kal-details"><span class="kal-time">15:30 &ndash; 17:15</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Untergriesheim Rasen &middot; Austr., 74177 Bad Friedrichshall</span></span></div></div>
         <span class="kal-badge kb-spiel">Spiel</span>
       </div>
+      <div class="kal-card" data-type="training" data-date="2026-04-08">
+        <div class="kal-date-col"><div class="kal-day">08</div><div class="kal-month">Apr</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-04-22">
+        <div class="kal-date-col"><div class="kal-day">22</div><div class="kal-month">Apr</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-05-06">
+        <div class="kal-date-col"><div class="kal-day">06</div><div class="kal-month">Mai</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-05-20">
+        <div class="kal-date-col"><div class="kal-day">20</div><div class="kal-month">Mai</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-06-03">
+        <div class="kal-date-col"><div class="kal-day">03</div><div class="kal-month">Jun</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-06-17">
+        <div class="kal-date-col"><div class="kal-day">17</div><div class="kal-month">Jun</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-07-01">
+        <div class="kal-date-col"><div class="kal-day">01</div><div class="kal-month">Jul</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-07-15">
+        <div class="kal-date-col"><div class="kal-day">15</div><div class="kal-month">Jul</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
       <div class="kal-card" data-type="schulung" data-date="2026-05-12">
         <div class="kal-date-col"><div class="kal-day">12</div><div class="kal-month">Mai</div><div class="kal-weekday">Di</div></div>
         <div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div>
@@ -1831,6 +1879,7 @@ footer {
         <div class="kal-date-col"><div class="kal-day">20</div><div class="kal-month">Okt</div><div class="kal-weekday">Di</div></div>
         <div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div>
         <span class="kal-badge kb-schulung">Schulung</span>
+      </div>
       </div>
       </div>
     </div>
@@ -2857,11 +2906,13 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       </div>
     </div>
     <div class="mfooter">
-      <a id="gm-maps"    class="mlink mlink-green" href="#" target="_blank" rel="noopener">&#x1F4CD; Route (Google Maps)</a>
+      <a id="gm-maps"    class="mlink mlink-green" href="#" target="_blank" rel="noopener">&#x1F4CD; Route</a>
       <a id="gm-fussball" class="mlink mlink-blue"  href="#" target="_blank" rel="noopener">fussball.de</a>
       <a id="gm-weather" class="mlink mlink-amber"  href="#" target="_blank" rel="noopener">&#x2600; Wetter</a>
       <a id="gm-fupa-home" class="mlink mlink-gray" href="#" target="_blank" rel="noopener">FUPA Heim</a>
       <a id="gm-fupa-away" class="mlink mlink-gray" href="#" target="_blank" rel="noopener">FUPA Gast</a>
+      <a class="mlink mlink-gray" href="https://www.dfbnet.org/spielplus/login.do" target="_blank" rel="noopener">DFBnet</a>
+      <a class="mlink mlink-gray" href="https://my.refsix.com/#/ref/fixtures" target="_blank" rel="noopener">RefSix</a>
     </div>
   </div>
 </div>
@@ -2964,12 +3015,9 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function dbSave(payload) {
-    // Immer lokal speichern (offline-Fallback) UND _cache aktualisieren
-    // damit dbGet sofort die neuen Werte sieht (nicht erst nach Seiten-Reload)
+    // Immer lokal speichern (offline-Fallback)
     Object.keys(payload).forEach(function(k){
-      var val = typeof payload[k] === 'object' ? JSON.stringify(payload[k]) : payload[k];
-      localStorage.setItem(k, val);
-      _cache[k] = val; // ← sofort im In-Memory-Cache aktualisieren
+      localStorage.setItem(k, typeof payload[k] === 'object' ? JSON.stringify(payload[k]) : payload[k]);
     });
     // Wenn URL hinterlegt: auch in Sheets speichern
     if (!SHEETS_URL) return;
@@ -3065,6 +3113,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       if (type === 'alle') show = true;
       else if (type === 'spiel') show = (t === 'spiel');
       else if (type === 'schulung') show = (t === 'schulung');
+      else if (type === 'training') show = (t === 'training');
       else show = (d >= today && d <= in4w);
       card.style.display = show ? 'grid' : 'none';
     });
@@ -3127,6 +3176,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     document.getElementById('gm-overlay').classList.add('is-open');
     document.body.style.overflow = 'hidden';
   }
+
   function gmClose() {
     document.getElementById('gm-overlay').classList.remove('is-open');
     document.body.style.overflow = '';
@@ -3345,7 +3395,6 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   var BCB_META_KEY = 'bcb_meta_v1'; // lightweight bogen metadata in Sheets (no base64)
 
   function bcbLoadStore() {
-    bcbReloadLPEF();   // LP/EF Modul-Cache zurücksetzen → nächste bcbLoadLP/EF liest frisch
     // Load local PDF store (has base64)
     var local = [];
     try { local = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) {}
@@ -3396,39 +3445,18 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; p[BCB_META_KEY] = meta;
     dbSave(p);
   }
-  // ── LP / EF: eigene Modul-Variablen statt dbGet/Cache ────────
-  // Diese werden beim Laden aus Sheets befüllt und beim Speichern
-  // SOFORT direkt aktualisiert – unabhängig vom Sheets-Cache-Layer.
-  var _lpState = null;
-  var _efState = null;
-
   function bcbLoadLP() {
-    if (_lpState !== null) return _lpState;
     var d = dbGet('bcb_lp_v1', {summary:'', aspekte:[]});
     if (!d || typeof d !== 'object') d = {summary:'', aspekte:[]};
     if (!Array.isArray(d.aspekte)) d.aspekte = [];
-    _lpState = d;
-    return _lpState;
+    return d;
   }
-  function bcbSaveLP(d) {
-    _lpState = d;                        // sofort im Speicher aktualisieren
-    dbSave({'bcb_lp_v1': d});           // async nach Sheets
-  }
+  function bcbSaveLP(d) { dbSave({'bcb_lp_v1': d}); }
   function bcbLoadEF() {
-    if (_efState !== null) return _efState;
     var d = dbGet('bcb_ef_v1', []);
-    _efState = Array.isArray(d) ? d : [];
-    return _efState;
+    return Array.isArray(d) ? d : [];
   }
-  function bcbSaveEF(d) {
-    _efState = d;                        // sofort im Speicher aktualisieren
-    dbSave({'bcb_ef_v1': d});           // async nach Sheets
-  }
-  function bcbReloadLPEF() {
-    // Beim Laden aus Sheets: Modul-Cache zurücksetzen damit neu gelesen wird
-    _lpState = null;
-    _efState = null;
-  }
+  function bcbSaveEF(d) { dbSave({'bcb_ef_v1': d}); }
 
   // File input handler
   // Wire up the file input (bcbLoadStore/Render handled by main dbLoad callback)
@@ -3766,27 +3794,25 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (bcbActiveBogen === id) bcbCloseModal();
   }
 
+  // Manual reset buttons accessible via browser console or future UI
   function bcbResetLP() {
     if (!confirm('Leistungsprofil komplett zur\u00fccksetzen?')) return;
-    bcbSaveLP({summary:'', aspekte:[]});   // setzt _lpState sofort auf leer
-    bcbUpdateBereiche();
+    bcbSaveLP({summary:'', aspekte:[]}); bcbUpdateBereiche();
   }
   function bcbResetEF() {
     if (!confirm('Entwicklungsfelder komplett zur\u00fccksetzen?')) return;
-    bcbSaveEF([]);                          // setzt _efState sofort auf leer
-    bcbUpdateBereiche();
+    bcbSaveEF([]); bcbUpdateBereiche();
   }
   function bcbResetAll() {
     if (!confirm('Alle Analysen, Leistungsprofil und Entwicklungsfelder zur\u00fccksetzen?\nPDFs bleiben erhalten.')) return;
     bcbAnalyses = {};
-    bcbBoegen   = [];
+    bcbBoegen = [];
     try { localStorage.removeItem(BCB_STORE_KEY); } catch(e) {}
     var p = {}; p[BCB_ANALYSIS_KEY] = {}; p[BCB_META_KEY] = [];
     dbSave(p);
-    bcbSaveLP({summary:'', aspekte:[]});   // setzt _lpState sofort auf leer
-    bcbSaveEF([]);                          // setzt _efState sofort auf leer
-    bcbRenderList();
-    bcbUpdateStats();   // ruft bcbUpdateBereiche intern auf
+    bcbSaveLP({summary:'', aspekte:[]});
+    bcbSaveEF([]);
+    bcbRenderList(); bcbUpdateStats();
   }
 
   // ── MODAL ────────────────────────────────────────────────────
@@ -4348,6 +4374,123 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var firstFilter = document.querySelector('.kal-filter');
     if (firstFilter) filterKal('upcoming', firstFilter);
   })();
+
+
+  // ── SR-NAECHSTES SPIEL NAVIGATION ───────────────────────────
+  var snCurrentIdx = 0;
+  var MONTHS_SN = ['Jan','Feb','Mar','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  var WDAYS_SN  = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+
+  function snFindNextGame() {
+    var today = new Date().toISOString().slice(0,10);
+    for (var i = 0; i < GAMES.length; i++) {
+      if (GAMES[i][0] >= today) return i;
+    }
+    return GAMES.length - 1;
+  }
+
+  function teamSlugSN(name) {
+    return name.replace(/ *\(.*?\) */g,'').trim()
+      .toLowerCase()
+      .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+      .replace(/[.'&,\/]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  }
+
+  function splitTeamsSN(title) {
+    var clean = title.replace(/ *\(.*?\) */g,'').trim();
+    var parts  = clean.split(' – ');
+    return { home: (parts[0]||'').trim(), away: (parts[1]||'').trim() };
+  }
+
+  function snLoad(idx) {
+    if (!GAMES || idx < 0 || idx >= GAMES.length) return;
+    snCurrentIdx = idx;
+    var g = GAMES[idx];
+    var date = g[0], title = g[1], time = g[2], addr = g[3], venue = g[4], surface = g[5];
+    var d     = new Date(date);
+    var today = new Date().toISOString().slice(0,10);
+    var teams = splitTeamsSN(title);
+    var isToday = (date === today);
+
+    // Counter
+    var counter = document.getElementById('sn-game-counter');
+    if (counter) counter.textContent = 'Spiel ' + (idx+1) + ' von ' + GAMES.length;
+
+    // Label
+    var label = document.getElementById('sn-label');
+    if (label) label.textContent = isToday ? 'Heute' : (idx === snFindNextGame() ? 'Nächster Einsatz' : WDAYS_SN[d.getDay()] + ', ' + d.getDate() + '. ' + MONTHS_SN[d.getMonth()]);
+
+    // Title & meta
+    var titleEl = document.getElementById('sn-title');
+    if (titleEl) titleEl.textContent = title.replace(/ *\(.*?\) */g,'').trim();
+    var metaEl  = document.getElementById('sn-meta');
+    if (metaEl)  metaEl.textContent = WDAYS_SN[d.getDay()] + ', ' + d.getDate() + '. ' + MONTHS_SN[d.getMonth()] + ' · ' + time + ' Uhr · ' + (addr.split(',').pop().replace(/[0-9]/g,'').trim());
+
+    // Info rows
+    var el = function(id){ return document.getElementById(id); };
+    if (el('sn-time'))    el('sn-time').textContent    = time + ' Uhr';
+    if (el('sn-addr'))    el('sn-addr').textContent    = addr;
+    if (el('sn-venue'))   el('sn-venue').textContent   = venue;
+    if (el('sn-surface')) el('sn-surface').textContent = surface;
+
+    // Links
+    var HOME_ADDR = 'Backnang, Deutschland';
+    if (el('sn-maps'))     el('sn-maps').href     = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(HOME_ADDR) + '&destination=' + encodeURIComponent(addr) + '&travelmode=driving';
+    if (el('sn-fussball')) el('sn-fussball').href = 'https://www.fussball.de/suche/-/query/' + encodeURIComponent(teams.home);
+    var city = addr.replace(/[0-9]/g,'').split(',').pop().trim();
+    if (el('sn-weather'))  el('sn-weather').href  = 'https://www.wetter.de/suche/?q=' + encodeURIComponent(city);
+
+    // FuPA
+    if (el('sn-home-link')) { el('sn-home-link').textContent = teams.home; el('sn-home-link').href = 'https://www.fupa.net/club/' + teamSlugSN(teams.home); }
+    if (el('sn-away-link')) { el('sn-away-link').textContent = teams.away; el('sn-away-link').href = 'https://www.fupa.net/club/' + teamSlugSN(teams.away); }
+    if (el('sn-lbl-home'))  el('sn-lbl-home').textContent = 'Heim: ' + teams.home;
+    if (el('sn-lbl-away'))  el('sn-lbl-away').textContent = 'Gast: ' + teams.away;
+
+    // Nav arrows
+    if (el('sn-prev')) el('sn-prev').style.opacity = idx === 0 ? '0.3' : '1';
+    if (el('sn-next')) el('sn-next').style.opacity = idx === GAMES.length-1 ? '0.3' : '1';
+
+    // Load analysis – SAME KEY as the game modal (sr-analysis-{idx})
+    var data = dbGet('sr-analysis-' + idx, {});
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch(e) { data = {}; } }
+    if (el('sn-note-gen'))  el('sn-note-gen').value  = data.gen  || '';
+    if (el('sn-note-home')) el('sn-note-home').value = data.home || '';
+    if (el('sn-note-away')) el('sn-note-away').value = data.away || '';
+    if (el('sn-status'))    el('sn-status').textContent = '';
+  }
+
+  function snNavigate(dir) {
+    var newIdx = snCurrentIdx + dir;
+    if (newIdx < 0 || newIdx >= GAMES.length) return;
+    snLoad(newIdx);
+  }
+
+  function snSave() {
+    var data = {
+      gen:  document.getElementById('sn-note-gen')  ? document.getElementById('sn-note-gen').value  : '',
+      home: document.getElementById('sn-note-home') ? document.getElementById('sn-note-home').value : '',
+      away: document.getElementById('sn-note-away') ? document.getElementById('sn-note-away').value : '',
+      savedAt: new Date().toISOString()
+    };
+    // Save with SAME key as modal (sr-analysis-{idx})
+    var key = 'sr-analysis-' + snCurrentIdx;
+    var payload = {}; payload[key] = data;
+    dbSave(payload);
+    var s = document.getElementById('sn-status');
+    if (s) { s.textContent = '✓ Gespeichert'; setTimeout(function(){ s.textContent = ''; }, 2000); }
+  }
+
+  // Also sync: when gmOpen is called, update sn analysis if same game is loaded
+  var _origGmSaveAnalysis = typeof gmSaveAnalysis !== 'undefined' ? gmSaveAnalysis : null;
+
+  // Patch gmSaveAnalysis to refresh sn-naechstes if same game
+  var _origGmSave = gmSaveAnalysis;
+  gmSaveAnalysis = function() {
+    _origGmSave();
+    if (currentGameIdx === snCurrentIdx) {
+      snLoad(snCurrentIdx);
+    }
+  };
 
 </script>
 </body>
