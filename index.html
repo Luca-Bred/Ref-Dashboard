@@ -1586,7 +1586,7 @@ footer {
 
         <!-- Rubrik-Durchschnitte (auto aus Analysen) -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Ø Bewertungsbereiche <span style="font-weight:400;color:var(--text-3);font-family:'Barlow',sans-serif;font-size:10px;text-transform:none;letter-spacing:0">(aus analysierten Bögen)</span></div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Leistungsübersicht <span style="font-weight:400;color:var(--text-3);font-family:'Barlow',sans-serif;font-size:10px;text-transform:none;letter-spacing:0">(aus analysierten Bögen)</span></div>
           <div style="display:flex;flex-direction:column;gap:10px" id="beob-bereiche">
             <!-- auto-filled by bcbUpdateStats() -->
             <div id="bcb-bereiche-placeholder" style="font-size:12px;color:var(--text-3);font-style:italic">Werden automatisch aus den KI-Analysen berechnet.</div>
@@ -2747,6 +2747,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         <a id="bcbDownloadLink" href="#" download style="text-decoration:none">
           <button class="bcb-btn" style="font-size:11px">&#x2B07; Download</button>
         </a>
+        <button class="bcb-btn" onclick="bcbResetApiKey()" title="API-Key \u00e4ndern" style="font-size:11px">&#x1F511; API-Key</button>
         <button class="bcb-btn bcb-btn-green" id="bcbAnalyzeBtn" onclick="bcbStartAnalysis()">&#x1F916; Analysieren</button>
         <button class="bcb-modal-close" onclick="bcbCloseModal()" title="Schlie&szlig;en">&#x2715;</button>
       </div>
@@ -3317,30 +3318,97 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var bereiche = document.getElementById('beob-bereiche');
     var placeholder = document.getElementById('bcb-bereiche-placeholder');
     if (!bereiche) return;
-    var allA = bcbBoegen.map(function(b){ return bcbAnalyses[b.id]; }).filter(function(a){ return a && typeof a === 'object' && a.rubriken; });
+
+    var allA = bcbBoegen.map(function(b){ return bcbAnalyses[b.id]; })
+      .filter(function(a){ return a && typeof a === 'object' && a.rubriken; });
+
     if (allA.length === 0) {
       if (placeholder) placeholder.style.display = '';
+      bereiche.innerHTML = '<div id="bcb-bereiche-placeholder" style="font-size:12px;color:var(--text-3);font-style:italic">Werden automatisch aus den KI-Analysen berechnet.</div>';
       return;
     }
     if (placeholder) placeholder.style.display = 'none';
-    var NAMES = ['Spielrel. Einzelszenen','Spielleitungsqualit\u00e4t','Disziplinarkontrolle','Pers\u00f6nl. Auftreten','Fitness & Stellungsspiel','Teamarbeit'];
-    var avgs = NAMES.map(function(name, ni) {
-      var vals = allA.map(function(a){ return a.rubriken[ni] ? a.rubriken[ni].wert : 4; });
-      return vals.reduce(function(s,v){return s+v;},0) / vals.length;
-    });
-    var html = NAMES.map(function(name, i) {
-      var v = avgs[i];
-      var pct = ((v - 1) / 5) * 100;
-      var col = v >= 5 ? 'var(--grass)' : v >= 4 ? 'var(--grass)' : v >= 3 ? 'var(--amber)' : 'var(--red)';
-      return '<div>'
-        + '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
-        +   '<span style="font-size:12px;color:var(--text-2)">' + name + '</span>'
-        +   '<span style="font-size:12px;font-weight:600;color:' + col + ';font-family:\'JetBrains Mono\',monospace">' + v.toFixed(1) + '</span>'
+
+    var RUBRIK_NAMES = ['Einzelszenen','Spielverst\u00e4ndnis','Zweikampfbewertung','Disziplinarkontrolle','Pers\u00f6nl. Auftreten','Fitness & Stellungsspiel','Teamarbeit'];
+
+    // ── Leistungsprofil (letzter analysierter Bogen) ───────────
+    var latestLP = '';
+    for (var i = 0; i < bcbBoegen.length; i++) {
+      var la = bcbAnalyses[bcbBoegen[i].id];
+      if (la && typeof la === 'object' && la.leistungsprofil) { latestLP = la.leistungsprofil; break; }
+    }
+    var html = '';
+    if (latestLP) {
+      html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--grass);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
+        + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--grass);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:6px">Leistungsprofil</div>'
+        + '<div style="font-size:12px;color:var(--text-2);line-height:1.7">' + bcbEsc(latestLP) + '</div>'
+        + '</div>';
+    }
+
+    // ── Entwicklungsfelder (aus allen Analysen gesammelt, dedupliziert) ──
+    var allEF = [];
+    allA.forEach(function(a){ (a.entwicklungsfelder || []).forEach(function(ef){ if (ef && allEF.indexOf(ef) === -1) allEF.push(ef); }); });
+    if (allEF.length) {
+      html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
+        + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:8px">Entwicklungsfelder</div>'
+        + allEF.map(function(ef, i){
+            return '<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;' + (i < allEF.length-1 ? 'border-bottom:1px solid var(--border);' : '') + '">'
+              + '<div style="width:18px;height:18px;background:var(--amber-dim);border:1px solid rgba(243,156,18,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--amber);flex-shrink:0;margin-top:1px;font-family:\'Barlow Condensed\',sans-serif">' + (i+1) + '</div>'
+              + '<div style="font-size:12px;color:var(--text-2);line-height:1.6">' + bcbEsc(ef) + '</div>'
+              + '</div>';
+          }).join('')
+        + '</div>';
+    }
+
+    // ── Ø Rubrik-Balken mit Abweichungsnotizen ────────────────
+    html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px">'
+      + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:10px">'
+      + '\u00d8 Rubrik-Bewertungen (1\u20136) &middot; <span style="color:var(--blue)">&#x2015;</span> Baseline = 4</div>';
+
+    RUBRIK_NAMES.forEach(function(name, ni) {
+      // Alle Werte dieser Rubrik über alle Analysen
+      var entries = allA.map(function(a, ai) {
+        var r = a.rubriken && a.rubriken[ni];
+        if (!r) return null;
+        var bogen = bcbBoegen[bcbBoegen.length - 1 - ai]; // neueste zuerst
+        var bName = bogen ? bogen.name : 'Bogen ' + (ai+1);
+        return { wert: r.wert || 4, abw: r.abweichung || '', bogen: bName };
+      }).filter(Boolean);
+
+      if (!entries.length) return;
+      var avg = entries.reduce(function(s,e){return s+e.wert;},0) / entries.length;
+      var pct = ((avg - 1) / 5) * 100;
+      var col = avg >= 5 ? 'var(--grass)' : avg === 4 ? 'var(--blue)' : avg >= 3 ? 'var(--amber)' : 'var(--red)';
+      var delta = avg - 4;
+      var deltaStr = delta > 0 ? '+' + delta.toFixed(1) : delta < 0 ? delta.toFixed(1) : '';
+      var deltaCol = delta > 0 ? 'var(--grass)' : delta < 0 ? 'var(--red)' : '';
+
+      // Abweichungen zusammensammeln (nur wenn wert ≠ 4)
+      var abwNotes = entries.filter(function(e){ return e.wert !== 4 && e.abw; });
+
+      html += '<div style="margin-bottom:10px">'
+        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+        +   '<span style="font-size:12px;color:var(--text-2);flex:1">' + bcbEsc(name) + '</span>'
+        +   (deltaStr ? '<span style="font-size:10px;font-weight:700;color:' + deltaCol + '">' + deltaStr + '</span>' : '')
+        +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:' + col + '">' + avg.toFixed(1) + '</span>'
         + '</div>'
-        + '<div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">'
-        +   '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:3px;transition:width .4s ease"></div>'
-        + '</div></div>';
-    }).join('');
+        + '<div style="position:relative;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:' + (abwNotes.length ? '6px' : '0') + '">'
+        +   '<div style="position:absolute;left:' + (((4-1)/5)*100).toFixed(1) + '%;width:2px;height:100%;background:var(--blue);opacity:.5"></div>'
+        +   '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:3px;transition:width .5s ease"></div>'
+        + '</div>'
+        + abwNotes.map(function(e){
+            var eCol = e.wert > 4 ? 'var(--grass)' : 'var(--red)';
+            var arrow = e.wert > 4 ? '&#x2197;' : '&#x2198;';
+            return '<div style="font-size:11px;color:var(--text-3);line-height:1.5;padding:3px 6px;background:var(--surface3);border-radius:4px;border-left:2px solid ' + eCol + ';margin-bottom:3px">'
+              + '<span style="color:' + eCol + ';font-weight:700;margin-right:4px">' + arrow + ' ' + e.wert + '</span>'
+              + '<span style="color:var(--text-3);font-size:10px;margin-right:6px">(' + bcbEsc(e.bogen) + ')</span>'
+              + bcbEsc(e.abw)
+              + '</div>';
+          }).join('')
+        + '</div>';
+    });
+
+    html += '</div>';
     bereiche.innerHTML = html;
   }
 
@@ -3430,69 +3498,67 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function bcbBuildAnalysisHtml(a) {
-    // Score
     var s = a.totalScore;
     var sCls = s ? (s >= 245 ? 's-high' : s >= 237 ? 's-mid' : 's-low') : '';
-    var sLabel = a.gesamtEinordnung || (s >= 245 ? 'Sehr gut' : s >= 242 ? 'Gut' : s >= 237 ? 'Erwartungsgem\u00e4\u00df' : 'Unterdurchschnittlich');
+    var sLabel = a.gesamtEinordnung
+      ? (a.gesamtEinordnung.charAt(0).toUpperCase() + a.gesamtEinordnung.slice(1))
+      : (s >= 245 ? 'Sehr gut' : s >= 242 ? 'Gut' : s >= 237 ? 'Erwartungsgem\u00e4\u00df' : 'Unterdurchschnittlich');
 
-    // Score overview
+    // ── Score-Header ──────────────────────────────────────────
     var html = '<div class="bcb-score-overview">'
       + '<div class="bcb-score-big ' + sCls + '">' + (s || '—') + '</div>'
       + '<div class="bcb-score-meta">'
       +   '<div class="bcb-score-label">' + bcbEsc(sLabel) + '</div>'
-      +   '<div class="bcb-score-sub">BCB Gesamtpunkte · Baseline 240</div>'
-      +   '<div class="bcb-tag-row">'
-      +     (a.staerken || []).map(function(t){ return '<span class="bcb-tag bcb-tag-green">&#x2713; ' + bcbEsc(t) + '</span>'; }).join('')
-      +     (a.schwaechen || []).map(function(t){ return '<span class="bcb-tag bcb-tag-red">&darr; ' + bcbEsc(t) + '</span>'; }).join('')
-      +   '</div>'
+      +   '<div class="bcb-score-sub">BCB Gesamtpunkte &middot; Baseline 240</div>'
       + '</div>'
       + '</div>';
 
-    // Rubrik bars
+    // ── Rubrik-Balken (7 Rubriken, mit Abweichungs-Tooltip) ──
     var rubriken = a.rubriken || [];
     if (rubriken.length) {
-      html += '<div class="bcb-rubrik-grid">';
+      html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px">';
       rubriken.forEach(function(r) {
-        var pct = ((r.wert - 1) / 5) * 100;
-        var col = r.wert >= 5 ? 'var(--grass)' : r.wert >= 4 ? 'var(--grass)' : r.wert >= 3 ? 'var(--amber)' : 'var(--red)';
-        html += '<div class="bcb-rubrik-item">'
-          + '<div class="bcb-rubrik-name">' + bcbEsc(r.name) + '</div>'
-          + '<div class="bcb-rubrik-row">'
-          +   '<div class="bcb-rubrik-bar"><div class="bcb-rubrik-fill" style="width:' + pct.toFixed(1) + '%;background:' + col + '"></div></div>'
-          +   '<div class="bcb-rubrik-val" style="color:' + col + '">' + r.wert + '</div>'
+        var v   = r.wert || 4;
+        var pct = ((v - 1) / 5) * 100;
+        var col = v >= 5 ? 'var(--grass)' : v === 4 ? 'var(--blue)' : v === 3 ? 'var(--amber)' : 'var(--red)';
+        var delta = v - 4;
+        var deltaHtml = '';
+        if (delta > 0) deltaHtml = '<span style="font-size:10px;color:var(--grass);font-weight:700;margin-left:4px">+' + delta + '</span>';
+        else if (delta < 0) deltaHtml = '<span style="font-size:10px;color:var(--red);font-weight:700;margin-left:4px">' + delta + '</span>';
+        var abw = r.abweichung || '';
+        html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px">'
+          + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+          +   '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">' + bcbEsc(r.name) + '</span>'
+          +   deltaHtml
+          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:' + col + '">' + v + '</span>'
           + '</div>'
+          + '<div style="display:flex;align-items:center;gap:8px">'
+          +   '<div style="flex:1;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden">'
+          +     '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:2px;transition:width .5s ease"></div>'
+          +   '</div>'
+          + '</div>'
+          + (abw ? '<div style="font-size:11px;color:var(--text-2);margin-top:5px;line-height:1.55;padding-top:5px;border-top:1px solid var(--border)">' + bcbEsc(abw) + '</div>' : '')
           + '</div>';
       });
       html += '</div>';
     }
 
-    // Collapsible sections
-    var sections = [
-      { icon: '&#x1F4CA;', title: 'A &ndash; Gesamtbewertung', key: 'gesamtbewertung' },
-      { icon: '&#x1F50D;', title: 'B &ndash; Schl\u00fcsselereignisse', key: 'schluessel' },
-      { icon: '&#x1F517;', title: 'C &ndash; Kettenwirkungen', key: 'ketten' },
-      { icon: '&#x1F4C8;', title: 'D &ndash; Leistungsprofil', key: 'profil' },
-      { icon: '&#x1F3C5;', title: 'F &ndash; Einordnung der Note', key: 'einordnung' },
-      { icon: '&#x1F3AF;', title: 'G &ndash; Konkrete Verbesserungen', key: 'verbesserungen', list: true }
+    // ── Sektionen A / B / C ───────────────────────────────────
+    var secs = [
+      { icon: '&#x1F4CA;', title: 'A \u2013 Gesamtbewertung', key: 'gesamtbewertung', open: true },
+      { icon: '&#x2705;',  title: 'B \u2013 Positive Aspekte', key: 'positiv', open: true },
+      { icon: '&#x1F4CC;', title: 'C \u2013 Entwicklungsfelder', key: 'negativ', open: false }
     ];
-    sections.forEach(function(sec, si) {
+    secs.forEach(function(sec, si) {
       var content = a[sec.key];
       if (!content) return;
-      var bodyHtml = '';
-      if (sec.list && Array.isArray(content)) {
-        bodyHtml = '<ul class="bcb-improve-list">' + content.map(function(item, i){
-          return '<li class="bcb-improve-item"><div class="bcb-improve-num">' + (i+1) + '</div><div class="bcb-improve-text">' + bcbEsc(item) + '</div></li>';
-        }).join('') + '</ul>';
-      } else {
-        bodyHtml = '<div>' + bcbEsc(typeof content === 'string' ? content : JSON.stringify(content,null,2)) + '</div>';
-      }
-      html += '<div class="bcb-section" id="bcbsec_' + si + '">'
+      html += '<div class="bcb-section' + (sec.open ? '' : ' bcb-collapsed') + '" id="bcbsec_' + si + '">'
         + '<div class="bcb-section-hdr" onclick="bcbToggleSec(\'bcbsec_' + si + '\')">'
         +   '<span class="bcb-section-icon">' + sec.icon + '</span>'
         +   '<span class="bcb-section-title">' + sec.title + '</span>'
         +   '<span class="bcb-section-chev">&rsaquo;</span>'
         + '</div>'
-        + '<div class="bcb-section-body">' + bodyHtml + '</div>'
+        + '<div class="bcb-section-body">' + bcbEsc(content) + '</div>'
         + '</div>';
     });
     return html;
@@ -3517,56 +3583,161 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (btn) { btn.disabled = true; btn.innerHTML = '&#x23F3; L\u00e4uft...'; }
     var bogenName = b.name;
 
-    var PROMPT = 'Du bist ein Experte f\u00fcr den DFB-Beobachtungs- und Coachingbogen (BCB) im Schiedsrichterwesen. Analysiere den beigef\u00fcgten Beobachtungsbogen strukturiert, regelbasiert und praxisnah.\n\n'
+    var PROMPT = 'Du bist ein Experte f\u00fcr den DFB-Beobachtungs- und Coachingbogen (BCB) im Schiedsrichterwesen.\n\n'
       + 'Grundlogik BCB:\n'
-      + '- Skala 1\u20136: 6=deutlich \u00fcber Erwartung, 5=\u00fcber Erwartung, 4=Baseline (fehlerfrei), 3=leicht darunter, 2=deutlich darunter, 1=gravierender Fehler\n'
-      + '- Ausgangswert immer 4. Abweichungen durch Szenen: +1/+2 (korrekte komplexe Szene), -1/-2/-3 (kleiner/mittlerer/gro\u00dfer Fehler)\n'
+      + '- Skala 1\u20136: 6=deutlich \u00fcber Erwartung, 5=\u00fcber, 4=Baseline (fehlerfrei), 3=leicht darunter, 2=deutlich darunter, 1=gravierender Fehler\n'
+      + '- Ausgangswert IMMER 4. Abweichungen entstehen NUR durch konkrete Szenen im Bogen: +1/+2 bei Aufwertung, -1/-2/-3 bei Fehler\n'
       + '- Spielentscheidende Szene kann mehrere Rubriken gleichzeitig beeinflussen\n'
-      + '- Nicht vorhandene Situationen bleiben bei 4\n\n'
-      + 'Rubriken: (1) Spielrelevante Einzelszenen, (2) Spielleitungsqualit\u00e4t, (3) Disziplinarkontrolle, (4) Pers\u00f6nliches Auftreten, (5) Fitness & Stellungsspiel, (6) Teamarbeit\n\n'
-      + 'WICHTIG zur Analyse:\n'
-      + '- Formuliere die Analyse ALLGEMEIN gehalten und auf Entwicklung ausgerichtet\n'
-      + '- Konkrete Spielsituationen aus dem Bogen gerne als Referenz bei St\u00e4rken oder Schw\u00e4chen erw\u00e4hnen (z.B. "Die korrekte Vorteilsentscheidung in Minute X zeigt...")\n'
-      + '- Keine reine Aufz\u00e4hlung, sondern kausale, erfahrungsorientierte Einsch\u00e4tzung\n'
-      + '- Der Schiedsrichter ist Le Bre (22 Jahre), du sprichst ihn in der Analyse direkt an (du-Form)\n\n'
+      + '- Nicht vorhandene Situationen bleiben bei 4 \u2013 das ist kein Mangel\n\n'
+      + 'WICHTIGE HINWEISE zur Formulierung:\n'
+      + '- Der Schiedsrichter ist Le Bre (22 Jahre), du-Form, entwicklungsorientiert\n'
+      + '- Szenen, die im Bogen konkret beschrieben sind, als Referenz nutzen\n'
+      + '- NIEMALS schreiben, er solle "komplexere Spiele" oder "h\u00f6heren Schwierigkeitsgrad" anstreben \u2013 das w\u00e4hlt man sich nicht aus\n'
+      + '- NIEMALS schreiben, er solle "Szenen aktiv suchen" \u2013 Szenen passieren, man reagiert darauf\n'
+      + '- Verbesserungen m\u00fcssen umsetzbar und konkret sein (z.B. Vorteilsgew\u00e4hrung, Kommunikation, Laufwege)\n\n'
+      + 'Die 7 Rubriken (lies die genauen Werte aus dem Bogen heraus, alle stehen explizit als Zahlenwert drin):\n'
+      + '1. Spielrelevante Einzelszenen (Tore, Strafst\u00f6\u00dfe, Platzverweis)\n'
+      + '2. Spielverst\u00e4ndnis (Spielcharakter, Antizipation, Vorteil, Regelkonformit\u00e4t, etc.)\n'
+      + '3. Zweikampfbewertung (Fu\u00df, Oberk\u00f6rper, Handspiel, etc.)\n'
+      + '4. Disziplinarkontrolle (Verwarnungen, Feldverweise, Linie)\n'
+      + '5. Pers\u00f6nl. Auftreten (Akzeptanz, Kommunikation, K\u00f6rpersprache)\n'
+      + '6. Fitness & Stellungsspiel (Ausdauer, Sprint, Positionierung)\n'
+      + '7. Teamarbeit (Zusammenarbeit AsR, Kommunikation)\n\n'
       + 'Antworte NUR mit einem validen JSON-Objekt ohne Markdown-Bl\u00f6cke:\n'
-      + '{"totalScore":<Zahl|null>,"gesamtEinordnung":"<sehr gut|gut|erwartungsgem\u00e4\u00df|unterdurchschnittlich>","rubriken":[{"name":"Spielrel. Einzelszenen","wert":<1-6>},{"name":"Spielleitungsqualit\u00e4t","wert":<1-6>},{"name":"Disziplinarkontrolle","wert":<1-6>},{"name":"Pers\u00f6nl. Auftreten","wert":<1-6>},{"name":"Fitness & Stellungsspiel","wert":<1-6>},{"name":"Teamarbeit","wert":<1-6>}],"staerken":["<2-4 W\u00f6rter, max 3>"],"schwaechen":["<2-4 W\u00f6rter, max 3>"],"gesamtbewertung":"<allgemeine Einordnung der Gesamtpunkte, 2-3 S\u00e4tze, du-Form>","schluessel":"<Schl\u00fcsselereignisse mit Klassifizierung klein/mittel/gro\u00df, Auf-/Abwertung, konkrete Szenen referenzieren, 3-5 S\u00e4tze>","ketten":"<Kettenwirkungsanalyse wo eine Szene mehrere Rubriken beeinflusste, 2-4 S\u00e4tze>","profil":"<allgemeines Leistungsprofil, St\u00e4rken und Schw\u00e4chen mit Spielreferenz wo passend, 3-5 S\u00e4tze, du-Form>","einordnung":"<war die Note unterdurchschnittlich/erwartungsgem\u00e4\u00df/gut/sehr gut, Kontexteinordnung Spielschwierigkeit, 2-3 S\u00e4tze>","verbesserungen":["<konkreter praxisnaher Hebel 1>","<konkreter praxisnaher Hebel 2>","<konkreter praxisnaher Hebel 3>"]}';
+      + '{\n'
+      + '  "totalScore": <Zahl aus Bogen oder null>,\n'
+      + '  "gesamtEinordnung": "<sehr gut|gut|erwartungsgem\u00e4\u00df|unterdurchschnittlich>",\n'
+      + '  "rubriken": [\n'
+      + '    {"name":"Einzelszenen","wert":<1-6>,"abweichung":"<leer wenn 4, sonst: was genau wurde auf- oder abgewertet und warum>"},\n'
+      + '    {"name":"Spielverst\u00e4ndnis","wert":<1-6>,"abweichung":"<...>"},\n'
+      + '    {"name":"Zweikampfbewertung","wert":<1-6>,"abweichung":"<...>"},\n'
+      + '    {"name":"Disziplinarkontrolle","wert":<1-6>,"abweichung":"<...>"},\n'
+      + '    {"name":"Pers\u00f6nl. Auftreten","wert":<1-6>,"abweichung":"<...>"},\n'
+      + '    {"name":"Fitness & Stellungsspiel","wert":<1-6>,"abweichung":"<...>"},\n'
+      + '    {"name":"Teamarbeit","wert":<1-6>,"abweichung":"<...>"}\n'
+      + '  ],\n'
+      + '  "gesamtbewertung": "<A: Gesamtbewertung \u2013 Einordnung der Punktzahl, Spielkontext, ob Erwartung erf\u00fcllt, 3-4 S\u00e4tze, du-Form>",\n'
+      + '  "positiv": "<B: Positive Aspekte \u2013 was hat konkret gut funktioniert, gerne mit Szenenbezug, 3-5 S\u00e4tze>",\n'
+      + '  "negativ": "<C: Negative Aspekte bzw. Entwicklungsfelder \u2013 was hat nicht funktioniert oder wo ist Potenzial, konkret und umsetzbar, 3-5 S\u00e4tze>",\n'
+      + '  "leistungsprofil": "<2-3 S\u00e4tze Kurzprofil f\u00fcr die \u00dcbersicht: Stil, St\u00e4rken, Tendenz>",\n'
+      + '  "entwicklungsfelder": ["<konkretes Feld 1>","<konkretes Feld 2>","<konkretes Feld 3>"]\n'
+      + '}';
 
-    // Proxy via Google Apps Script (kein CORS-Problem, API-Key bleibt serverseitig)
-    var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxpGj8Gdw9tT_gZNc8EsOqNuNQN6RhvboNCN_ru9RwMimjOWQWL-Q7igHB7RHfmMaTj/exec';
-
-    fetch(SHEETS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'bcb_analyze', pdfBase64: b.base64 })
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      if (data.error) throw new Error(data.error);
-      var parsed = data.analysis || data;
-      bcbAnalyses[id] = parsed;
+    // ── API-Key holen ─────────────────────────────────────────
+    var apiKey = localStorage.getItem('bcb_api_key') || '';
+    if (!apiKey) {
+      bcbAnalyses[id] = null;
       bcbSaveStore();
-      bcbRenderList();
-      bcbUpdateStats();
+      // Key-Dialog anzeigen statt Analyse starten
+      var btn0 = document.getElementById('bcbAnalyzeBtn');
+      if (btn0) { btn0.disabled = false; btn0.innerHTML = '&#x1F916; Analysieren'; }
+      bcbShowKeyDialog(id);
+      return;
+    }
+
+    // ── Direkter Anthropic API-Call ───────────────────────────
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1200,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b.base64 } },
+            { type: 'text', text: PROMPT }
+          ]
+        }]
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        if (data.error.type === 'authentication_error') {
+          localStorage.removeItem('bcb_api_key');
+        }
+        throw new Error(data.error.message || JSON.stringify(data.error));
+      }
+      var raw = (data.content || []).map(function(x){ return x.text || ''; }).join('').trim();
+      var parsed;
+      try {
+        var clean = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
+        parsed = JSON.parse(clean);
+      } catch(e) { parsed = { raw: raw }; }
+      bcbAnalyses[id] = parsed;
+      bcbSaveStore(); bcbRenderList(); bcbUpdateStats();
       if (bcbActiveBogen === id) {
         bcbRenderModalAnalysis(id);
         var btn2 = document.getElementById('bcbAnalyzeBtn');
         if (btn2) { btn2.disabled = false; btn2.innerHTML = '&#x1F504; Neu analysieren'; }
       }
-    }).catch(function(err) {
-      console.error('BCB Analysis error:', err);
+    })
+    .catch(function(err) {
+      console.error('BCB error:', err);
       bcbAnalyses[id] = 'error';
-      bcbSaveStore();
-      bcbRenderList();
+      bcbSaveStore(); bcbRenderList();
       if (bcbActiveBogen === id) {
-        bcbRenderModalAnalysis(id);
+        // Zeige konkreten Fehler im Analyse-Panel
+        var cont = document.getElementById('bcbAnalysisContent');
+        if (cont) cont.innerHTML = '<div style="padding:14px"><div class="bcb-error-box">'
+          + '<strong>&#x26A0; Fehler:</strong><br>' + bcbEsc(err.message || String(err))
+          + '<br><br><small>Tipp: Falscher API-Key? \u2192 &#x1F511;-Button oben klicken.</small></div></div>';
         var btn3 = document.getElementById('bcbAnalyzeBtn');
         if (btn3) { btn3.disabled = false; btn3.innerHTML = '&#x1F916; Analysieren'; }
+        var stat = document.getElementById('bcbAnalysisStatus');
+        if (stat) stat.textContent = '';
       }
     });
   }
 
+  // ── API-Key Dialog ───────────────────────────────────────────
+  function bcbShowKeyDialog(pendingId) {
+    var overlay = document.getElementById('bcbKeyDialog');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'bcbKeyDialog';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem';
+      overlay.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border-med);border-radius:var(--r);padding:1.75rem;max-width:420px;width:100%;animation:slideUp .2s ease">'
+        + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:6px">API-Zugang</div>'
+        + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:12px">Anthropic API-Key eingeben</div>'
+        + '<div style="font-size:12px;color:var(--text-2);line-height:1.65;margin-bottom:16px">Der Key wird nur lokal in deinem Browser gespeichert (localStorage) und nie \u00fcbertragen. Du findest ihn unter <strong style="color:var(--text)">console.anthropic.com</strong> \u2192 API Keys.</div>'
+        + '<input id="bcbKeyInput" type="password" placeholder="sk-ant-api03-..." style="width:100%;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:13px;font-family:\'JetBrains Mono\',monospace;outline:none;margin-bottom:12px">'
+        + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+        +   '<button onclick="document.getElementById(\'bcbKeyDialog\').remove()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Abbrechen</button>'
+        +   '<button onclick="bcbSaveKey()" style="background:var(--grass);border:none;color:#0a1f0e;font-size:12px;font-weight:700;padding:8px 18px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Speichern &amp; Analysieren</button>'
+        + '</div>'
+        + '</div>';
+      document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+    overlay.setAttribute('data-pending', pendingId || '');
+    setTimeout(function(){ var inp = document.getElementById('bcbKeyInput'); if(inp) inp.focus(); }, 100);
+  }
+
+  function bcbSaveKey() {
+    var inp = document.getElementById('bcbKeyInput');
+    var key = inp ? inp.value.trim() : '';
+    if (!key) { inp.style.border = '1px solid var(--red)'; return; }
+    localStorage.setItem('bcb_api_key', key);
+    var dialog = document.getElementById('bcbKeyDialog');
+    var pendingId = dialog ? dialog.getAttribute('data-pending') : '';
+    if (dialog) dialog.remove();
+    if (pendingId) {
+      bcbActiveBogen = pendingId;
+      bcbOpenModal(pendingId);
+      setTimeout(bcbStartAnalysis, 200);
+    }
+  }
+
   function bcbResetApiKey() {
-    var key = (window.prompt('Neuen Anthropic API-Key eingeben:') || '').trim();
-    if (key) { localStorage.setItem('bcb_api_key', key); alert('API-Key gespeichert.'); }
+    localStorage.removeItem('bcb_api_key');
+    bcbShowKeyDialog(bcbActiveBogen);
   }
 
   function bcbEsc(s) {
