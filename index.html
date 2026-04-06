@@ -3338,15 +3338,59 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   var bcbBlobUrls      = {};
 
   // PDFs (Base64) stay in localStorage – too big for Sheets
-  // Analyses, LP, EF → dbSave/dbGet (Google Sheets = cross-device + survives HTML updates)
+  // Analyses, LP, EF, Bogen-Meta → dbSave/dbGet (Google Sheets = cross-device)
+  var BCB_META_KEY = 'bcb_meta_v1'; // lightweight bogen metadata in Sheets (no base64)
+
   function bcbLoadStore() {
-    try { bcbBoegen = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) { bcbBoegen = []; }
+    // Load local PDF store (has base64)
+    var local = [];
+    try { local = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) {}
+
+    // Load analyses from Sheets
     var a = dbGet(BCB_ANALYSIS_KEY, {});
     bcbAnalyses = (a && typeof a === 'object' && !Array.isArray(a)) ? a : {};
+
+    // Load bogen metadata from Sheets (cross-device, no base64)
+    var meta = dbGet(BCB_META_KEY, []);
+    if (!Array.isArray(meta)) meta = [];
+
+    // Merge: start from Sheets meta (cross-device truth), add base64 from local where available
+    var merged = [];
+    meta.forEach(function(m) {
+      var localB = local.find(function(b){ return b.id === m.id; });
+      merged.push({
+        id:           m.id,
+        name:         m.name,
+        spielpaarung: m.spielpaarung || '',
+        spieldatum:   m.spieldatum   || '',
+        date:         m.date,
+        size:         m.size || 0,
+        base64:       localB ? localB.base64 : null  // null = phantom, PDF not on this device
+      });
+    });
+
+    // Add any local-only boegen not yet in Sheets meta (e.g. uploaded but not yet synced)
+    local.forEach(function(b) {
+      var inMeta = merged.find(function(m){ return m.id === b.id; });
+      if (!inMeta) merged.push(b);
+    });
+
+    // Sort newest first
+    merged.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    bcbBoegen = merged;
   }
+
   function bcbSaveStore() {
-    try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(bcbBoegen)); } catch(e) {}
-    var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; dbSave(p);
+    // Save only non-phantom boegen to localStorage (those with base64)
+    var withPdf = bcbBoegen.filter(function(b){ return b.base64; });
+    try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(withPdf)); } catch(e) {}
+
+    // Save lightweight meta for all boegen to Sheets (cross-device list)
+    var meta = bcbBoegen.map(function(b){
+      return { id: b.id, name: b.name, spielpaarung: b.spielpaarung||'', spieldatum: b.spieldatum||'', date: b.date, size: b.size||0 };
+    });
+    var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; p[BCB_META_KEY] = meta;
+    dbSave(p);
   }
   function bcbLoadLP() {
     var d = dbGet('bcb_lp_v1', {summary:'', aspekte:[]});
@@ -3378,14 +3422,14 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
             var fname = file.name.replace(/\.pdf$/i,'');
             // Use sanitized filename as stable ID so analyses survive re-uploads
             var stableId = 'bcb_' + fname.toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0, 40);
-            // If same file already uploaded, update Base64 but keep everything else
+            // If same file already uploaded (with or without PDF), update base64 and revoke old blob
             var existing = bcbBoegen.find(function(b){ return b.id === stableId; });
             if (existing) {
               existing.base64 = b64;
               existing.size   = file.size;
               if (bcbBlobUrls[stableId]) { URL.revokeObjectURL(bcbBlobUrls[stableId]); delete bcbBlobUrls[stableId]; }
             } else {
-              bcbBoegen.unshift({ id: stableId, name: fname, date: new Date().toISOString(), base64: b64, size: file.size });
+              bcbBoegen.unshift({ id: stableId, name: fname, spielpaarung:'', spieldatum:'', date: new Date().toISOString(), base64: b64, size: file.size });
             }
             pending--;
             if (pending === 0) {
@@ -3709,7 +3753,10 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   function bcbResetAll() {
     if (!confirm('Alle Analysen, Leistungsprofil und Entwicklungsfelder zur\u00fccksetzen?\nPDFs bleiben erhalten.')) return;
     bcbAnalyses = {};
-    bcbSaveStore();
+    bcbBoegen = [];
+    try { localStorage.removeItem(BCB_STORE_KEY); } catch(e) {}
+    var p = {}; p[BCB_ANALYSIS_KEY] = {}; p[BCB_META_KEY] = [];
+    dbSave(p);
     bcbSaveLP({summary:'', aspekte:[]});
     bcbSaveEF([]);
     bcbRenderList(); bcbUpdateStats();
@@ -3728,10 +3775,33 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     document.getElementById('bcbModalTitle').textContent = b.name;
     // PDF
     var url = bcbGetBlobUrl(id);
-    document.getElementById('bcbPdfFrame').src = url + '#toolbar=0';
-    // Download link
-    var dl = document.getElementById('bcbDownloadLink');
-    dl.href = url; dl.download = b.name + '.pdf';
+    var frame = document.getElementById('bcbPdfFrame');
+    var dl    = document.getElementById('bcbDownloadLink');
+    if (url) {
+      frame.src  = url + '#toolbar=0';
+      frame.style.display = '';
+      dl.href    = url;
+      dl.download = b.name + '.pdf';
+      dl.style.display = '';
+    } else {
+      // Phantom: PDF not on this device
+      frame.src  = 'about:blank';
+      frame.style.display = 'none';
+      // Show placeholder in PDF pane
+      var pdfPane = frame.parentElement;
+      var ph = pdfPane.querySelector('.bcb-pdf-phantom');
+      if (!ph) {
+        ph = document.createElement('div');
+        ph.className = 'bcb-pdf-phantom';
+        ph.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;color:var(--text-3)';
+        ph.innerHTML = '<div style="font-size:36px;opacity:.3">📄</div>'
+          + '<div style="font-size:13px;color:var(--text-2)">PDF nicht auf diesem Gerät</div>'
+          + '<div style="font-size:11px;line-height:1.6">Lade <strong style="color:var(--text)">' + bcbEsc(b.name) + '.pdf</strong><br>erneut hoch um das Dokument anzuzeigen.</div>';
+        pdfPane.appendChild(ph);
+      }
+      ph.style.display = '';
+      dl.style.display = 'none';
+    }
     // Analysis button state
     var a = bcbAnalyses[id];
     var btn = document.getElementById('bcbAnalyzeBtn');
