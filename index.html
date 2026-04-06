@@ -37,126 +37,6 @@
   --r: 12px; --r-sm: 8px; --r-xs: 5px;
 }
 
-/* ══════════════════════════════════════
-   LOCK SCREEN
-══════════════════════════════════════ */
-#lock-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: #0a1208;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Barlow', sans-serif;
-}
-#lock-screen.hidden { display: none; }
-.lock-card {
-  background: #181c26;
-  border: 1px solid rgba(46,204,113,0.2);
-  border-radius: 16px;
-  padding: 2.5rem 2rem;
-  width: 100%;
-  max-width: 360px;
-  text-align: center;
-  box-shadow: 0 0 60px rgba(46,204,113,0.07);
-}
-.lock-logo {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: #2ecc71;
-  margin-bottom: 1.75rem;
-  opacity: .85;
-}
-.lock-icon {
-  width: 52px;
-  height: 52px;
-  background: rgba(46,204,113,0.1);
-  border: 1px solid rgba(46,204,113,0.25);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  font-size: 22px;
-}
-.lock-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  color: #f0f2f7;
-  margin-bottom: .35rem;
-}
-.lock-sub {
-  font-size: 13px;
-  color: #555e78;
-  margin-bottom: 1.75rem;
-}
-.lock-input-wrap {
-  position: relative;
-  margin-bottom: .875rem;
-}
-.lock-input {
-  width: 100%;
-  background: #0f1117;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  padding: 12px 44px 12px 16px;
-  color: #f0f2f7;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 16px;
-  letter-spacing: .1em;
-  outline: none;
-  transition: border-color .2s;
-}
-.lock-input:focus { border-color: rgba(46,204,113,0.5); }
-.lock-input.error { border-color: rgba(231,76,60,0.6) !important; animation: shake .35s ease; }
-.lock-eye {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #555e78;
-  font-size: 16px;
-  user-select: none;
-  transition: color .2s;
-}
-.lock-eye:hover { color: #8b92a8; }
-.lock-btn {
-  width: 100%;
-  padding: 13px;
-  background: #2ecc71;
-  color: #0a1f0e;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background .2s, opacity .2s;
-}
-.lock-btn:hover { background: #27ae60; }
-.lock-btn:disabled { opacity: .5; cursor: default; }
-.lock-err {
-  font-size: 12px;
-  color: #e74c3c;
-  margin-top: .6rem;
-  min-height: 18px;
-}
-@keyframes shake {
-  0%,100%{transform:translateX(0)}
-  20%{transform:translateX(-6px)}
-  40%{transform:translateX(6px)}
-  60%{transform:translateX(-4px)}
-  80%{transform:translateX(4px)}
-}
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -169,8 +49,69 @@ body {
 }
 
 /* ══════════════════════════════════════
-   HEADER – FOOTBALL PITCH STYLE
+   LOCK SCREEN
 ══════════════════════════════════════ */
+#lock-screen {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #0a1208;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow', sans-serif;
+}
+#lock-screen.hidden { display: none; }
+.lock-card {
+  background: #181c26; border: 1px solid rgba(46,204,113,0.2);
+  border-radius: 16px; padding: 2.5rem 2rem; width: 100%;
+  max-width: 360px; text-align: center;
+  box-shadow: 0 0 60px rgba(46,204,113,0.07);
+}
+.lock-logo {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  color: #2ecc71; margin-bottom: 1.75rem; opacity: .85;
+}
+.lock-icon {
+  width: 52px; height: 52px; background: rgba(46,204,113,0.1);
+  border: 1px solid rgba(46,204,113,0.25); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem; font-size: 22px;
+}
+.lock-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 22px;
+  font-weight: 700; color: #f0f2f7; margin-bottom: .35rem;
+}
+.lock-sub { font-size: 13px; color: #555e78; margin-bottom: 1.75rem; }
+.lock-input-wrap { position: relative; margin-bottom: .875rem; }
+.lock-input {
+  width: 100%; background: #0f1117;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+  padding: 12px 44px 12px 16px; color: #f0f2f7;
+  font-family: 'JetBrains Mono', monospace; font-size: 16px;
+  letter-spacing: .1em; outline: none; transition: border-color .2s;
+}
+.lock-input:focus { border-color: rgba(46,204,113,0.5); }
+.lock-input.error { border-color: rgba(231,76,60,0.6) !important; animation: shake .35s ease; }
+.lock-eye {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  cursor: pointer; color: #555e78; font-size: 16px;
+  user-select: none; transition: color .2s;
+}
+.lock-eye:hover { color: #8b92a8; }
+.lock-btn {
+  width: 100%; padding: 13px; background: #2ecc71; color: #0a1f0e;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 15px;
+  font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  border: none; border-radius: 10px; cursor: pointer;
+  transition: background .2s, opacity .2s;
+}
+.lock-btn:hover { background: #27ae60; }
+.lock-btn:disabled { opacity: .5; cursor: default; }
+.lock-err { font-size: 12px; color: #e74c3c; margin-top: .6rem; min-height: 18px; }
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+}
+
+
 .site-header {
   position: relative;
   background: #0a1f0e;
@@ -1442,11 +1383,38 @@ footer {
   .bcb-modal-body { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; }
   .bcb-pdf-pane { border-right: none; border-bottom: 1px solid var(--border); }
 }
+/* BCB editable list items */
+.bcb-list-item {
+  display:flex;align-items:flex-start;gap:8px;
+  padding:6px 0;border-bottom:1px solid var(--border);
+}
+.bcb-list-item:last-child{border-bottom:none;}
+.bcb-list-num{
+  width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;flex-shrink:0;margin-top:2px;font-family:'Barlow Condensed',sans-serif;
+}
+.bcb-list-text{flex:1;font-size:12px;color:var(--text-2);line-height:1.6;}
+.bcb-list-text.positiv{color:var(--grass);}
+.bcb-list-actions{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .15s;}
+.bcb-list-item:hover .bcb-list-actions{opacity:1;}
+.bcb-item-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:11px;padding:2px 5px;border-radius:4px;
+  color:var(--text-3);transition:all .12s;
+}
+.bcb-item-btn:hover{background:var(--surface3);color:var(--text);}
+.bcb-item-btn.del:hover{background:var(--red-dim);color:var(--red);}
+.bcb-item-btn.up:hover,.bcb-item-btn.dn:hover{background:var(--grass-dim);color:var(--grass);}
+.bcb-positiv-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;
+  background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25);
+  margin-left:4px;vertical-align:middle;white-space:nowrap;
+}
 </style>
 </head>
 <body>
 
-<!-- ══════════ LOCK SCREEN ══════════ -->
 <div id="lock-screen">
   <div class="lock-card">
     <div class="lock-logo">SR Dashboard</div>
@@ -1466,74 +1434,49 @@ footer {
 
 <script>
 (function(){
-  // SHA-256 hash of the password – update this hash to change the password.
   var PASS_HASH = '825493e9b4d4cdf6328b3e11bb58435e81048b4bd4017b7d6f0dea827768bb2f';
   var SESSION_KEY = 'sr_dash_auth';
-
-  // Already authenticated this browser session?
   if (sessionStorage.getItem(SESSION_KEY) === PASS_HASH) {
     document.getElementById('lock-screen').classList.add('hidden');
   }
-
   window.unlockDash = async function() {
     var input = document.getElementById('lock-input');
     var btn   = document.getElementById('lock-btn');
     var err   = document.getElementById('lock-err');
     var val   = input.value;
     if (!val) return;
-
-    btn.disabled = true;
-    btn.textContent = '…';
-
+    btn.disabled = true; btn.textContent = '…';
     try {
       var enc = new TextEncoder().encode(val);
       var buf = await crypto.subtle.digest('SHA-256', enc);
-      var hex = Array.from(new Uint8Array(buf))
-                  .map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-
+      var hex = Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
       if (hex === PASS_HASH) {
         sessionStorage.setItem(SESSION_KEY, PASS_HASH);
         var ls = document.getElementById('lock-screen');
-        ls.style.transition = 'opacity .4s';
-        ls.style.opacity = '0';
+        ls.style.transition = 'opacity .4s'; ls.style.opacity = '0';
         setTimeout(function(){ ls.classList.add('hidden'); }, 400);
         err.textContent = '';
       } else {
         input.classList.add('error');
         err.textContent = 'Falsches Passwort. Bitte erneut versuchen.';
         setTimeout(function(){ input.classList.remove('error'); }, 400);
-        input.value = '';
-        input.focus();
+        input.value = ''; input.focus();
       }
-    } catch(e) {
-      err.textContent = 'Fehler beim Überprüfen des Passworts.';
-    }
-
-    btn.disabled = false;
-    btn.textContent = 'Entsperren';
+    } catch(e) { err.textContent = 'Fehler beim Überprüfen.'; }
+    btn.disabled = false; btn.textContent = 'Entsperren';
   };
-
   window.togglePw = function() {
     var input = document.getElementById('lock-input');
     var eye   = document.getElementById('lock-eye');
-    if (input.type === 'password') {
-      input.type = 'text';
-      eye.textContent = '🙈';
-    } else {
-      input.type = 'password';
-      eye.textContent = '👁';
-    }
+    if (input.type === 'password') { input.type = 'text'; eye.textContent = '🙈'; }
+    else { input.type = 'password'; eye.textContent = '👁'; }
   };
-
   window.addEventListener('load', function(){
     var ls = document.getElementById('lock-screen');
-    if (!ls.classList.contains('hidden')) {
-      document.getElementById('lock-input').focus();
-    }
+    if (!ls.classList.contains('hidden')) document.getElementById('lock-input').focus();
   });
 })();
 </script>
-
 
 <header class="site-header" id="site-header" style="background-image:url('img/header.jpg');background-size:cover;background-position:center 25%;background-blend-mode:luminosity;">
   <svg class="pitch-overlay" viewBox="0 0 1100 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -1793,16 +1736,12 @@ footer {
           </div>
         </div>
 
-        <!-- Rubrik-Durchschnitte (auto aus Analysen) -->
+
+        <!-- Leistungsübersicht (auto aus Analysen) -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Ø Bewertungsbereiche <span style="font-weight:400;color:var(--text-3);font-family:'Barlow',sans-serif;font-size:10px;text-transform:none;letter-spacing:0">(aus analysierten Bögen)</span></div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Leistungsübersicht <span style="font-weight:400;color:var(--text-3);font-family:'Barlow',sans-serif;font-size:10px;text-transform:none;letter-spacing:0">(aus analysierten Bögen)</span></div>
           <div style="display:flex;flex-direction:column;gap:10px" id="beob-bereiche">
-            <!-- auto-filled by bcbUpdateStats() -->
             <div id="bcb-bereiche-placeholder" style="font-size:12px;color:var(--text-3);font-style:italic">Werden automatisch aus den KI-Analysen berechnet.</div>
-          </div>
-          <div style="margin-top:1rem;padding:10px 12px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border)">
-            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif">Entwicklungsfelder</div>
-            <textarea id="beob-entwicklung" class="analysis-ta" style="min-height:80px" placeholder="Persönliche Entwicklungsfelder und Lernziele aus den Beobachtungen..." onchange="dbSave({'sr-entwicklung':this.value})"></textarea>
           </div>
         </div>
 
@@ -2956,7 +2895,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         <a id="bcbDownloadLink" href="#" download style="text-decoration:none">
           <button class="bcb-btn" style="font-size:11px">&#x2B07; Download</button>
         </a>
-        <button class="bcb-btn bcb-btn-green" id="bcbAnalyzeBtn" onclick="bcbStartAnalysis()">&#x1F916; Analysieren</button>
+        <button class="bcb-btn bcb-btn-green" id="bcbAnalyzeBtn" onclick="bcbShowPasteDialog()">&#x1F4CB; Analyse einf&uuml;gen</button>
         <button class="bcb-modal-close" onclick="bcbCloseModal()" title="Schlie&szlig;en">&#x2715;</button>
       </div>
     </div>
@@ -3301,6 +3240,10 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       srLoadNotes();
       loadMeals();
       lpLoad();
+      // BCB: Analysen + LP + EF aus Sheets laden, Bögen aus localStorage
+      bcbLoadStore();
+      bcbRenderList();
+      bcbUpdateStats();
     });
     // Wire up game cards in SR
     document.querySelectorAll('.kal-card[data-idx]').forEach(function(card){
@@ -3377,31 +3320,43 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (data.home && document.getElementById('sr-note-home')) document.getElementById('sr-note-home').value = data.home;
     if (data.away && document.getElementById('sr-note-away')) document.getElementById('sr-note-away').value = data.away;
     var ent = dbGet('sr-entwicklung', '');
-    if (ent && document.getElementById('beob-entwicklung')) document.getElementById('beob-entwicklung').value = ent;
+    // beob-entwicklung textarea removed – EF now managed via bcbLoadEF()
   }
   // ── BCB SYSTEM ───────────────────────────────────────────────
-  var BCB_STORE_KEY     = 'bcb_boegen_v3';
-  var BCB_ANALYSIS_KEY  = 'bcb_analyses_v3';
-  var bcbBoegen         = [];
-  var bcbAnalyses       = {};
-  var bcbActiveBogen    = null;
-  var bcbBlobUrls       = {};
+  var BCB_STORE_KEY    = 'bcb_boegen_v3';
+  var BCB_ANALYSIS_KEY = 'bcb_analyses_v3';
+  var bcbBoegen        = [];
+  var bcbAnalyses      = {};
+  var bcbActiveBogen   = null;
+  var bcbBlobUrls      = {};
 
+  // PDFs (Base64) stay in localStorage – too big for Sheets
+  // Analyses, LP, EF → dbSave/dbGet (Google Sheets = cross-device + survives HTML updates)
   function bcbLoadStore() {
-    try { bcbBoegen   = JSON.parse(localStorage.getItem(BCB_STORE_KEY))   || []; } catch(e) { bcbBoegen = []; }
-    try { bcbAnalyses = JSON.parse(localStorage.getItem(BCB_ANALYSIS_KEY)) || {}; } catch(e) { bcbAnalyses = {}; }
+    try { bcbBoegen = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) { bcbBoegen = []; }
+    var a = dbGet(BCB_ANALYSIS_KEY, {});
+    bcbAnalyses = (a && typeof a === 'object' && !Array.isArray(a)) ? a : {};
   }
   function bcbSaveStore() {
     try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(bcbBoegen)); } catch(e) {}
-    try { localStorage.setItem(BCB_ANALYSIS_KEY, JSON.stringify(bcbAnalyses)); } catch(e) {}
+    var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; dbSave(p);
   }
+  function bcbLoadLP() {
+    var d = dbGet('bcb_lp_v1', {summary:'', aspekte:[]});
+    if (!d || typeof d !== 'object') d = {summary:'', aspekte:[]};
+    if (!Array.isArray(d.aspekte)) d.aspekte = [];
+    return d;
+  }
+  function bcbSaveLP(d) { dbSave({'bcb_lp_v1': d}); }
+  function bcbLoadEF() {
+    var d = dbGet('bcb_ef_v1', []);
+    return Array.isArray(d) ? d : [];
+  }
+  function bcbSaveEF(d) { dbSave({'bcb_ef_v1': d}); }
 
   // File input handler
+  // Wire up the file input (bcbLoadStore/Render handled by main dbLoad callback)
   document.addEventListener('DOMContentLoaded', function() {
-    bcbLoadStore();
-    bcbRenderList();
-    bcbUpdateStats();
-
     var inp = document.getElementById('bcbFileInput');
     if (inp) {
       inp.addEventListener('change', function(e) {
@@ -3500,8 +3455,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (anzahlEl) anzahlEl.textContent = n;
     if (schnittEl) {
       if (scores.length) {
-        var avg = Math.round(scores.reduce(function(a,b){return a+b;},0) / scores.length);
-        schnittEl.textContent = avg;
+        var avg = scores.reduce(function(a,b){return a+b;},0) / scores.length;
+        schnittEl.textContent = avg.toFixed(2);
         schnittEl.style.color = avg >= 245 ? 'var(--grass)' : avg >= 237 ? 'var(--amber)' : 'var(--red)';
       } else {
         schnittEl.textContent = '—';
@@ -3524,32 +3479,158 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
   function bcbUpdateBereiche() {
     var bereiche = document.getElementById('beob-bereiche');
-    var placeholder = document.getElementById('bcb-bereiche-placeholder');
     if (!bereiche) return;
-    var allA = bcbBoegen.map(function(b){ return bcbAnalyses[b.id]; }).filter(function(a){ return a && typeof a === 'object' && a.rubriken; });
-    if (allA.length === 0) {
-      if (placeholder) placeholder.style.display = '';
+
+    var allA = bcbBoegen.map(function(b){ return bcbAnalyses[b.id]; })
+      .filter(function(a){ return a && typeof a === 'object' && a.rubriken; });
+
+    var lp = bcbLoadLP();
+    var ef = bcbLoadEF();
+    var hasData = allA.length > 0 || lp.aspekte.length > 0 || ef.length > 0;
+
+    if (!hasData) {
+      bereiche.innerHTML = '<div id="bcb-bereiche-placeholder" style="font-size:12px;color:var(--text-3);font-style:italic">Werden automatisch aus den KI-Analysen berechnet.</div>';
       return;
     }
-    if (placeholder) placeholder.style.display = 'none';
-    var NAMES = ['Spielrel. Einzelszenen','Spielleitungsqualit\u00e4t','Disziplinarkontrolle','Pers\u00f6nl. Auftreten','Fitness & Stellungsspiel','Teamarbeit'];
-    var avgs = NAMES.map(function(name, ni) {
-      var vals = allA.map(function(a){ return a.rubriken[ni] ? a.rubriken[ni].wert : 4; });
-      return vals.reduce(function(s,v){return s+v;},0) / vals.length;
-    });
-    var html = NAMES.map(function(name, i) {
-      var v = avgs[i];
-      var pct = ((v - 1) / 5) * 100;
-      var col = v >= 5 ? 'var(--grass)' : v >= 4 ? 'var(--grass)' : v >= 3 ? 'var(--amber)' : 'var(--red)';
-      return '<div>'
-        + '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
-        +   '<span style="font-size:12px;color:var(--text-2)">' + name + '</span>'
-        +   '<span style="font-size:12px;font-weight:600;color:' + col + ';font-family:\'JetBrains Mono\',monospace">' + v.toFixed(1) + '</span>'
-        + '</div>'
-        + '<div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">'
-        +   '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:3px;transition:width .4s ease"></div>'
-        + '</div></div>';
-    }).join('');
+
+    var html = '';
+
+    // ── 1. LEISTUNGSPROFIL ────────────────────────────────────
+    html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--grass);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      +   '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--grass);font-family:\'Barlow Condensed\',sans-serif">Leistungsprofil</div>'
+      + '</div>'
+      + (lp.summary
+          ? '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:10px;font-weight:500;cursor:pointer" onclick="bcbEditLPSummary()" title="Klicken zum Bearbeiten">'
+            + bcbEsc(lp.summary) + ' <span style="font-size:10px;color:var(--text-3)">✎</span></div>'
+          : '<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-style:italic">Zusammenfassung (aus Analyse) <span style="cursor:pointer;color:var(--grass)" onclick="bcbEditLPSummary()">+ hinzufügen</span></div>'
+        );
+
+    if (lp.aspekte.length) {
+      lp.aspekte.forEach(function(item, i) {
+        html += '<div class="bcb-list-item">'
+          + '<div class="bcb-list-num" style="background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25)">' + (i+1) + '</div>'
+          + '<div class="bcb-list-text">' + bcbEsc(item.text) + '</div>'
+          + '<div class="bcb-list-actions">'
+          +   '<button class="bcb-item-btn" onclick="bcbEditLP(' + i + ')" title="Bearbeiten">✎</button>'
+          +   '<button class="bcb-item-btn del" onclick="bcbDeleteLP(' + i + ')" title="Löschen">✕</button>'
+          + '</div>'
+          + '</div>';
+      });
+    }
+    html += '</div>';
+
+    // ── 2. ENTWICKLUNGSFELDER ─────────────────────────────────
+    html += '<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px">'
+      + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:8px">Entwicklungsfelder</div>';
+
+    if (ef.length === 0) {
+      html += '<div style="font-size:12px;color:var(--text-3);font-style:italic">Keine Entwicklungsfelder aus den Bögen.</div>';
+    } else {
+      var activeEF  = ef.filter(function(e){ return !e.archived && !e.sehrPositiv; });
+      var posEF     = activeEF.filter(function(e){ return e.isPositive; });
+      var openEF    = activeEF.filter(function(e){ return !e.isPositive; });
+
+      if (openEF.length === 0 && posEF.length === 0) {
+        html += '<div style="font-size:12px;color:var(--text-3);font-style:italic">Alle Entwicklungsfelder abgearbeitet ✓</div>';
+      }
+
+      openEF.forEach(function(item, i) {
+        var idx = ef.indexOf(item);
+        var countBadge = item.count > 1
+          ? '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3);margin-left:5px">' + item.count + '×</span>'
+          : '';
+        var typeBadge = item.type === 'abzug'
+          ? '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--red-dim);color:var(--red);border:1px solid rgba(231,76,60,0.25);margin-left:5px">−Pkt</span>'
+          : '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(74,144,217,0.25);margin-left:5px">Tipp</span>';
+        html += '<div class="bcb-list-item">'
+          + '<div class="bcb-list-num" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3)">' + (i+1) + '</div>'
+          + '<div class="bcb-list-text">' + bcbEsc(item.text) + countBadge + typeBadge + '</div>'
+          + '<div class="bcb-list-actions">'
+          + (idx > 0 ? '<button class="bcb-item-btn up" onclick="bcbMoveEF(' + idx + ',-1)" title="Nach oben">↑</button>' : '')
+          + (idx < ef.length-1 ? '<button class="bcb-item-btn dn" onclick="bcbMoveEF(' + idx + ',1)" title="Nach unten">↓</button>' : '')
+          + '<button class="bcb-item-btn" onclick="bcbEditEF(' + idx + ')" title="Bearbeiten">✎</button>'
+          + '<button class="bcb-item-btn del" onclick="bcbDeleteEF(' + idx + ')" title="Löschen">✕</button>'
+          + '</div></div>';
+      });
+
+      if (posEF.length > 0) {
+        html += '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--grass);font-family:\'Barlow Condensed\',sans-serif;margin:10px 0 6px">Positive Entwicklungen</div>';
+        posEF.forEach(function(item) {
+          var idx = ef.indexOf(item);
+          var badge = item.sehrPositiv
+            ? '<span class="bcb-positiv-badge" style="background:rgba(46,204,113,0.2);border-color:rgba(46,204,113,0.4)">★ Sehr positive Entwicklung</span>'
+            : '<span class="bcb-positiv-badge">✓ ' + (item.positiveLabel || 'Positive Entwicklung') + '</span>';
+          html += '<div class="bcb-list-item" style="opacity:.8">'
+            + '<div class="bcb-list-num" style="background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.3)">✓</div>'
+            + '<div class="bcb-list-text">' + bcbEsc(item.text) + badge
+            + (item.positiveNote ? '<div style="font-size:10px;color:var(--text-3);margin-top:3px">' + bcbEsc(item.positiveNote) + '</div>' : '')
+            + '</div>'
+            + '<div class="bcb-list-actions"><button class="bcb-item-btn del" onclick="bcbDeleteEF(' + idx + ')" title="Löschen">✕</button></div>'
+            + '</div>';
+        });
+      }
+    }
+    html += '</div>';
+
+    // ── 3. RUBRIK-BALKEN (9 Unterkategorien) ─────────────────
+    var RUBRIK_NAMES = [
+      '1. Einzelsituationen',
+      '2.1 Spielverständnis',
+      '2.2 Zweikampfbewertung',
+      '3. Disziplinarkontrolle',
+      '4.1 Verhaltensmerkmale',
+      '4.2 Kommunikation & Körpersprache',
+      '5.1 Fitness',
+      '5.2 Stellungsspiel',
+      '6. Teamarbeit / Abseits'
+    ];
+
+    if (allA.length > 0) {
+      html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px">'
+        + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:10px">'
+        + '\u00d8 Rubrik-Bewertungen (1\u20136) \u00b7 <span style="color:var(--blue)">&#x2015;</span> Baseline = 4</div>';
+
+      RUBRIK_NAMES.forEach(function(label, ni) {
+        var entries = allA.map(function(a, ai) {
+          var r = a.rubriken && a.rubriken[ni];
+          if (!r) return null;
+          var bogen = bcbBoegen[ai] ? bcbBoegen[ai].name : 'Bogen '+(ai+1);
+          return { wert: r.wert || 4, abw: r.abweichung || '', bogen: bogen };
+        }).filter(Boolean);
+
+        if (!entries.length) return;
+        var avg = entries.reduce(function(s,e){return s+e.wert;},0) / entries.length;
+        var pct = ((avg-1)/5)*100;
+        var col = avg >= 5 ? 'var(--grass)' : avg === 4 ? 'var(--blue)' : avg >= 3 ? 'var(--amber)' : 'var(--red)';
+        var delta = avg - 4;
+        var deltaStr = delta > 0 ? '+'+delta.toFixed(1) : delta < 0 ? delta.toFixed(1) : '';
+        var deltaCol = delta > 0 ? 'var(--grass)' : delta < 0 ? 'var(--red)' : '';
+        var abwNotes = entries.filter(function(e){ return e.wert !== 4 && e.abw; });
+
+        html += '<div style="margin-bottom:10px">'
+          + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+          +   '<span style="font-size:12px;color:var(--text-2);flex:1">' + bcbEsc(label) + '</span>'
+          +   (deltaStr ? '<span style="font-size:10px;font-weight:700;color:'+deltaCol+'">'+deltaStr+'</span>' : '')
+          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+col+'">'+avg.toFixed(1)+'</span>'
+          + '</div>'
+          + '<div style="position:relative;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:'+(abwNotes.length?'6px':'0')+'">'
+          +   '<div style="position:absolute;left:'+(((4-1)/5)*100).toFixed(1)+'%;width:2px;height:100%;background:var(--blue);opacity:.5"></div>'
+          +   '<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+col+';border-radius:3px;transition:width .5s ease"></div>'
+          + '</div>'
+          + abwNotes.map(function(e){
+              var c = e.wert > 4 ? 'var(--grass)' : 'var(--red)';
+              var arr = e.wert > 4 ? '&#x2197;' : '&#x2198;';
+              return '<div style="font-size:11px;line-height:1.5;padding:3px 6px;background:var(--surface3);border-radius:4px;border-left:2px solid '+c+';margin-bottom:3px">'
+                + '<span style="color:'+c+';font-weight:700;margin-right:4px">'+arr+' '+e.wert+'</span>'
+                + '<span style="color:var(--text-3);font-size:10px;margin-right:6px">('+bcbEsc(e.bogen)+')</span>'
+                + bcbEsc(e.abw)+'</div>';
+            }).join('')
+          + '</div>';
+      });
+      html += '</div>';
+    }
+
     bereiche.innerHTML = html;
   }
 
@@ -3639,69 +3720,67 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function bcbBuildAnalysisHtml(a) {
-    // Score
     var s = a.totalScore;
     var sCls = s ? (s >= 245 ? 's-high' : s >= 237 ? 's-mid' : 's-low') : '';
-    var sLabel = a.gesamtEinordnung || (s >= 245 ? 'Sehr gut' : s >= 242 ? 'Gut' : s >= 237 ? 'Erwartungsgem\u00e4\u00df' : 'Unterdurchschnittlich');
+    var sLabel = a.gesamtEinordnung
+      ? (a.gesamtEinordnung.charAt(0).toUpperCase() + a.gesamtEinordnung.slice(1))
+      : (s >= 245 ? 'Sehr gut' : s >= 242 ? 'Gut' : s >= 237 ? 'Erwartungsgem\u00e4\u00df' : 'Unterdurchschnittlich');
 
-    // Score overview
+    // ── Score-Header ──────────────────────────────────────────
     var html = '<div class="bcb-score-overview">'
       + '<div class="bcb-score-big ' + sCls + '">' + (s || '—') + '</div>'
       + '<div class="bcb-score-meta">'
       +   '<div class="bcb-score-label">' + bcbEsc(sLabel) + '</div>'
-      +   '<div class="bcb-score-sub">BCB Gesamtpunkte · Baseline 240</div>'
-      +   '<div class="bcb-tag-row">'
-      +     (a.staerken || []).map(function(t){ return '<span class="bcb-tag bcb-tag-green">&#x2713; ' + bcbEsc(t) + '</span>'; }).join('')
-      +     (a.schwaechen || []).map(function(t){ return '<span class="bcb-tag bcb-tag-red">&darr; ' + bcbEsc(t) + '</span>'; }).join('')
-      +   '</div>'
+      +   '<div class="bcb-score-sub">BCB Gesamtpunkte &middot; Baseline 240</div>'
       + '</div>'
       + '</div>';
 
-    // Rubrik bars
+    // ── Rubrik-Balken (7 Rubriken, mit Abweichungs-Tooltip) ──
     var rubriken = a.rubriken || [];
     if (rubriken.length) {
-      html += '<div class="bcb-rubrik-grid">';
+      html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px">';
       rubriken.forEach(function(r) {
-        var pct = ((r.wert - 1) / 5) * 100;
-        var col = r.wert >= 5 ? 'var(--grass)' : r.wert >= 4 ? 'var(--grass)' : r.wert >= 3 ? 'var(--amber)' : 'var(--red)';
-        html += '<div class="bcb-rubrik-item">'
-          + '<div class="bcb-rubrik-name">' + bcbEsc(r.name) + '</div>'
-          + '<div class="bcb-rubrik-row">'
-          +   '<div class="bcb-rubrik-bar"><div class="bcb-rubrik-fill" style="width:' + pct.toFixed(1) + '%;background:' + col + '"></div></div>'
-          +   '<div class="bcb-rubrik-val" style="color:' + col + '">' + r.wert + '</div>'
+        var v   = r.wert || 4;
+        var pct = ((v - 1) / 5) * 100;
+        var col = v >= 5 ? 'var(--grass)' : v === 4 ? 'var(--blue)' : v === 3 ? 'var(--amber)' : 'var(--red)';
+        var delta = v - 4;
+        var deltaHtml = '';
+        if (delta > 0) deltaHtml = '<span style="font-size:10px;color:var(--grass);font-weight:700;margin-left:4px">+' + delta + '</span>';
+        else if (delta < 0) deltaHtml = '<span style="font-size:10px;color:var(--red);font-weight:700;margin-left:4px">' + delta + '</span>';
+        var abw = r.abweichung || '';
+        html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px">'
+          + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+          +   '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">' + bcbEsc(r.name) + '</span>'
+          +   deltaHtml
+          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:' + col + '">' + v + '</span>'
           + '</div>'
+          + '<div style="display:flex;align-items:center;gap:8px">'
+          +   '<div style="flex:1;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden">'
+          +     '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:2px;transition:width .5s ease"></div>'
+          +   '</div>'
+          + '</div>'
+          + (abw ? '<div style="font-size:11px;color:var(--text-2);margin-top:5px;line-height:1.55;padding-top:5px;border-top:1px solid var(--border)">' + bcbEsc(abw) + '</div>' : '')
           + '</div>';
       });
       html += '</div>';
     }
 
-    // Collapsible sections
-    var sections = [
-      { icon: '&#x1F4CA;', title: 'A &ndash; Gesamtbewertung', key: 'gesamtbewertung' },
-      { icon: '&#x1F50D;', title: 'B &ndash; Schl\u00fcsselereignisse', key: 'schluessel' },
-      { icon: '&#x1F517;', title: 'C &ndash; Kettenwirkungen', key: 'ketten' },
-      { icon: '&#x1F4C8;', title: 'D &ndash; Leistungsprofil', key: 'profil' },
-      { icon: '&#x1F3C5;', title: 'F &ndash; Einordnung der Note', key: 'einordnung' },
-      { icon: '&#x1F3AF;', title: 'G &ndash; Konkrete Verbesserungen', key: 'verbesserungen', list: true }
+    // ── Sektionen A / B / C ───────────────────────────────────
+    var secs = [
+      { icon: '&#x1F4CA;', title: 'A \u2013 Gesamtbewertung', key: 'gesamtbewertung', open: true },
+      { icon: '&#x2705;',  title: 'B \u2013 Positive Aspekte', key: 'positiv', open: true },
+      { icon: '&#x1F4CC;', title: 'C \u2013 Entwicklungsfelder', key: 'negativ', open: false }
     ];
-    sections.forEach(function(sec, si) {
+    secs.forEach(function(sec, si) {
       var content = a[sec.key];
       if (!content) return;
-      var bodyHtml = '';
-      if (sec.list && Array.isArray(content)) {
-        bodyHtml = '<ul class="bcb-improve-list">' + content.map(function(item, i){
-          return '<li class="bcb-improve-item"><div class="bcb-improve-num">' + (i+1) + '</div><div class="bcb-improve-text">' + bcbEsc(item) + '</div></li>';
-        }).join('') + '</ul>';
-      } else {
-        bodyHtml = '<div>' + bcbEsc(typeof content === 'string' ? content : JSON.stringify(content,null,2)) + '</div>';
-      }
-      html += '<div class="bcb-section" id="bcbsec_' + si + '">'
+      html += '<div class="bcb-section' + (sec.open ? '' : ' bcb-collapsed') + '" id="bcbsec_' + si + '">'
         + '<div class="bcb-section-hdr" onclick="bcbToggleSec(\'bcbsec_' + si + '\')">'
         +   '<span class="bcb-section-icon">' + sec.icon + '</span>'
         +   '<span class="bcb-section-title">' + sec.title + '</span>'
         +   '<span class="bcb-section-chev">&rsaquo;</span>'
         + '</div>'
-        + '<div class="bcb-section-body">' + bodyHtml + '</div>'
+        + '<div class="bcb-section-body">' + bcbEsc(content) + '</div>'
         + '</div>';
     });
     return html;
@@ -3712,87 +3791,249 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (el) el.classList.toggle('bcb-collapsed');
   }
 
-  // ── AI ANALYSIS ──────────────────────────────────────────────
-  function bcbStartAnalysis() {
+  // ── ANALYSE EINFÜGEN (manueller Workflow) ────────────────────
+  function bcbShowPasteDialog() {
     var id = bcbActiveBogen;
-    if (!id) return;
-    var b = bcbBoegen.find(function(x){ return x.id === id; });
-    if (!b) return;
-    bcbAnalyses[id] = 'analyzing';
+    var existing = document.getElementById('bcbPasteDialog');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'bcbPasteDialog';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;padding:1rem';
+    overlay.innerHTML = ''
+      + '<div style="background:var(--surface);border:1px solid var(--border-med);border-radius:var(--r);padding:1.75rem;max-width:520px;width:100%;animation:slideUp .2s ease">'
+      +   '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:6px">Manuelle BCB-Analyse</div>'
+      +   '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:12px">Analyse von Claude einfügen</div>'
+      +   '<div style="font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:14px">'
+      +     '1. Schicke den BCB-Bogen als PDF an Claude im Chat<br>'
+      +     '2. Claude liefert dir ein JSON-Objekt als Analyse<br>'
+      +     '3. Das JSON hier einfügen und auf <strong style="color:var(--grass)">Speichern</strong> klicken'
+      +   '</div>'
+      +   '<textarea id="bcbPasteInput" placeholder=\'{"totalScore": 240, "gesamtEinordnung": "erwartungsgemäß", ...}\' '
+      +     'style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:11px;font-family:\'JetBrains Mono\',monospace;outline:none;resize:vertical;margin-bottom:10px;line-height:1.5"></textarea>'
+      +   '<div id="bcbPasteError" style="font-size:11px;color:var(--red);margin-bottom:8px;display:none">⚠ Ungültiges JSON – bitte nochmal prüfen.</div>'
+      +   '<div style="display:flex;gap:8px;justify-content:flex-end">'
+      +     '<button onclick="document.getElementById(\'bcbPasteDialog\').remove()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">Abbrechen</button>'
+      +     '<button onclick="bcbSavePaste(\'' + (id||'') + '\')" style="background:var(--grass);border:none;color:#0a1f0e;font-size:12px;font-weight:700;padding:8px 18px;border-radius:var(--r-sm);cursor:pointer;font-family:\'Barlow\',sans-serif">&#x2713; Speichern</button>'
+      +   '</div>'
+      + '</div>';
+    document.body.appendChild(overlay);
+    setTimeout(function(){ var t = document.getElementById('bcbPasteInput'); if(t) t.focus(); }, 100);
+  }
+
+  function bcbSavePaste(id) {
+    var ta = document.getElementById('bcbPasteInput');
+    var errEl = document.getElementById('bcbPasteError');
+    var raw = ta ? ta.value.trim() : '';
+    if (!raw) { if(errEl) errEl.style.display=''; return; }
+    var parsed;
+    try {
+      var clean = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) { if(errEl) errEl.style.display=''; return; }
+
+    bcbAnalyses[id] = parsed;
     bcbSaveStore();
-    bcbRenderList();
-    bcbRenderModalAnalysis(id);
-    var btn = document.getElementById('bcbAnalyzeBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '&#x23F3; L\u00e4uft...'; }
-    var bogenName = b.name;
 
-    var PROMPT = 'Du bist ein Experte f\u00fcr den DFB-Beobachtungs- und Coachingbogen (BCB) im Schiedsrichterwesen. Analysiere den beigef\u00fcgten Beobachtungsbogen strukturiert, regelbasiert und praxisnah.\n\n'
-      + 'Grundlogik BCB:\n'
-      + '- Skala 1\u20136: 6=deutlich \u00fcber Erwartung, 5=\u00fcber Erwartung, 4=Baseline (fehlerfrei), 3=leicht darunter, 2=deutlich darunter, 1=gravierender Fehler\n'
-      + '- Ausgangswert immer 4. Abweichungen durch Szenen: +1/+2 (korrekte komplexe Szene), -1/-2/-3 (kleiner/mittlerer/gro\u00dfer Fehler)\n'
-      + '- Spielentscheidende Szene kann mehrere Rubriken gleichzeitig beeinflussen\n'
-      + '- Nicht vorhandene Situationen bleiben bei 4\n\n'
-      + 'Rubriken: (1) Spielrelevante Einzelszenen, (2) Spielleitungsqualit\u00e4t, (3) Disziplinarkontrolle, (4) Pers\u00f6nliches Auftreten, (5) Fitness & Stellungsspiel, (6) Teamarbeit\n\n'
-      + 'WICHTIG zur Analyse:\n'
-      + '- Formuliere die Analyse ALLGEMEIN gehalten und auf Entwicklung ausgerichtet\n'
-      + '- Konkrete Spielsituationen aus dem Bogen gerne als Referenz bei St\u00e4rken oder Schw\u00e4chen erw\u00e4hnen (z.B. "Die korrekte Vorteilsentscheidung in Minute X zeigt...")\n'
-      + '- Keine reine Aufz\u00e4hlung, sondern kausale, erfahrungsorientierte Einsch\u00e4tzung\n'
-      + '- Der Schiedsrichter ist Le Bre (22 Jahre), du sprichst ihn in der Analyse direkt an (du-Form)\n\n'
-      + 'Antworte NUR mit einem validen JSON-Objekt ohne Markdown-Bl\u00f6cke:\n'
-      + '{"totalScore":<Zahl|null>,"gesamtEinordnung":"<sehr gut|gut|erwartungsgem\u00e4\u00df|unterdurchschnittlich>","rubriken":[{"name":"Spielrel. Einzelszenen","wert":<1-6>},{"name":"Spielleitungsqualit\u00e4t","wert":<1-6>},{"name":"Disziplinarkontrolle","wert":<1-6>},{"name":"Pers\u00f6nl. Auftreten","wert":<1-6>},{"name":"Fitness & Stellungsspiel","wert":<1-6>},{"name":"Teamarbeit","wert":<1-6>}],"staerken":["<2-4 W\u00f6rter, max 3>"],"schwaechen":["<2-4 W\u00f6rter, max 3>"],"gesamtbewertung":"<allgemeine Einordnung der Gesamtpunkte, 2-3 S\u00e4tze, du-Form>","schluessel":"<Schl\u00fcsselereignisse mit Klassifizierung klein/mittel/gro\u00df, Auf-/Abwertung, konkrete Szenen referenzieren, 3-5 S\u00e4tze>","ketten":"<Kettenwirkungsanalyse wo eine Szene mehrere Rubriken beeinflusste, 2-4 S\u00e4tze>","profil":"<allgemeines Leistungsprofil, St\u00e4rken und Schw\u00e4chen mit Spielreferenz wo passend, 3-5 S\u00e4tze, du-Form>","einordnung":"<war die Note unterdurchschnittlich/erwartungsgem\u00e4\u00df/gut/sehr gut, Kontexteinordnung Spielschwierigkeit, 2-3 S\u00e4tze>","verbesserungen":["<konkreter praxisnaher Hebel 1>","<konkreter praxisnaher Hebel 2>","<konkreter praxisnaher Hebel 3>"]}';
+    var bogenName = (bcbBoegen.find(function(b){ return b.id === id; }) || {}).name || id;
 
-    fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b.base64 } },
-            { type: 'text', text: PROMPT }
-          ]
-        }]
-      })
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      if (data.error) throw new Error(data.error.message);
-      var raw = (data.content || []).map(function(x){ return x.text || ''; }).join('').trim();
-      var parsed;
-      try {
-        var clean = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
-        parsed = JSON.parse(clean);
-      } catch(e) {
-        parsed = raw;
-      }
-      bcbAnalyses[id] = parsed;
-      bcbSaveStore();
-      bcbRenderList();
-      bcbUpdateStats();
-      if (bcbActiveBogen === id) {
-        bcbRenderModalAnalysis(id);
-        var btn2 = document.getElementById('bcbAnalyzeBtn');
-        if (btn2) { btn2.disabled = false; btn2.innerHTML = '&#x1F504; Neu analysieren'; }
-      }
-    }).catch(function(err) {
-      console.error('BCB Analysis error:', err);
-      bcbAnalyses[id] = 'error';
-      bcbSaveStore();
-      bcbRenderList();
-      if (bcbActiveBogen === id) {
-        bcbRenderModalAnalysis(id);
-        var btn3 = document.getElementById('bcbAnalyzeBtn');
-        if (btn3) { btn3.disabled = false; btn3.innerHTML = '&#x1F916; Analysieren'; }
+    // ── LEISTUNGSPROFIL mergen ────────────────────────────────
+    if (parsed.leistungsprofil) {
+      var lp = bcbLoadLP();
+      // Extract first sentence as summary if not set
+      var firstSent = parsed.leistungsprofil.split(/(?<=[.!?])\s+/)[0] || parsed.leistungsprofil;
+      if (!lp.summary) lp.summary = firstSent;
+
+      // Split LP into individual strength statements, deduplicate aggressively
+      var sentences = parsed.leistungsprofil.replace(/([.!?])\s+/g,'$1|||').split('|||')
+        .map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 10; });
+
+      sentences.forEach(function(s) {
+        // Skip score-only sentences (contain "240", "Punkte", "Baseline", "Erwartungsniveau")
+        if (/\b(240|239|238|241|Punkt|Punkte|Baseline|Erwartungsniveau|harmlos|fehlerfrei runterpfeifen)\b/i.test(s)) return;
+        // Check if semantically similar to existing aspekte
+        var similar = lp.aspekte.some(function(a) {
+          var kwA = a.text.toLowerCase().split(/\s+/).filter(function(w){ return w.length > 5; });
+          var kwS = s.toLowerCase();
+          return kwA.filter(function(w){ return kwS.indexOf(w) >= 0; }).length >= 2;
+        });
+        if (!similar) {
+          lp.aspekte.push({ id: 'lp_'+Date.now()+'_'+Math.random().toString(36).slice(2,4), text: s });
+        }
+      });
+      bcbSaveLP(lp);
+    }
+
+    // ── ENTWICKLUNGSFELDER: full tracking logic ───────────────
+    var ef = bcbLoadEF();
+    var positiveText = (parsed.positiv || '').toLowerCase();
+    var negativeText = (parsed.negativ || '').toLowerCase();
+    var newEF = (parsed.entwicklungsfelder || []).filter(function(f){ return f && f !== 'keine'; });
+
+    // 1) Update miss-streak for ALL existing EF (not mentioned in this bogen)
+    ef.forEach(function(item) {
+      var mentionedAsNew = newEF.some(function(t){ return bcbSimilar(item.text, t); });
+      var mentionedPositive = bcbSimilar(item.text, positiveText);
+
+      if (mentionedPositive) {
+        // Positively mentioned
+        item.positiveCount = (item.positiveCount || 0) + 1;
+        item.recentPositive = item.recentPositive || [];
+        item.recentPositive.push(id);
+        if (item.recentPositive.length > 4) item.recentPositive.shift();
+        item.missStreak = 0;
+        item.positiveNote = parsed.positiv ? parsed.positiv.slice(0,120) + (parsed.positiv.length > 120 ? '…' : '') : '';
+
+        // Rule: Abzug once positively mentioned → mark as positive development
+        if (item.type === 'abzug' && !item.isPositive) {
+          item.isPositive = true;
+          item.positiveLabel = 'Positive Entwicklung';
+        }
+        // Rule: Tipp, Abzug – 2 positive in last 4 OR 3+ total → sehr positive Entwicklung → move to LP
+        var recentCount = (item.recentPositive || []).length;
+        if ((recentCount >= 2 || (item.positiveCount || 0) >= 3) && !item.sehrPositiv) {
+          item.sehrPositiv = true;
+          item.positiveLabel = 'Sehr positive Entwicklung';
+          // Add to LP
+          var lp2 = bcbLoadLP();
+          var lpText = item.text + ' – zeigt klare Verbesserung';
+          var alreadyInLP = lp2.aspekte.some(function(a){ return bcbSimilar(a.text, lpText); });
+          if (!alreadyInLP) {
+            lp2.aspekte.push({ id: 'lp_ef_'+item.id, text: lpText, fromEF: true });
+            bcbSaveLP(lp2);
+          }
+          item.archived = true; // will be filtered out of display
+        }
+      } else if (mentionedAsNew) {
+        // Still a problem – reset positiveCount streak tracking
+        item.missStreak = 0;
+      } else {
+        // Not mentioned at all this bogen
+        item.missStreak = (item.missStreak || 0) + 1;
+
+        // Rule: Tipp – 2 consecutive not mentioned → positive development
+        if (item.type === 'tipp' && item.missStreak >= 2 && !item.isPositive) {
+          item.isPositive = true;
+          item.positiveLabel = 'Positive Entwicklung';
+        }
+        // Rule: Tipp – 4 consecutive not mentioned → archive
+        if (item.type === 'tipp' && item.missStreak >= 4) {
+          item.archived = true;
+        }
+        // Rule: Abzug – 4 consecutive not mentioned → positive development
+        if (item.type === 'abzug' && item.missStreak >= 4 && !item.isPositive) {
+          item.isPositive = true;
+          item.positiveLabel = 'Positive Entwicklung';
+        }
       }
     });
+
+    // 2) Add newly mentioned EF items
+    newEF.forEach(function(text) {
+      var existing = ef.find(function(e){ return bcbSimilar(e.text, text); });
+      if (existing) {
+        existing.count = (existing.count || 1) + 1;
+        existing.missStreak = 0;
+        existing.archived = false; // re-activate if archived
+      } else {
+        // Determine type: Abzug if negativeText contains point-deduction language
+        var isAbzug = /(-1|-2|-3|abzug|abgewertet|fehler|falsch)/i.test(negativeText + ' ' + text);
+        ef.push({
+          id: 'ef_'+Date.now()+'_'+Math.random().toString(36).slice(2,4),
+          text: text,
+          type: isAbzug ? 'abzug' : 'tipp',
+          count: 1,
+          missStreak: 0,
+          positiveCount: 0,
+          recentPositive: [],
+          isPositive: false,
+          sehrPositiv: false,
+          archived: false,
+          positiveLabel: '',
+          positiveNote: ''
+        });
+      }
+    });
+
+    // 3) Sort: active first by count desc, positive developments last, archived hidden
+    ef.sort(function(a,b){
+      if (a.archived && !b.archived) return 1;
+      if (!a.archived && b.archived) return -1;
+      if (a.sehrPositiv && !b.sehrPositiv) return 1;
+      if (!a.sehrPositiv && b.sehrPositiv) return -1;
+      if (a.isPositive && !b.isPositive) return 1;
+      if (!a.isPositive && b.isPositive) return -1;
+      return (b.count||1) - (a.count||1);
+    });
+
+    bcbSaveEF(ef);
+
+    bcbRenderList(); bcbUpdateStats();
+    var dialog = document.getElementById('bcbPasteDialog');
+    if (dialog) dialog.remove();
+    if (bcbActiveBogen === id) {
+      bcbRenderModalAnalysis(id);
+      var btn = document.getElementById('bcbAnalyzeBtn');
+      if (btn) btn.innerHTML = '&#x1F504; Analyse aktualisieren';
+      var stat = document.getElementById('bcbAnalysisStatus');
+      if (stat) stat.textContent = '\u2713 Geladen';
+    }
   }
+
+  function bcbSimilar(a, b) {
+    if (!a || !b) return false;
+    var wa = a.toLowerCase().split(/\W+/).filter(function(w){ return w.length > 4; }).slice(0, 5);
+    var bLow = b.toLowerCase();
+    var hits = wa.filter(function(w){ return bLow.indexOf(w) >= 0; });
+    return hits.length >= Math.min(2, wa.length);
+  }
+
+  // ── LP EDIT FUNCTIONS ─────────────────────────────────────────
+  function bcbEditLPSummary() {
+    var lp = bcbLoadLP();
+    var val = window.prompt('Zusammenfassung bearbeiten:', lp.summary || '');
+    if (val !== null) { lp.summary = val.trim(); bcbSaveLP(lp); bcbUpdateBereiche(); }
+  }
+  function bcbEditLP(idx) {
+    var lp = bcbLoadLP();
+    if (!lp.aspekte[idx]) return;
+    var val = window.prompt('Aspekt bearbeiten:', lp.aspekte[idx].text);
+    if (val !== null) { lp.aspekte[idx].text = val.trim(); bcbSaveLP(lp); bcbUpdateBereiche(); }
+  }
+  function bcbDeleteLP(idx) {
+    var lp = bcbLoadLP();
+    lp.aspekte.splice(idx, 1);
+    bcbSaveLP(lp); bcbUpdateBereiche();
+  }
+
+  // ── EF EDIT FUNCTIONS ─────────────────────────────────────────
+  function bcbEditEF(idx) {
+    var ef = bcbLoadEF();
+    if (!ef[idx]) return;
+    var val = window.prompt('Entwicklungsfeld bearbeiten:', ef[idx].text);
+    if (val !== null) { ef[idx].text = val.trim(); bcbSaveEF(ef); bcbUpdateBereiche(); }
+  }
+  function bcbDeleteEF(idx) {
+    var ef = bcbLoadEF();
+    ef.splice(idx, 1);
+    bcbSaveEF(ef); bcbUpdateBereiche();
+  }
+  function bcbMoveEF(idx, dir) {
+    var ef = bcbLoadEF();
+    var to = idx + dir;
+    if (to < 0 || to >= ef.length) return;
+    var tmp = ef[idx]; ef[idx] = ef[to]; ef[to] = tmp;
+    bcbSaveEF(ef); bcbUpdateBereiche();
+  }
+
+  // Placeholder – nicht mehr genutzt, aber referenziert
+  function bcbStartAnalysis() { bcbShowPasteDialog(); }
+  function bcbResetApiKey()   { bcbShowPasteDialog(); }
 
   function bcbEsc(s) {
     if (typeof s !== 'string') return '';
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
-
-  document.addEventListener('DOMContentLoaded', function(){ srLoadNotes(); });
 
   // ── DYNAMISCHES DATUM ────────────────────────────────────────
   (function() {
