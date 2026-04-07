@@ -1609,7 +1609,7 @@ footer {
           <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs)"><span style="color:var(--text-3);font-weight:700;font-size:10px;min-width:52px">–90 Min</span><span style="color:var(--text-2)">HYDRAFIT vorbereiten</span></div>
           <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs)"><span style="color:var(--text-3);font-weight:700;font-size:10px;min-width:52px">Halbzeit</span><span style="color:var(--text-2)">Amino Gel · neue HYDRAFIT-Flasche</span></div>
           <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs)"><span style="color:var(--text-3);font-weight:700;font-size:10px;min-width:52px">Post</span><span style="color:var(--text-2)">4 Fuel Recharge → Whey + Carbs</span></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs)"><span style="color:var(--text-3);font-weight:700;font-size:10px;min-width:52px">Abends</span><span style="color:var(--text-2)">Magnesium · Ashwagandha</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs)"><span style="color:var(--text-3);font-weight:700;font-size:10px;min-width:52px">Abends</span><span style="color:var(--text-2)">Magnesium</span></div>
         </div>
       </div>
     </div>
@@ -1705,6 +1705,14 @@ footer {
           </div>
         </div>
       </div>
+
+      <div style="margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:.75rem">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3)">Archiv vergangener Spiele</div>
+          <div style="font-size:11px;color:var(--text-3)">Manuell löschbar</div>
+        </div>
+        <div id="sn-archive-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
     </div>
 
     <!-- ── 2. BEOBACHTUNGEN ──────────────────────────────── -->
@@ -1775,47 +1783,110 @@ footer {
         <span class="kal-updated" id="stand-datum">Stand: …</span>
       </div>
       <div class="kal-list" id="kal-list">
-      <div class="kal-card" data-type="spiel" data-date="2026-02-08" data-idx="0"><div class="kal-date-col"><div class="kal-day">08</div><div class="kal-month">Feb</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">FSV Waiblingen II - SV Kaisersbach (Herren)</div><div class="kal-details"><span class="kal-time">12:00 &ndash; 13:40</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen 1 Waiblingen-Oberer Ring &middot; Oberer Ring 6, 71332 Waiblingen</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-02-08" data-idx="1"><div class="kal-date-col"><div class="kal-day">08</div><div class="kal-month">Feb</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">SV Fellbach II - SGM Althütte/Sechselberg (Herren)</div><div class="kal-details"><span class="kal-time">15:30 &ndash; 17:10</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen 2 Fellbach &middot; Esslinger Str. 118, 70734 Fellbach</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-02-12" data-idx="2"><div class="kal-date-col"><div class="kal-day">12</div><div class="kal-month">Feb</div><div class="kal-weekday">Do</div></div><div class="kal-info"><div class="kal-title">TSV Schornbach - Calcio Leinfelden-Echterdingen (Herren)</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 21:10</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen Schornbach &middot; Weißbucher Str. 45, 73614 Schorndorf</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-02-21" data-idx="3"><div class="kal-date-col"><div class="kal-day">21</div><div class="kal-month">Feb</div><div class="kal-weekday">Sa</div></div><div class="kal-info"><div class="kal-title">D-Junioren Verbands-Hallenrunde</div><div class="kal-details"><span class="kal-time">10:00 &ndash; 12:30</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sporthalle Schalkwiese Sporthalle 1 &middot; Hildrizhauser Straße 80, 71139 Ehningen</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-02-22" data-idx="4"><div class="kal-date-col"><div class="kal-day">22</div><div class="kal-month">Feb</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">SC Abstatt - SGM Fürfeld/Bonfeld (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Abstatt Kunstrasen &middot; Kirschenwiesen, 74232 Abstatt</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-02-25"><div class="kal-date-col"><div class="kal-day">25</div><div class="kal-month">Feb</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-03-01" data-idx="5"><div class="kal-date-col"><div class="kal-day">01</div><div class="kal-month">Maer</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">KV Plieningen - ABV Stuttgart (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Rasenplatz KV Plieningen &middot; Im Wolfer 32, 70599 Stuttgart</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-03-05" data-idx="6"><div class="kal-date-col"><div class="kal-day">05</div><div class="kal-month">Maer</div><div class="kal-weekday">Do</div></div><div class="kal-info"><div class="kal-title">Teamevent SRG WN</div><div class="kal-details"><span class="kal-time">16:00 &ndash; 21:00</span> </div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-03-08" data-idx="7"><div class="kal-date-col"><div class="kal-day">08</div><div class="kal-month">Maer</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">TV Bempflingen - TSV Oberensingen II (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Stadion Bempflingen &middot; Großbettlinger Str., 72658 Bempflingen</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-03-11"><div class="kal-date-col"><div class="kal-day">11</div><div class="kal-month">Maer</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-03-14" data-idx="8"><div class="kal-date-col"><div class="kal-day">14</div><div class="kal-month">Maer</div><div class="kal-weekday">Sa</div></div><div class="kal-info"><div class="kal-title">BZL Lehrgang Ruit</div><div class="kal-details"><span class="kal-time">09:00 &ndash; 16:00</span> </div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="schulung" data-date="2026-03-17"><div class="kal-date-col"><div class="kal-day">17</div><div class="kal-month">Maer</div><div class="kal-weekday">Di</div></div><div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div><span class="kal-badge kb-schulung">Schulung</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-03-22" data-idx="9"><div class="kal-date-col"><div class="kal-day">22</div><div class="kal-month">Maer</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">FV Plochingen - SV Ebersbach/Fils (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportplatz Pfostenberg &middot; Pfostenbergweg, 73207 Plochingen</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-03-25"><div class="kal-date-col"><div class="kal-day">25</div><div class="kal-month">Maer</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-03-28" data-idx="10"><div class="kal-date-col"><div class="kal-day">28</div><div class="kal-month">Maer</div><div class="kal-weekday">Sa</div></div><div class="kal-info"><div class="kal-title">TSV Crailsheim - SV Leonberg/Eltingen (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Schönebürgstadion &middot; Schönebürgstr., 74564 Crailsheim</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-03-29" data-idx="11"><div class="kal-date-col"><div class="kal-day">29</div><div class="kal-month">Maer</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">SSG Ulm - FV Olympia Laupheim (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Hauptspielfeld Halde &middot; Bertholdstr. 90, 89079 Ulm</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-02" data-idx="12"><div class="kal-date-col"><div class="kal-day">02</div><div class="kal-month">Apr</div><div class="kal-weekday">Do</div></div><div class="kal-info"><div class="kal-title">TSV Heimerdingen - TSV Ilshofen (Herren)</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 20:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Rasen Weissacherstrasse &middot; Weissacher Str., 71254 Ditzingen</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-04" data-idx="13"><div class="kal-date-col"><div class="kal-day">04</div><div class="kal-month">Apr</div><div class="kal-weekday">Sa</div></div><div class="kal-info"><div class="kal-title">VfL Sindelfingen - GSV Maichingen (Herren)</div><div class="kal-details"><span class="kal-time">15:30 &ndash; 17:15</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Floschenstadion &middot; Rosenstr., 71063 Sindelfingen</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-04-08"><div class="kal-date-col"><div class="kal-day">08</div><div class="kal-month">Apr</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-12" data-idx="14"><div class="kal-date-col"><div class="kal-day">12</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">FV Kirchheim - FC Mezopotamya Bietigheim (Herren)</div><div class="kal-details"><span class="kal-time">17:30 &ndash; 19:15</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportpark Fronberg &middot; Hohensteiner Str., 74366 Kirchheim am Neckar</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-19" data-idx="15"><div class="kal-date-col"><div class="kal-day">19</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">VfL Mainhardt - TSV Rudersberg (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportplatz 1 an Steinbühlhalle &middot; Steinbühl, 74535 Mainhardt</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-04-22"><div class="kal-date-col"><div class="kal-day">22</div><div class="kal-month">Apr</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-26" data-idx="16"><div class="kal-date-col"><div class="kal-day">26</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">SGM Krumme Ebene am Neckar - SG Schorndorf (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Obergriesheim Rasen &middot; Mühlweg, 74831 Gundelsheim</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-04-27" data-idx="17"><div class="kal-date-col"><div class="kal-day">27</div><div class="kal-month">Apr</div><div class="kal-weekday">Mo</div></div><div class="kal-info"><div class="kal-title">PSG Fellbach - 1. FC Adler Weilimdorf (Freizeitsport Herren)</div><div class="kal-details"><span class="kal-time">20:30 &ndash; 22:10</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen 2 Schmiden &middot; Tournonstr., 70736 Fellbach</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-05-03" data-idx="18"><div class="kal-date-col"><div class="kal-day">03</div><div class="kal-month">Mai</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">FC Marbach - TV Pflugfelden (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Hainbuch Stadion &middot; Sportgelände Leiselstein, 71672 Marbach</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-05-06"><div class="kal-date-col"><div class="kal-day">06</div><div class="kal-month">Mai</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="schulung" data-date="2026-05-12"><div class="kal-date-col"><div class="kal-day">12</div><div class="kal-month">Mai</div><div class="kal-weekday">Di</div></div><div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div><span class="kal-badge kb-schulung">Schulung</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-05-17" data-idx="19"><div class="kal-date-col"><div class="kal-day">17</div><div class="kal-month">Mai</div><div class="kal-weekday">So</div></div><div class="kal-info"><div class="kal-title">TSV Schornbach - TSV Gaildorf (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen Schornbach &middot; Weißbucher Str. 45, 73614 Schorndorf</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-05-20"><div class="kal-date-col"><div class="kal-day">20</div><div class="kal-month">Mai</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="spiel" data-date="2026-05-23" data-idx="20"><div class="kal-date-col"><div class="kal-day">23</div><div class="kal-month">Mai</div><div class="kal-weekday">Sa</div></div><div class="kal-info"><div class="kal-title">Spfr Untergriesheim - FSV Schwaigern (Herren)</div><div class="kal-details"><span class="kal-time">15:30 &ndash; 17:15</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Untergriesheim Rasen &middot; Austr., 74177 Bad Friedrichshall</span></span></div></div><span class="kal-badge kb-spiel">Spiel</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-06-03"><div class="kal-date-col"><div class="kal-day">03</div><div class="kal-month">Jun</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="schulung" data-date="2026-06-16"><div class="kal-date-col"><div class="kal-day">16</div><div class="kal-month">Jun</div><div class="kal-weekday">Di</div></div><div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div><span class="kal-badge kb-schulung">Schulung</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-06-17"><div class="kal-date-col"><div class="kal-day">17</div><div class="kal-month">Jun</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-07-01"><div class="kal-date-col"><div class="kal-day">01</div><div class="kal-month">Jul</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="training" data-date="2026-07-15"><div class="kal-date-col"><div class="kal-day">15</div><div class="kal-month">Jul</div><div class="kal-weekday">Mi</div></div><div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div><span class="kal-badge kb-training">Training</span></div>
-      <div class="kal-card" data-type="schulung" data-date="2026-09-15"><div class="kal-date-col"><div class="kal-day">15</div><div class="kal-month">Sep</div><div class="kal-weekday">Di</div></div><div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div><span class="kal-badge kb-schulung">Schulung</span></div>
-      <div class="kal-card" data-type="schulung" data-date="2026-10-20"><div class="kal-date-col"><div class="kal-day">20</div><div class="kal-month">Okt</div><div class="kal-weekday">Di</div></div><div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div><span class="kal-badge kb-schulung">Schulung</span></div>
-      <div class="kal-card" data-type="schulung" data-date="2026-12-08"><div class="kal-date-col"><div class="kal-day">08</div><div class="kal-month">Dez</div><div class="kal-weekday">Di</div></div><div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div><span class="kal-badge kb-schulung">Schulung</span></div>
+      <div class="kal-card" data-type="spiel" data-date="2026-04-02" data-idx="0">
+        <div class="kal-date-col"><div class="kal-day">02</div><div class="kal-month">Apr</div><div class="kal-weekday">Do</div></div>
+        <div class="kal-info"><div class="kal-title">TSV Heimerdingen – TSV Ilshofen (Herren)</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 20:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Rasen Weissacherstrasse &middot; Weissacher Str., 71254 Ditzingen</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
       </div>
+      <div class="kal-card" data-type="spiel" data-date="2026-04-04" data-idx="1">
+        <div class="kal-date-col"><div class="kal-day">04</div><div class="kal-month">Apr</div><div class="kal-weekday">Sa</div></div>
+        <div class="kal-info"><div class="kal-title">VfL Sindelfingen – GSV Maichingen (Herren)</div><div class="kal-details"><span class="kal-time">15:30 &ndash; 17:15</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Floschenstadion &middot; Rosenstr., 71063 Sindelfingen</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
       </div>
+      <div class="kal-card" data-type="spiel" data-date="2026-04-12" data-idx="2">
+        <div class="kal-date-col"><div class="kal-day">12</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div>
+        <div class="kal-info"><div class="kal-title">FV Kirchheim – FC Mezopotamya Bietigheim (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportpark Fronberg &middot; Hohensteiner Str., 74366 Kirchheim am Neckar</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
       </div>
+      <div class="kal-card" data-type="spiel" data-date="2026-04-19" data-idx="3">
+        <div class="kal-date-col"><div class="kal-day">19</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div>
+        <div class="kal-info"><div class="kal-title">VfL Mainhardt – TSV Rudersberg (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Sportplatz 1 an Steinbühlhalle &middot; Steinbühl, 74535 Mainhardt</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
+      </div>
+      <div class="kal-card" data-type="spiel" data-date="2026-04-26" data-idx="4">
+        <div class="kal-date-col"><div class="kal-day">26</div><div class="kal-month">Apr</div><div class="kal-weekday">So</div></div>
+        <div class="kal-info"><div class="kal-title">SGM Krumme Ebene am Neckar – SG Schorndorf (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Obergriesheim Rasen &middot; Mühlweg, 74831 Gundelsheim</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
+      </div>
+      <div class="kal-card" data-type="spiel" data-date="2026-04-27" data-idx="5">
+        <div class="kal-date-col"><div class="kal-day">27</div><div class="kal-month">Apr</div><div class="kal-weekday">Mo</div></div>
+        <div class="kal-info"><div class="kal-title">PSG Fellbach – 1. FC Adler Weilimdorf (Freizeitsport Herren)</div><div class="kal-details"><span class="kal-time">20:30 &ndash; 22:10</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen 2 Schmiden &middot; Tournonstr., 70736 Fellbach</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
+      </div>
+      <div class="kal-card" data-type="spiel" data-date="2026-05-03" data-idx="6">
+        <div class="kal-date-col"><div class="kal-day">03</div><div class="kal-month">Mai</div><div class="kal-weekday">So</div></div>
+        <div class="kal-info"><div class="kal-title">FC Marbach – TV Pflugfelden (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Hainbuch Stadion &middot; Sportgelände Leiselstein, 71672 Marbach</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
+      </div>
+      <div class="kal-card" data-type="spiel" data-date="2026-05-17" data-idx="7">
+        <div class="kal-date-col"><div class="kal-day">17</div><div class="kal-month">Mai</div><div class="kal-weekday">So</div></div>
+        <div class="kal-info"><div class="kal-title">TSV Schornbach – TSV Gaildorf (Herren)</div><div class="kal-details"><span class="kal-time">15:00 &ndash; 16:45</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Kunstrasen Schornbach &middot; Weißbucher Str. 45, 73614 Schorndorf</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
+      </div>
+      <div class="kal-card" data-type="spiel" data-date="2026-05-23" data-idx="8">
+        <div class="kal-date-col"><div class="kal-day">23</div><div class="kal-month">Mai</div><div class="kal-weekday">Sa</div></div>
+        <div class="kal-info"><div class="kal-title">Spfr Untergriesheim – FSV Schwaigern (Herren)</div><div class="kal-details"><span class="kal-time">15:30 &ndash; 17:15</span> <span class="kal-detail-item"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg><span class="kal-location">Untergriesheim Rasen &middot; Austr., 74177 Bad Friedrichshall</span></span></div></div>
+        <span class="kal-badge kb-spiel">Spiel</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-04-08">
+        <div class="kal-date-col"><div class="kal-day">08</div><div class="kal-month">Apr</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-04-22">
+        <div class="kal-date-col"><div class="kal-day">22</div><div class="kal-month">Apr</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-05-06">
+        <div class="kal-date-col"><div class="kal-day">06</div><div class="kal-month">Mai</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-05-20">
+        <div class="kal-date-col"><div class="kal-day">20</div><div class="kal-month">Mai</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-06-03">
+        <div class="kal-date-col"><div class="kal-day">03</div><div class="kal-month">Jun</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-06-17">
+        <div class="kal-date-col"><div class="kal-day">17</div><div class="kal-month">Jun</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-07-01">
+        <div class="kal-date-col"><div class="kal-day">01</div><div class="kal-month">Jul</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="training" data-date="2026-07-15">
+        <div class="kal-date-col"><div class="kal-day">15</div><div class="kal-month">Jul</div><div class="kal-weekday">Mi</div></div>
+        <div class="kal-info"><div class="kal-title">SR Training</div><div class="kal-details"><span class="kal-time">19:00 &ndash; 22:00 Uhr</span></div></div>
+        <span class="kal-badge kb-training">Training</span>
+      </div>
+      <div class="kal-card" data-type="schulung" data-date="2026-05-12">
+        <div class="kal-date-col"><div class="kal-day">12</div><div class="kal-month">Mai</div><div class="kal-weekday">Di</div></div>
+        <div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div>
+        <span class="kal-badge kb-schulung">Schulung</span>
+      </div>
+      <div class="kal-card" data-type="schulung" data-date="2026-06-16">
+        <div class="kal-date-col"><div class="kal-day">16</div><div class="kal-month">Jun</div><div class="kal-weekday">Di</div></div>
+        <div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div>
+        <span class="kal-badge kb-schulung">Schulung</span>
+      </div>
+      <div class="kal-card" data-type="schulung" data-date="2026-09-15">
+        <div class="kal-date-col"><div class="kal-day">15</div><div class="kal-month">Sep</div><div class="kal-weekday">Di</div></div>
+        <div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div>
+        <span class="kal-badge kb-schulung">Schulung</span>
+      </div>
+      <div class="kal-card" data-type="schulung" data-date="2026-10-20">
+        <div class="kal-date-col"><div class="kal-day">20</div><div class="kal-month">Okt</div><div class="kal-weekday">Di</div></div>
+        <div class="kal-info"><div class="kal-title">Schulung</div><div class="kal-details"><span class="kal-time">19:30 &ndash; 20:30 Uhr</span></div></div>
+        <span class="kal-badge kb-schulung">Schulung</span>
       </div>
       </div>
       </div>
@@ -1870,7 +1941,14 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
     <div id="tp-kalender" class="slot-section">
       <div style="font-size:12px;color:var(--text-2);padding:10px 14px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);border-left:3px solid var(--blue);margin-bottom:1rem;line-height:1.6">
-        2-Wochen-Übersicht · Training und Spieltermine. Später passt die KI den Trainingsplan automatisch an Spieltermine an.
+        Monatsübersicht · Training und Spieltermine mit Monatsnavigation. Matchday erscheint nur dann, wenn im Kalender wirklich ein Spiel eingetragen ist.
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:0 0 .875rem;gap:8px;flex-wrap:wrap">
+        <div id="tp-cal-label" style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text)">–</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="tpNavigateMonth(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#8592;</button>
+          <button onclick="tpNavigateMonth(1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#8594;</button>
+        </div>
       </div>
       <div id="tp-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px"></div>
       <div style="display:flex;gap:10px;margin-top:.875rem;flex-wrap:wrap">
@@ -1932,7 +2010,14 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       </div>
     </div>
     <div id="essensplan" class="slot-section active">
-    <div style="font-size:12px;color:var(--text-2);padding:10px 14px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);border-left:3px solid var(--grass);margin-bottom:1rem;line-height:1.6">Wochenplan Mo–So. Empfohlenes Essen basiert auf der Tagesbelastung. Trage dein tatssächliches Essen im Eingabefeld ein.</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:.875rem">
+      <div id="meal-week-label" style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text)">–</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="mealNavigateWeek(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#8592;</button>
+        <button onclick="mealNavigateWeek(1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#8594;</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text-2);padding:10px 14px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);border-left:3px solid var(--grass);margin-bottom:1rem;line-height:1.6">Wochenplan Mo–So. Empfohlenes Essen basiert auf der Tagesbelastung. Trage dein tatsächliches Essen im Eingabefeld ein.</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
         <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border)">
@@ -2221,7 +2306,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
     <!-- ABENDS -->
     <div id="abends" class="inner-slot">
-      <div class="intro-bar">Abend-Stack – beide Produkte entfalten ihre Wirkung über Nacht. Regeneration passiert im Schlaf. Magnesium und Ashwagandha ergänzen sich ideal und können zusammen eingenommen werden.</div>
+      <div class="intro-bar">Abend-Stack – Fokus auf Schlaf, Regeneration und muskuläre Entspannung über Nacht.</div>
       <div class="cards">
 
         <div class="card">
@@ -2235,20 +2320,6 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
           <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Kürbiskerne, Cashews, Mandeln, dunkle Schokolade 85%+, Spinat.</b> <span class="av av-ok">Teilweise Ergänzung</span> – bei hohem Trainingsvolumen reicht Ernährung allein selten. Beides kombinieren ist optimal.</div></div>
           <div class="warn-box">Nicht morgens – sedierende Wirkung kontraproduktiv am Anfang des Tages</div>
         </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Ashwagandha (KSM-66 oder Sensoril)</div><div class="badges"><span class="badge b-ext">Extern</span><span class="badge b-ok">Empfohlen</span></div></div>
-          <div class="dose">300–600 mg KSM-66 täglich · abends · Wirkung nach 4–8 Wochen</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Senkt Cortisol (chronischer Stressmarker bei hohem Trainingsvolumen), verbessert Schlafqualität und Erholungstiefe, erhöht in Studien die VO2max leicht. Adaptogen – wirkt kumulativ über Wochen, nicht akut.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">7+ Einheiten/Woche + Beruf + Spielstress = dauerhaft erhöhtes Cortisol. Das hemmt Muskelaufbau, Schlaf und Immunsystem gleichzeitig. <b>Nur KSM-66 oder Sensoril-Extrakte</b> – nicht generisches Pulver mit unklarem Wirkstoffgehalt.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Schlafhygiene</b> (feste Zeiten, kühles Zimmer, kein Bildschirm 30 Min vor Bett) + <b>Kälteanwendungen</b> (kalte Dusche post-training) haben ähnliche Cortisol-senkende Effekte. <span class="av av-gut">Echte Alternative</span> – wenn Schlaf bereits gut ist, ist Ashwagandha optional.</div></div>
-        </div>
-
-      </div>
-    </div>
 
     <!-- PRE GYM -->
     <div id="pre-gym" class="inner-slot">
@@ -2787,7 +2858,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         </div>
         <div class="md-content-col" style="padding-bottom:.5rem">
           <div class="md-slot-title">Abend-Stack (Supplements)</div>
-          <div class="md-slot-sub">Magnesium Liquid + ggf. Ashwagandha vor dem Schlafen – erhöhte Priorität am Sonntagabend. Der Schlaf von Sonntag auf Montag ist der wichtigste Regenerationsschlaf der Woche da Montag direkt Pull-Tag folgt.</div>
+          <div class="md-slot-sub">Magnesium Liquid vor dem Schlafen – erhöhte Priorität am Sonntagabend. Der Schlaf von Sonntag auf Montag ist der wichtigste Regenerationsschlaf der Woche da Montag direkt Pull-Tag folgt.</div>
           <div class="md-rule" style="margin-top:0"><b>Magnesium ist am Sonntagabend besonders wichtig</b> – nach 90 Min Spielbelastung sind die Reserven besonders erschöpft. Tiefer Schlaf jetzt bestimmt wie du Montagmorgen beim Gym ankommst.</div>
         </div>
       </div>
@@ -2918,35 +2989,23 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
 <script>
   var GAMES = [
-    ["2026-02-08", "FSV Waiblingen II - SV Kaisersbach (Herren)", "12:00", "Oberer Ring 6, 71332 Waiblingen", "Kunstrasen 1 Waiblingen-Oberer Ring", "Kunstrasenplatz"],
-    ["2026-02-08", "SV Fellbach II - SGM Althütte/Sechselberg (Herren)", "15:30", "Esslinger Str. 118, 70734 Fellbach", "Kunstrasen 2 Fellbach", "Kunstrasenplatz"],
-    ["2026-02-12", "TSV Schornbach - Calcio Leinfelden-Echterdingen (Herren)", "19:30", "Weißbucher Str. 45, 73614 Schorndorf", "Kunstrasen Schornbach", "Kunstrasenplatz"],
-    ["2026-02-21", "D-Junioren Verbands-Hallenrunde", "10:00", "Hildrizhauser Straße 80, 71139 Ehningen", "Sporthalle Schalkwiese Sporthalle 1", "Halle"],
-    ["2026-02-22", "SC Abstatt - SGM Fürfeld/Bonfeld (Herren)", "15:00", "Kirschenwiesen, 74232 Abstatt", "Abstatt Kunstrasen", "Kunstrasenplatz"],
-    ["2026-03-01", "KV Plieningen - ABV Stuttgart (Herren)", "15:00", "Im Wolfer 32, 70599 Stuttgart", "Rasenplatz KV Plieningen", "Rasenplatz"],
-    ["2026-03-05", "Teamevent SRG WN", "16:00", "", "", ""],
-    ["2026-03-08", "TV Bempflingen - TSV Oberensingen II (Herren)", "15:00", "Großbettlinger Str., 72658 Bempflingen", "Stadion Bempflingen", "Rasenplatz"],
-    ["2026-03-14", "BZL Lehrgang Ruit", "09:00", "", "", ""],
-    ["2026-03-22", "FV Plochingen - SV Ebersbach/Fils (Herren)", "15:00", "Pfostenbergweg, 73207 Plochingen", "Sportplatz Pfostenberg", "Rasenplatz"],
-    ["2026-03-28", "TSV Crailsheim - SV Leonberg/Eltingen (Herren)", "15:00", "Schönebürgstr., 74564 Crailsheim", "Schönebürgstadion", "Rasenplatz"],
-    ["2026-03-29", "SSG Ulm - FV Olympia Laupheim (Herren)", "15:00", "Bertholdstr. 90, 89079 Ulm", "Hauptspielfeld Halde", "Rasenplatz"],
-    ["2026-04-02", "TSV Heimerdingen - TSV Ilshofen (Herren)", "19:00", "Weissacher Str., 71254 Ditzingen", "Rasen Weissacherstrasse", "Rasenplatz"],
-    ["2026-04-04", "VfL Sindelfingen - GSV Maichingen (Herren)", "15:30", "Rosenstr., 71063 Sindelfingen", "Floschenstadion", "Rasenplatz"],
-    ["2026-04-12", "FV Kirchheim - FC Mezopotamya Bietigheim (Herren)", "17:30", "Hohensteiner Str., 74366 Kirchheim am Neckar", "Sportpark Fronberg", "Kunstrasenplatz"],
-    ["2026-04-19", "VfL Mainhardt - TSV Rudersberg (Herren)", "15:00", "Steinbühl, 74535 Mainhardt", "Sportplatz 1 an Steinbühlhalle", "Rasenplatz"],
-    ["2026-04-26", "SGM Krumme Ebene am Neckar - SG Schorndorf (Herren)", "15:00", "Mühlweg, 74831 Gundelsheim", "Obergriesheim Rasen", "Rasenplatz"],
-    ["2026-04-27", "PSG Fellbach - 1. FC Adler Weilimdorf (Freizeitsport Herren)", "20:30", "Tournonstr., 70736 Fellbach", "Kunstrasen 2 Schmiden", "Kunstrasenplatz"],
-    ["2026-05-03", "FC Marbach - TV Pflugfelden (Herren)", "15:00", "Sportgelände Leiselstein, 71672 Marbach", "Hainbuch Stadion", "Rasenplatz"],
-    ["2026-05-17", "TSV Schornbach - TSV Gaildorf (Herren)", "15:00", "Weißbucher Str. 45, 73614 Schorndorf", "Kunstrasen Schornbach", "Kunstrasenplatz"],
-    ["2026-05-23", "Spfr Untergriesheim - FSV Schwaigern (Herren)", "15:30", "Austr., 74177 Bad Friedrichshall", "Untergriesheim Rasen", "Rasenplatz"]
+    ["2026-04-02", "TSV Heimerdingen – TSV Ilshofen (Herren)", "19:00", "Weissacher Str., 71254 Ditzingen", "Rasen Weissacherstrasse", "Rasenplatz"],
+    ["2026-04-04", "VfL Sindelfingen – GSV Maichingen (Herren)", "15:30", "Rosenstr., 71063 Sindelfingen", "Floschenstadion", "Rasenplatz"],
+    ["2026-04-12", "FV Kirchheim – FC Mezopotamya Bietigheim (Herren)", "15:00", "Hohensteiner Str., 74366 Kirchheim am Neckar", "Sportpark Fronberg", "Kunstrasenplatz"],
+    ["2026-04-19", "VfL Mainhardt – TSV Rudersberg (Herren)", "15:00", "Steinbühl, 74535 Mainhardt", "Sportplatz 1 an Steinbühlhalle", "Rasenplatz"],
+    ["2026-04-26", "SGM Krumme Ebene am Neckar – SG Schorndorf (Herren)", "15:00", "Mühlweg, 74831 Gundelsheim", "Obergriesheim Rasen", "Rasenplatz"],
+    ["2026-04-27", "PSG Fellbach – 1. FC Adler Weilimdorf (Freizeitsport Herren)", "20:30", "Tournonstr., 70736 Fellbach", "Kunstrasen 2 Schmiden", "Kunstrasenplatz"],
+    ["2026-05-03", "FC Marbach – TV Pflugfelden (Herren)", "15:00", "Sportgelände Leiselstein, 71672 Marbach", "Hainbuch Stadion", "Rasenplatz"],
+    ["2026-05-17", "TSV Schornbach – TSV Gaildorf (Herren)", "15:00", "Weißbucher Str. 45, 73614 Schorndorf", "Kunstrasen Schornbach", "Kunstrasenplatz"],
+    ["2026-05-23", "Spfr Untergriesheim – FSV Schwaigern (Herren)", "15:30", "Austr., 74177 Bad Friedrichshall", "Untergriesheim Rasen", "Rasenplatz"]
   ];
-  var GAMES_DATES = ["2026-02-08", "2026-02-08", "2026-02-12", "2026-02-21", "2026-02-22", "2026-03-01", "2026-03-05", "2026-03-08", "2026-03-14", "2026-03-22", "2026-03-28", "2026-03-29", "2026-04-02", "2026-04-04", "2026-04-12", "2026-04-19", "2026-04-26", "2026-04-27", "2026-05-03", "2026-05-17", "2026-05-23"];
+  var GAMES_DATES = ["2026-04-02", "2026-04-04", "2026-04-12", "2026-04-19", "2026-04-26", "2026-04-27", "2026-05-03", "2026-05-17", "2026-05-23"];
 
   // ══════════════════════════════════════════════════════════════
   //  GOOGLE SHEETS SYNC
   //  Trage deine Web App URL hier ein nach dem Einrichten:
   // ══════════════════════════════════════════════════════════════
-  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwPV7_twk45P3OdkH5HAr4V3IXAy_j9c4njVWlPkAzxTz8M2-3UtkkT4jC4ZWHVIxLg/exec';
+  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxpGj8Gdw9tT_gZNc8EsOqNuNQN6RhvboNCN_ru9RwMimjOWQWL-Q7igHB7RHfmMaTj/exec';
 
   var _cache = {};  // lokaler Cache für offline-Betrieb
 
@@ -3017,7 +3076,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
       if (tabs.length > 0) tabs[0].classList.add('active');
     }
-    if (id === 'trainingsplan') buildTpCalendar();
+    if (id === 'trainingsplan') buildTpCalendar(true);
   }
 
   function showSlot(id, btn) {
@@ -3184,59 +3243,141 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   // ── MEAL PLAN ────────────────────────────────────────────────
-  function saveMeal(d,m,v){ var key='sr-meal-'+d+'-'+m; var p={}; p[key]=v; dbSave(p); }
+  var MEAL_DAY_ORDER = ['mo','di','mi','do','fr','sa','so'];
+  var MEAL_CODES = ['fr','mi','pw','ab','ka'];
+  var MEAL_WEEK_OFFSET = 0;
+
+  function getWeekStart(baseDate, offsetWeeks) {
+    var d = new Date(baseDate);
+    d.setHours(0,0,0,0);
+    var day = d.getDay();
+    var diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff + (offsetWeeks * 7));
+    return d;
+  }
+  function getIsoWeekData(date) {
+    var d = new Date(date);
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+    var week1 = new Date(d.getFullYear(), 0, 4);
+    var week = 1 + Math.round(((d - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+    return { year: d.getFullYear(), week: week };
+  }
+  function getMealWeekKey(offsetWeeks) {
+    var start = getWeekStart(new Date(), offsetWeeks);
+    var iso = getIsoWeekData(start);
+    return iso.year + '-W' + String(iso.week).padStart(2,'0');
+  }
+  function saveMeal(d,m,v){ var key='sr-meal-'+getMealWeekKey(MEAL_WEEK_OFFSET)+'-'+d+'-'+m; var p={}; p[key]=v; dbSave(p); }
   function loadMeals() {
-    ['mo','di','mi','do','fr','sa','so'].forEach(function(d){
-      ['fr','mi','pw','ab'].forEach(function(m){
-        var v = dbGet('sr-meal-'+d+'-'+m, '');
+    var weekKey = getMealWeekKey(MEAL_WEEK_OFFSET);
+    MEAL_DAY_ORDER.forEach(function(d){
+      MEAL_CODES.forEach(function(m){
+        var v = dbGet('sr-meal-'+weekKey+'-'+d+'-'+m, '');
         var el = document.getElementById('meal-'+d+'-'+m);
-        if (v && el) el.value = v;
+        if (el) el.value = v || '';
       });
     });
   }
+  function ensureMealPurchaseFields() {
+    var section = document.getElementById('essensplan');
+    if (!section || section.getAttribute('data-kaufempfehlung-ready') === '1') return;
+    var cardsWrap = section.querySelector('div[style*="display:flex;flex-direction:column;gap:10px"]');
+    if (!cardsWrap) return;
+    Array.prototype.forEach.call(cardsWrap.children, function(card, idx){
+      var grid = card.querySelector('div[style*="grid-template-columns:repeat(4,1fr)"]');
+      if (!grid) return;
+      grid.style.gridTemplateColumns = 'repeat(5,1fr)';
+      var dayCode = MEAL_DAY_ORDER[idx];
+      var col = document.createElement('div');
+      col.style.cssText = 'padding:.75rem';
+      col.innerHTML = '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:&quot;Barlow Condensed&quot;,sans-serif">Kaufempfehlung</div>'
+        + '<div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">&nbsp;</div>'
+        + '<textarea id="meal-' + dayCode + '-ka" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:&quot;Barlow&quot;,sans-serif;resize:vertical;outline:none" placeholder="" onchange="saveMeal(\'' + dayCode + '\',\'ka\',this.value)"></textarea>';
+      grid.appendChild(col);
+    });
+    section.setAttribute('data-kaufempfehlung-ready', '1');
+  }
+  function renderMealWeek() {
+    ensureMealPurchaseFields();
+    var start = getWeekStart(new Date(), MEAL_WEEK_OFFSET);
+    var end = new Date(start); end.setDate(start.getDate() + 6);
+    var iso = getIsoWeekData(start);
+    var label = document.getElementById('meal-week-label');
+    if (label) label.textContent = 'KW ' + String(iso.week).padStart(2,'0') + ' · ' + start.getDate() + '. ' + MONTHS[start.getMonth()] + ' – ' + end.getDate() + '. ' + MONTHS[end.getMonth()];
+    var section = document.getElementById('essensplan');
+    if (!section) return;
+    var cardsWrap = section.querySelector('div[style*="display:flex;flex-direction:column;gap:10px"]');
+    if (!cardsWrap) return;
+    Array.prototype.forEach.call(cardsWrap.children, function(card, idx){
+      var d = new Date(start); d.setDate(start.getDate() + idx);
+      var header = card.firstElementChild;
+      if (!header) return;
+      var title = header.children[0];
+      var subtitle = header.children[1];
+      if (title) title.textContent = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][idx];
+      if (subtitle) {
+        var original = subtitle.getAttribute('data-base-text') || subtitle.textContent;
+        subtitle.setAttribute('data-base-text', original);
+        subtitle.textContent = ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth()+1)).slice(-2) + ' · ' + original;
+      }
+    });
+    loadMeals();
+  }
+  function mealNavigateWeek(dir) {
+    MEAL_WEEK_OFFSET += dir;
+    renderMealWeek();
+  }
 
-  // ── 2-WEEK TRAINING CALENDAR ─────────────────────────────────
-  var CAL_BUILT = false;
-  function buildTpCalendar() {
+  // ── TRAINING CALENDAR (MONTH VIEW) ──────────────────────────
+  var TP_CAL_MONTH_OFFSET = 0;
+  function hasGameOnDate(ds) { return GAMES_DATES.indexOf(ds) >= 0; }
+  function tpNavigateMonth(dir) { TP_CAL_MONTH_OFFSET += dir; buildTpCalendar(true); }
+  function buildTpCalendar(force) {
     var grid = document.getElementById('tp-cal-grid');
-    if (!grid || CAL_BUILT) return;
-    CAL_BUILT = true;
-    var PLAN  = {0:'Spieltag',1:'Pull + Auslaufen',2:'Beine',3:'Push + Zone 2-3',4:'Pause',5:'OK + HIIT',6:'Pause'};
-    var CKEY  = {0:'game',1:'kraft',2:'kraft',3:'mixed',4:'rest',5:'mixed',6:'rest'};
-    var COLS  = {
+    if (!grid) return;
+    if (!force && grid.getAttribute('data-built') === '1') return;
+    grid.setAttribute('data-built', '1');
+    grid.innerHTML = '';
+    var PLAN = {1:'Pull + Auslaufen',2:'Beine',3:'Push + Zone 2-3',4:'Pause',5:'OK + HIIT',6:'Pause',0:'Pause'};
+    var CKEY = {1:'kraft',2:'kraft',3:'mixed',4:'rest',5:'mixed',6:'rest',0:'rest'};
+    var COLS = {
       game: 'background:rgba(46,204,113,0.18);border:1px solid rgba(46,204,113,0.55)',
       kraft:'background:rgba(74,144,217,0.18);border:1px solid rgba(74,144,217,0.5)',
       mixed:'background:rgba(26,188,156,0.18);border:1px solid rgba(26,188,156,0.5)',
       rest: 'background:var(--surface2);border:1px solid var(--border-med)'
     };
-    var today = new Date('2026-04-03');
-    var dow = today.getDay();
-    var start = new Date(today);
-    start.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
-    var DN = ['Mo','Di','Mi','Do','Fr','Sa','So'];
-    DN.forEach(function(n){
+    var base = new Date();
+    base = new Date(base.getFullYear(), base.getMonth() + TP_CAL_MONTH_OFFSET, 1);
+    var label = document.getElementById('tp-cal-label');
+    if (label) label.textContent = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'][base.getMonth()] + ' ' + base.getFullYear();
+    ['Mo','Di','Mi','Do','Fr','Sa','So'].forEach(function(n){
       var h = document.createElement('div');
       h.style.cssText = 'text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);padding:4px 0;font-family:Barlow Condensed,sans-serif';
       h.textContent = n;
       grid.appendChild(h);
     });
-    for (var i = 0; i < 14; i++) {
-      var d = new Date(start); d.setDate(start.getDate() + i);
-      var weekDay = (d.getDay() + 6) % 7; // 0=Mon
-      var isoDay  = d.getDay(); // 0=Sun for PLAN lookup
+    var first = new Date(base);
+    var offset = (first.getDay() + 6) % 7;
+    first.setDate(first.getDate() - offset);
+    var todayStr = new Date().toISOString().slice(0,10);
+    for (var i = 0; i < 42; i++) {
+      var d = new Date(first); d.setDate(first.getDate() + i);
       var ds = d.toISOString().slice(0,10);
-      var isGame   = GAMES_DATES.indexOf(ds) >= 0;
-      var isToday  = (ds === '2026-04-03');
+      var isCurrentMonth = d.getMonth() === base.getMonth();
+      var isGame = hasGameOnDate(ds);
+      var isToday = ds === todayStr;
+      var isoDay = d.getDay();
       var ck = isGame ? 'game' : CKEY[isoDay];
-      var plan = isGame ? '\u26BD Spiel' : PLAN[isoDay];
+      var plan = isGame ? '⚽ Matchday' : PLAN[isoDay];
       var cell = document.createElement('div');
-      cell.style.cssText = 'border-radius:8px;padding:.5rem .4rem;min-height:76px;' + COLS[ck] + (isToday ? ';outline:2px solid var(--grass);outline-offset:1px' : '');
+      cell.style.cssText = 'border-radius:8px;padding:.5rem .4rem;min-height:76px;' + COLS[ck] + (isToday ? ';outline:2px solid var(--grass);outline-offset:1px' : '') + (!isCurrentMonth ? ';opacity:.38' : '');
       cell.innerHTML = '<div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;line-height:1;color:' + (isToday?'var(--grass)':'var(--text)') + '">' + d.getDate() + '</div>'
         + '<div style="font-size:9px;color:var(--text-3);margin-bottom:4px">' + MONTHS[d.getMonth()] + '</div>'
         + '<div style="font-size:10px;line-height:1.35;color:' + (isGame?'var(--grass)':'var(--text-2)') + ';font-weight:' + (isGame?'700':'400') + '">' + plan + '</div>';
       if (isGame) {
         cell.style.cursor = 'pointer';
-        (function(idx){ cell.addEventListener('click', function(){ gmOpen(GAMES_DATES.indexOf(ds)); }); })(i);
+        (function(gameIdx){ cell.addEventListener('click', function(){ gmOpen(gameIdx); }); })(GAMES_DATES.indexOf(ds));
       }
       grid.appendChild(cell);
     }
@@ -3277,6 +3418,9 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var upBtn = document.querySelector('.kal-filter');
     if (upBtn) filterKal('upcoming', upBtn);
     // Load persisted data
+    snLoad(snFindNextGame());
+    snRenderArchive();
+    renderMealWeek();
   });
 
   // ── IMAGE ROTATION ──────────────────────────────────────────
@@ -4244,68 +4388,53 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var MONTHS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
     var MONTHS_LONG = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
     var WDAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
-    var WDAYS_LONG = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 
     var now = new Date();
-    var todayStr = now.toISOString().slice(0,10);  // YYYY-MM-DD
+    var todayStr = now.toISOString().slice(0,10);
 
-    // Stand-Datum
     var standEl = document.getElementById('stand-datum');
     if (standEl) {
-      standEl.textContent = 'Stand: '
-        + ('0'+now.getDate()).slice(-2) + '.'
-        + ('0'+(now.getMonth()+1)).slice(-2) + '.'
-        + now.getFullYear();
+      standEl.textContent = 'Stand: ' + ('0'+now.getDate()).slice(-2) + '.' + ('0'+(now.getMonth()+1)).slice(-2) + '.' + now.getFullYear();
     }
 
-    // Nächstes Spiel finden (erstes Spiel >= heute)
     var nextGame = null;
     var nextIdx  = -1;
     if (typeof GAMES !== 'undefined') {
       for (var i = 0; i < GAMES.length; i++) {
-        if (GAMES[i][0] >= todayStr) {
-          nextGame = GAMES[i];
-          nextIdx  = i;
-          break;
-        }
+        if (GAMES[i][0] >= todayStr) { nextGame = GAMES[i]; nextIdx = i; break; }
       }
+      if (!nextGame && GAMES.length) { nextGame = GAMES[GAMES.length - 1]; nextIdx = GAMES.length - 1; }
     }
 
     if (nextGame) {
       var gd = new Date(nextGame[0]);
       var isToday = (nextGame[0] === todayStr);
       var dayLabel = isToday ? 'Heute' : (WDAYS[gd.getDay()] + ', ' + gd.getDate() + '. ' + MONTHS_LONG[gd.getMonth()]);
-      var city = nextGame[3].split(',').pop().replace(/[0-9]/g,'').trim();
+      var cleanTitle = nextGame[1].replace(/ *\(.*?\) */g,'').trim();
 
-      // Hero badge
       var badge = document.getElementById('hero-badge');
       if (badge) badge.textContent = isToday ? 'Heute' : dayLabel;
 
-      // Hero date line
-      var heroDl = document.getElementById('hero-date-line');
-      if (heroDl) heroDl.textContent = (isToday ? 'Heute · ' : dayLabel + ' · ') + nextGame[2] + ' Uhr · ' + city;
-
-      // Übersicht next-game-trigger
       var nd = document.getElementById('naechstes-datum');
-      if (nd) nd.textContent = (isToday ? 'Heute' : dayLabel) + ' · ' + nextGame[2] + ' Uhr · ' + city;
+      if (nd) nd.textContent = (isToday ? 'Heute' : dayLabel) + ' · ' + nextGame[2] + ' Uhr';
 
-      // SR tab
-      var srd = document.getElementById('sr-datum');
-      if (srd) srd.textContent = (isToday ? 'Heute' : dayLabel) + ' · ' + nextGame[2] + ' Uhr · ' + city;
+      var heroTitle = document.getElementById('hero-title');
+      if (heroTitle) heroTitle.textContent = cleanTitle;
 
-      // Update the next-game-trigger data-idx to point to correct game
+      var hStat = document.getElementById('hstat-naechstes');
+      if (hStat) {
+        hStat.setAttribute('data-idx', nextIdx);
+        var val = hStat.querySelector('.hstat-val');
+        var lbl = hStat.querySelector('.hstat-label');
+        if (val) val.textContent = cleanTitle;
+        if (lbl) lbl.textContent = 'Nächstes Spiel · ' + (isToday ? 'Heute' : (WDAYS[gd.getDay()] + ' ' + gd.getDate() + '.' + ('0'+(gd.getMonth()+1)).slice(-2))) + ' ' + nextGame[2];
+      }
+
       document.querySelectorAll('.next-game-trigger').forEach(function(el){
         el.setAttribute('data-idx', nextIdx);
       });
-
-      // Update Übersicht game title
-      var heroTitle = document.getElementById('hero-title');
-      if (heroTitle && nextGame[1]) {
-        heroTitle.textContent = nextGame[1].replace(/ *\(.*?\) */g,'').trim();
-      }
     }
 
-    // Mark today's card in kal-list
     document.querySelectorAll('.kal-card').forEach(function(card) {
       var cardDate = card.getAttribute('data-date');
       if (cardDate === todayStr) {
@@ -4319,7 +4448,6 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       }
     });
 
-    // Run default filter (upcoming)
     var firstFilter = document.querySelector('.kal-filter');
     if (firstFilter) filterKal('upcoming', firstFilter);
   })();
@@ -4329,6 +4457,15 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   var snCurrentIdx = 0;
   var MONTHS_SN = ['Jan','Feb','Mar','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   var WDAYS_SN  = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  var SN_ARCHIVE_DELETE_KEY = 'sr-archive-deleted-v1';
+
+  function snGetDeletedArchiveIds() {
+    var ids = dbGet(SN_ARCHIVE_DELETE_KEY, []);
+    return Array.isArray(ids) ? ids : [];
+  }
+  function snSaveDeletedArchiveIds(ids) {
+    var p = {}; p[SN_ARCHIVE_DELETE_KEY] = ids; dbSave(p);
+  }
 
   function snFindNextGame() {
     var today = new Date().toISOString().slice(0,10);
@@ -4336,6 +4473,41 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       if (GAMES[i][0] >= today) return i;
     }
     return GAMES.length - 1;
+  }
+
+  function snRenderArchive() {
+    var list = document.getElementById('sn-archive-list');
+    if (!list) return;
+    var today = new Date().toISOString().slice(0,10);
+    var deleted = snGetDeletedArchiveIds();
+    var items = GAMES.map(function(g, idx){ return { idx: idx, game: g }; }).filter(function(item){
+      return item.game[0] < today && deleted.indexOf(String(item.idx)) === -1;
+    }).reverse();
+    if (!items.length) {
+      list.innerHTML = '<div style="padding:10px 12px;background:var(--surface2);border:1px dashed var(--border);border-radius:var(--r-sm);font-size:12px;color:var(--text-3)">Kein archiviertes Spiel vorhanden.</div>';
+      return;
+    }
+    list.innerHTML = items.map(function(item){
+      var g = item.game;
+      var d = new Date(g[0]);
+      return '<div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px">'
+        + '<div>'
+        +   '<div style="font-size:12px;font-weight:600;color:var(--text)">' + g[1].replace(/ *\(.*?\) */g,'').trim() + '</div>'
+        +   '<div style="font-size:11px;color:var(--text-3)">' + WDAYS_SN[d.getDay()] + ', ' + d.getDate() + '. ' + MONTHS_SN[d.getMonth()] + ' · ' + g[2] + ' Uhr</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px">'
+        +   '<button class="bcb-btn" onclick="snLoad(' + item.idx + ')">Öffnen</button>'
+        +   '<button class="bcb-btn bcb-btn-del" onclick="snDeleteArchiveItem(' + item.idx + ')" title="Aus Archiv löschen">🗑</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+  function snDeleteArchiveItem(idx) {
+    var deleted = snGetDeletedArchiveIds();
+    var id = String(idx);
+    if (deleted.indexOf(id) === -1) deleted.push(id);
+    snSaveDeletedArchiveIds(deleted);
+    snRenderArchive();
   }
 
   function teamSlugSN(name) {
