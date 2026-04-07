@@ -15,7 +15,7 @@ jobs:
       - name: Repository auschecken
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           ref: main
           fetch-depth: 0
 
@@ -30,11 +30,18 @@ jobs:
       - name: Kalender aktualisieren und committen
         env:
           SHEETS_URL: ${{ secrets.SHEETS_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           python3 - << 'PYEOF'
-          import os, re, json, requests, sys, base64
+          import os
+          import re
+          import json
+          import html
+          import sys
+          import base64
+          import requests
+          from urllib.parse import urlencode
           from datetime import datetime
 
           SHEETS_URL = os.environ.get('SHEETS_URL', '')
@@ -46,15 +53,69 @@ jobs:
               print('FEHLER: SHEETS_URL nicht gesetzt')
               sys.exit(1)
 
+          if not GITHUB_TOKEN:
+              print('FEHLER: GITHUB_TOKEN nicht gesetzt')
+              sys.exit(1)
+
+          if not REPO:
+              print('FEHLER: GITHUB_REPOSITORY nicht gesetzt')
+              sys.exit(1)
+
           # 1. Termine laden
           print('Lade Termine...')
-          resp = requests.get(SHEETS_URL + '?action=calendar', timeout=30)
-          data = resp.json()
-          if not data.get('ok') or 'events' not in data:
-              print('Fehler: ' + json.dumps(data)[:200])
+          url = SHEETS_URL + ('&' if '?' in SHEETS_URL else '?') + urlencode({'action': 'calendar'})
+          resp = requests.get(url, timeout=30)
+
+          if resp.status_code != 200:
+              print('FEHLER beim Abruf der Apps-Script-URL: ' + str(resp.status_code))
+              print(resp.text[:500])
               sys.exit(1)
+
+          try:
+              data = resp.json()
+          except Exception:
+              print('FEHLER: Antwort ist kein gueltiges JSON')
+              print(resp.text[:500])
+              sys.exit(1)
+
+          if not isinstance(data, dict):
+              print('FEHLER: JSON-Antwort ist kein Objekt')
+              print(str(data)[:500])
+              sys.exit(1)
+
+          if not data.get('ok') or 'events' not in data:
+              print('FEHLER: JSON-Struktur ungueltig')
+              print(json.dumps(data, ensure_ascii=False)[:500])
+              sys.exit(1)
+
           events = data['events']
-          print(str(len(events)) + ' Termine geladen')
+          if not isinstance(events, list):
+              print('FEHLER: events ist keine Liste')
+              sys.exit(1)
+
+          print(str(len(events)) + ' Termine geladen (roh)')
+
+          # Events validieren
+          valid_events = []
+          for i, e in enumerate(events):
+              if not isinstance(e, dict):
+                  print(f'WARNUNG: Event {i} ist kein Objekt und wird uebersprungen')
+                  continue
+
+              if 'date' not in e or 'type' not in e:
+                  print(f'WARNUNG: Event {i} ohne date/type wird uebersprungen: {e}')
+                  continue
+
+              try:
+                  datetime.strptime(e['date'], '%Y-%m-%d')
+              except Exception:
+                  print(f'WARNUNG: Event {i} mit ungueltigem Datum wird uebersprungen: {e}')
+                  continue
+
+              valid_events.append(e)
+
+          events = valid_events
+          print(str(len(events)) + ' gueltige Termine geladen')
 
           MONTHS = ['Jan','Feb','Maer','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez']
           WDAYS  = ['So','Mo','Di','Mi','Do','Fr','Sa']
@@ -68,100 +129,176 @@ jobs:
               d = datetime.strptime(ds, '%Y-%m-%d')
               return WDAYS[d.isoweekday() % 7]
 
+          def h(value):
+              return html.escape(str(value or ''))
+
           def build_cards(events):
               cards = ''
               idx = 0
+
               for e in events:
-                  d     = datetime.strptime(e['date'], '%Y-%m-%d')
-                  day   = str(d.day).zfill(2)
+                  d = datetime.strptime(e['date'], '%Y-%m-%d')
+                  day = str(d.day).zfill(2)
                   month = MONTHS[d.month - 1]
-                  w     = wd(e['date'])
-                  typ   = e['type']
-                  t, te = e.get('time',''), e.get('end','')
-                  title = e.get('title','')
-                  addr  = e.get('addr','')
-                  venue = e.get('venue','')
+                  w = wd(e['date'])
+                  typ = e['type']
+
+                  t = h(e.get('time', ''))
+                  te = h(e.get('end', ''))
+                  title = h(e.get('title', ''))
+                  addr = h(e.get('addr', ''))
+                  venue = h(e.get('venue', ''))
+
                   dc = ('<div class="kal-date-col">'
                         '<div class="kal-day">' + day + '</div>'
                         '<div class="kal-month">' + month + '</div>'
                         '<div class="kal-weekday">' + w + '</div></div>')
+
                   if typ == 'spiel':
+                      location_text = ''
+                      if venue and addr:
+                          location_text = venue + ' &middot; ' + addr
+                      elif venue:
+                          location_text = venue
+                      elif addr:
+                          location_text = addr
+
                       loc = (('<span class="kal-detail-item">' + LOC_SVG +
-                              '<span class="kal-location">' + venue + ' &middot; ' + addr +
-                              '</span></span>') if addr else '')
+                              '<span class="kal-location">' + location_text +
+                              '</span></span>') if location_text else '')
+
                       cards += ('\n      <div class="kal-card" data-type="spiel" data-date="' +
-                                e['date'] + '" data-idx="' + str(idx) + '">' + dc +
+                                h(e['date']) + '" data-idx="' + str(idx) + '">' + dc +
                                 '<div class="kal-info"><div class="kal-title">' + title + '</div>'
                                 '<div class="kal-details"><span class="kal-time">' + t +
                                 ' &ndash; ' + te + '</span> ' + loc + '</div></div>'
                                 '<span class="kal-badge kb-spiel">Spiel</span></div>')
                       idx += 1
+
                   elif typ == 'training':
                       cards += ('\n      <div class="kal-card" data-type="training" data-date="' +
-                                e['date'] + '">' + dc +
+                                h(e['date']) + '">' + dc +
                                 '<div class="kal-info"><div class="kal-title">SR Training</div>'
                                 '<div class="kal-details"><span class="kal-time">' + t +
                                 ' &ndash; ' + te + ' Uhr</span></div></div>'
                                 '<span class="kal-badge kb-training">Training</span></div>')
+
                   elif typ == 'schulung':
                       cards += ('\n      <div class="kal-card" data-type="schulung" data-date="' +
-                                e['date'] + '">' + dc +
+                                h(e['date']) + '">' + dc +
                                 '<div class="kal-info"><div class="kal-title">Schulung</div>'
                                 '<div class="kal-details"><span class="kal-time">' + t +
                                 ' &ndash; ' + te + ' Uhr</span></div></div>'
                                 '<span class="kal-badge kb-schulung">Schulung</span></div>')
+
               return cards
 
           def build_games_js(events):
-              sp = [e for e in events if e['type'] == 'spiel']
-              rows = ['    ' + json.dumps(
-                  [g['date'], g['title'], g.get('time',''),
-                   g.get('addr',''), g.get('venue',''), g.get('surface','')],
-                  ensure_ascii=False
-              ) for g in sp]
+              sp = [e for e in events if e.get('type') == 'spiel']
+              rows = [
+                  '    ' + json.dumps(
+                      [
+                          g.get('date', ''),
+                          g.get('title', ''),
+                          g.get('time', ''),
+                          g.get('addr', ''),
+                          g.get('venue', ''),
+                          g.get('surface', '')
+                      ],
+                      ensure_ascii=False
+                  )
+                  for g in sp
+              ]
+
               return (
                   'var GAMES = [\n' + ',\n'.join(rows) + '\n  ];',
-                  'var GAMES_DATES = ' + json.dumps([g['date'] for g in sp], ensure_ascii=False) + ';'
+                  'var GAMES_DATES = ' + json.dumps([g.get('date', '') for g in sp], ensure_ascii=False) + ';'
               )
 
-          # 2. HTML aktualisieren
-          with open(HTML_FILE, 'r', encoding='utf-8') as f:
-              content = f.read()
-
-          new_list = ('<div class="kal-list" id="kal-list">' +
-                      build_cards(events) + '\n      </div>')
-
-          content = re.sub(
-              r'<div class="kal-list" id="kal-list">.*?</div>(?=\s*\n\s*</div>)',
-              new_list,
-              content,
-              flags=re.DOTALL,
-              count=1
-          )
-
-          gjs, djs = build_games_js(events)
-          content = re.sub(r'var GAMES = \[.*?\];', gjs, content, flags=re.DOTALL, count=1)
-          content = re.sub(r'var GAMES_DATES = \[.*?\];', djs, content, count=1)
-
-          if "var SHEETS_URL = '';" in content:
-              content = content.replace(
-                  "var SHEETS_URL = '';",
-                  "var SHEETS_URL = '" + SHEETS_URL + "';"
-              )
-
-          # 3. Per GitHub API committen
+          # 2. HTML aus GitHub holen
           api_url = 'https://api.github.com/repos/' + REPO + '/contents/' + HTML_FILE
           headers = {
               'Authorization': 'token ' + GITHUB_TOKEN,
               'Accept': 'application/vnd.github.v3+json'
           }
 
-          # Aktuellen SHA holen
           get_resp = requests.get(api_url, headers=headers)
-          sha = get_resp.json()['sha']
+
+          if get_resp.status_code != 200:
+              print('FEHLER beim Laden des aktuellen Dateistands: ' +
+                    str(get_resp.status_code) + ' ' + get_resp.text[:300])
+              sys.exit(1)
+
+          get_data = get_resp.json()
+          sha = get_data.get('sha')
+          old_content_b64 = get_data.get('content', '')
+
+          if not sha:
+              print('FEHLER: Kein SHA in GitHub-Antwort gefunden')
+              print(json.dumps(get_data)[:300])
+              sys.exit(1)
+
+          try:
+              content = base64.b64decode(old_content_b64).decode('utf-8')
+          except Exception:
+              print('FEHLER: Konnte bestehende index.html nicht dekodieren')
+              sys.exit(1)
+
           print('Aktueller SHA: ' + sha[:8])
 
-          # Datei updaten
+          new_list = ('<div class="kal-list" id="kal-list">' +
+                      build_cards(events) + '\n      </div>')
+
+          content, replacements = re.subn(
+              r'<div class="kal-list" id="kal-list">.*?</div>(?=\s*\n\s*</div>)',
+              new_list,
+              content,
+              flags=re.DOTALL,
+              count=1
+          )
+          if replacements != 1:
+              print('FEHLER: Kalenderliste in index.html nicht eindeutig gefunden')
+              sys.exit(1)
+
+          gjs, djs = build_games_js(events)
+
+          content, repl_games = re.subn(
+              r'var GAMES = \[.*?\];',
+              gjs,
+              content,
+              flags=re.DOTALL,
+              count=1
+          )
+          if repl_games != 1:
+              print('FEHLER: var GAMES nicht gefunden')
+              sys.exit(1)
+
+          content, repl_dates = re.subn(
+              r'var GAMES_DATES = \[.*?\];',
+              djs,
+              content,
+              count=1
+          )
+          if repl_dates != 1:
+              print('FEHLER: var GAMES_DATES nicht gefunden')
+              sys.exit(1)
+
+          content, repl_url = re.subn(
+              r"var SHEETS_URL\s*=\s*'.*?';",
+              "var SHEETS_URL = '" + SHEETS_URL.replace("\\", "\\\\").replace("'", "\\'") + "';",
+              content,
+              count=1
+          )
+          if repl_url != 1:
+              print('WARNUNG: SHEETS_URL in index.html nicht ersetzt')
+
+          # 3. Nur committen, wenn sich was geaendert hat
+          old_content = base64.b64decode(old_content_b64).decode('utf-8')
+          if old_content == content:
+              print('Keine Aenderungen erkannt - kein Commit notwendig')
+              sys.exit(0)
+
+          # 4. Datei per GitHub API updaten
           today = datetime.now().strftime('%d.%m.%Y')
           put_resp = requests.put(
               api_url,
@@ -175,12 +312,12 @@ jobs:
           )
 
           if put_resp.status_code in (200, 201):
-              sp_c = sum(1 for e in events if e['type'] == 'spiel')
-              tr_c = sum(1 for e in events if e['type'] == 'training')
-              sc_c = sum(1 for e in events if e['type'] == 'schulung')
+              sp_c = sum(1 for e in events if e.get('type') == 'spiel')
+              tr_c = sum(1 for e in events if e.get('type') == 'training')
+              sc_c = sum(1 for e in events if e.get('type') == 'schulung')
               print('OK ' + today + ': ' + str(sp_c) + ' Spiele, ' +
                     str(tr_c) + ' Trainings, ' + str(sc_c) + ' Schulungen')
           else:
-              print('API Fehler: ' + str(put_resp.status_code) + ' ' + put_resp.text[:200])
+              print('API Fehler: ' + str(put_resp.status_code) + ' ' + put_resp.text[:500])
               sys.exit(1)
           PYEOF
