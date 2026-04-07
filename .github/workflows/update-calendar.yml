@@ -5,6 +5,9 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -37,17 +40,13 @@ jobs:
               print('FEHLER: SHEETS_URL Secret nicht gesetzt!')
               sys.exit(1)
 
-          # Test: rufe Apps Script auf und zeige was zurueckkommt
           url = SHEETS_URL + '?action=calendar'
-          print('Rufe auf: ' + url[:60] + '...')
+          print('Rufe Apps Script auf...')
           try:
               resp = requests.get(url, timeout=30)
-              print('HTTP Status: ' + str(resp.status_code))
               data = resp.json()
-              print('Antwort-Keys: ' + str(list(data.keys())))
-              print('ok-Wert: ' + str(data.get('ok')))
           except Exception as ex:
-              print('Fehler beim Abruf: ' + str(ex))
+              print('Fehler: ' + str(ex))
               sys.exit(1)
 
           if not data.get('ok'):
@@ -55,12 +54,7 @@ jobs:
               sys.exit(1)
 
           if 'events' not in data:
-              print('PROBLEM: Apps Script gibt kein "events"-Feld zurueck.')
-              print('Volle Antwort: ' + json.dumps(data)[:200])
-              print('')
-              print('LOESUNG: Das Apps Script muss aktualisiert werden!')
-              print('Geh zu script.google.com, ersetze den Code mit der')
-              print('neuen sr-backend.gs Version und deploye neu.')
+              print('Kein events-Feld. Antwort: ' + json.dumps(data)[:200])
               sys.exit(1)
 
           events = data['events']
