@@ -8,72 +8,65 @@ on:
 permissions:
   contents: write
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - name: Repository auschecken
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+          fetch-depth: 0
 
       - name: Python einrichten
-        uses: actions/setup-python@v5.4.0
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Abhaengigkeiten installieren
         run: pip install requests
 
-      - name: Kalender aktualisieren
+      - name: Kalender aktualisieren und committen
         env:
           SHEETS_URL: ${{ secrets.SHEETS_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           python3 - << 'PYEOF'
-          import os, re, json, requests, sys
+          import os, re, json, requests, sys, base64
           from datetime import datetime
 
           SHEETS_URL = os.environ.get('SHEETS_URL', '')
-          HTML_FILE  = 'index.html'
+          GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
+          REPO = os.environ.get('GITHUB_REPOSITORY', '')
+          HTML_FILE = 'index.html'
 
           if not SHEETS_URL:
-              print('FEHLER: SHEETS_URL Secret nicht gesetzt!')
+              print('FEHLER: SHEETS_URL nicht gesetzt')
               sys.exit(1)
 
-          url = SHEETS_URL + '?action=calendar'
-          print('Rufe Apps Script auf...')
-          try:
-              resp = requests.get(url, timeout=30)
-              data = resp.json()
-          except Exception as ex:
-              print('Fehler: ' + str(ex))
+          # 1. Termine laden
+          print('Lade Termine...')
+          resp = requests.get(SHEETS_URL + '?action=calendar', timeout=30)
+          data = resp.json()
+          if not data.get('ok') or 'events' not in data:
+              print('Fehler: ' + json.dumps(data)[:200])
               sys.exit(1)
-
-          if not data.get('ok'):
-              print('Apps Script Fehler: ' + str(data.get('error', 'unbekannt')))
-              sys.exit(1)
-
-          if 'events' not in data:
-              print('Kein events-Feld. Antwort: ' + json.dumps(data)[:200])
-              sys.exit(1)
-
           events = data['events']
           print(str(len(events)) + ' Termine geladen')
 
-          MONTHS_DE = ['Jan','Feb','Maer','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez']
-          WDAYS_DE  = ['So','Mo','Di','Mi','Do','Fr','Sa']
-          LOC_SVG   = ('<svg width="11" height="11" viewBox="0 0 16 16" fill="none">'
-                       '<path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s'
-                       '4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" '
-                       'stroke-width="1.5" fill="none"/>'
-                       '<circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg>')
+          MONTHS = ['Jan','Feb','Maer','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez']
+          WDAYS  = ['So','Mo','Di','Mi','Do','Fr','Sa']
+          LOC_SVG = ('<svg width="11" height="11" viewBox="0 0 16 16" fill="none">'
+                     '<path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5s'
+                     '4.5-5 4.5-8.5c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" '
+                     'stroke-width="1.5" fill="none"/>'
+                     '<circle cx="8" cy="6" r="1.5" fill="currentColor"/></svg>')
 
-          def get_wd(ds):
+          def wd(ds):
               d = datetime.strptime(ds, '%Y-%m-%d')
-              return WDAYS_DE[d.isoweekday() % 7]
+              return WDAYS[d.isoweekday() % 7]
 
           def build_cards(events):
               cards = ''
@@ -81,99 +74,93 @@ jobs:
               for e in events:
                   d     = datetime.strptime(e['date'], '%Y-%m-%d')
                   day   = str(d.day).zfill(2)
-                  month = MONTHS_DE[d.month - 1]
-                  wd    = get_wd(e['date'])
+                  month = MONTHS[d.month - 1]
+                  w     = wd(e['date'])
                   typ   = e['type']
-                  t     = e.get('time', '')
-                  te    = e.get('end', '')
-                  title = e.get('title', '')
-                  addr  = e.get('addr', '')
-                  venue = e.get('venue', '')
-                  dc    = ('<div class="kal-date-col">'
-                           '<div class="kal-day">' + day + '</div>'
-                           '<div class="kal-month">' + month + '</div>'
-                           '<div class="kal-weekday">' + wd + '</div></div>')
+                  t, te = e.get('time',''), e.get('end','')
+                  title = e.get('title','')
+                  addr  = e.get('addr','')
+                  venue = e.get('venue','')
+                  dc = ('<div class="kal-date-col">'
+                        '<div class="kal-day">' + day + '</div>'
+                        '<div class="kal-month">' + month + '</div>'
+                        '<div class="kal-weekday">' + w + '</div></div>')
                   if typ == 'spiel':
-                      loc = ''
-                      if addr:
-                          loc = ('<span class="kal-detail-item">' + LOC_SVG +
-                                 '<span class="kal-location">' + venue +
-                                 ' &middot; ' + addr + '</span></span>')
-                      cards += ('\n      <div class="kal-card" data-type="spiel"'
-                                ' data-date="' + e['date'] + '" data-idx="' + str(idx) + '">'
-                                + dc +
-                                '<div class="kal-info">'
-                                '<div class="kal-title">' + title + '</div>'
-                                '<div class="kal-details">'
-                                '<span class="kal-time">' + t + ' &ndash; ' + te + '</span> '
-                                + loc + '</div></div>'
+                      loc = (('<span class="kal-detail-item">' + LOC_SVG +
+                              '<span class="kal-location">' + venue + ' &middot; ' + addr +
+                              '</span></span>') if addr else '')
+                      cards += ('\n      <div class="kal-card" data-type="spiel" data-date="' +
+                                e['date'] + '" data-idx="' + str(idx) + '">' + dc +
+                                '<div class="kal-info"><div class="kal-title">' + title + '</div>'
+                                '<div class="kal-details"><span class="kal-time">' + t +
+                                ' &ndash; ' + te + '</span> ' + loc + '</div></div>'
                                 '<span class="kal-badge kb-spiel">Spiel</span></div>')
                       idx += 1
                   elif typ == 'training':
-                      cards += ('\n      <div class="kal-card" data-type="training"'
-                                ' data-date="' + e['date'] + '">' + dc +
-                                '<div class="kal-info">'
-                                '<div class="kal-title">SR Training</div>'
-                                '<div class="kal-details">'
-                                '<span class="kal-time">' + t + ' &ndash; ' + te + ' Uhr</span>'
-                                '</div></div>'
+                      cards += ('\n      <div class="kal-card" data-type="training" data-date="' +
+                                e['date'] + '">' + dc +
+                                '<div class="kal-info"><div class="kal-title">SR Training</div>'
+                                '<div class="kal-details"><span class="kal-time">' + t +
+                                ' &ndash; ' + te + ' Uhr</span></div></div>'
                                 '<span class="kal-badge kb-training">Training</span></div>')
                   elif typ == 'schulung':
-                      cards += ('\n      <div class="kal-card" data-type="schulung"'
-                                ' data-date="' + e['date'] + '">' + dc +
-                                '<div class="kal-info">'
-                                '<div class="kal-title">Schulung</div>'
-                                '<div class="kal-details">'
-                                '<span class="kal-time">' + t + ' &ndash; ' + te + ' Uhr</span>'
-                                '</div></div>'
+                      cards += ('\n      <div class="kal-card" data-type="schulung" data-date="' +
+                                e['date'] + '">' + dc +
+                                '<div class="kal-info"><div class="kal-title">Schulung</div>'
+                                '<div class="kal-details"><span class="kal-time">' + t +
+                                ' &ndash; ' + te + ' Uhr</span></div></div>'
                                 '<span class="kal-badge kb-schulung">Schulung</span></div>')
               return cards
 
           def build_games_js(events):
               sp = [e for e in events if e['type'] == 'spiel']
-              rows = ['    ' + json.dumps(
-                  [g['date'], g['title'], g.get('time',''),
-                   g.get('addr',''), g.get('venue',''), g.get('surface','')],
-                  ensure_ascii=False) for g in sp]
+              rows = ['    ' + json.dumps([g['date'],g['title'],g.get('time',''),
+                      g.get('addr',''),g.get('venue',''),g.get('surface','')],
+                      ensure_ascii=False) for g in sp]
               return ('var GAMES = [\n' + ',\n'.join(rows) + '\n  ];',
                       'var GAMES_DATES = ' + json.dumps([g['date'] for g in sp]) + ';')
 
-          if not os.path.exists(HTML_FILE):
-              print('FEHLER: ' + HTML_FILE + ' nicht gefunden!')
-              sys.exit(1)
-
+          # 2. HTML aktualisieren
           with open(HTML_FILE, 'r', encoding='utf-8') as f:
               content = f.read()
-
-          new_list = ('<div class="kal-list" id="kal-list">'
-                      + build_cards(events) + '\n      </div>')
+          new_list = ('<div class="kal-list" id="kal-list">' +
+                      build_cards(events) + '\n      </div>')
           content = re.sub(
               r'<div class="kal-list" id="kal-list">.*?</div>(?=\s*\n\s*</div>)',
               new_list, content, flags=re.DOTALL, count=1)
           gjs, djs = build_games_js(events)
-          content = re.sub(r'var GAMES = \[.*?\];',       gjs, content, flags=re.DOTALL, count=1)
+          content = re.sub(r'var GAMES = \[.*?\];', gjs, content, flags=re.DOTALL, count=1)
           content = re.sub(r'var GAMES_DATES = \[.*?\];', djs, content, count=1)
           if "var SHEETS_URL = '';" in content:
               content = content.replace("var SHEETS_URL = '';",
                                         "var SHEETS_URL = '" + SHEETS_URL + "';")
 
-          with open(HTML_FILE, 'w', encoding='utf-8') as f:
-              f.write(content)
+          # 3. Per GitHub API committen (kein git push noetig)
+          api_url = 'https://api.github.com/repos/' + REPO + '/contents/' + HTML_FILE
+          headers = {'Authorization': 'token ' + GITHUB_TOKEN,
+                     'Accept': 'application/vnd.github.v3+json'}
 
-          sp_count = sum(1 for e in events if e['type'] == 'spiel')
-          tr_count = sum(1 for e in events if e['type'] == 'training')
-          sc_count = sum(1 for e in events if e['type'] == 'schulung')
-          print('OK ' + datetime.now().strftime('%d.%m.%Y') + ': '
-                + str(sp_count) + ' Spiele, '
-                + str(tr_count) + ' Trainings, '
-                + str(sc_count) + ' Schulungen')
+          # Aktuellen SHA holen
+          get_resp = requests.get(api_url, headers=headers)
+          sha = get_resp.json()['sha']
+          print('Aktueller SHA: ' + sha[:8])
+
+          # Datei updaten
+          today = datetime.now().strftime('%d.%m.%Y')
+          put_resp = requests.put(api_url, headers=headers, json={
+              'message': 'Kalender aktualisiert ' + today,
+              'content': base64.b64encode(content.encode('utf-8')).decode('utf-8'),
+              'sha': sha,
+              'branch': 'main'
+          })
+
+          if put_resp.status_code in (200, 201):
+              sp_c = sum(1 for e in events if e['type'] == 'spiel')
+              tr_c = sum(1 for e in events if e['type'] == 'training')
+              sc_c = sum(1 for e in events if e['type'] == 'schulung')
+              print('OK ' + today + ': ' + str(sp_c) + ' Spiele, ' +
+                    str(tr_c) + ' Trainings, ' + str(sc_c) + ' Schulungen')
+          else:
+              print('API Fehler: ' + str(put_resp.status_code) + ' ' + put_resp.text[:200])
+              sys.exit(1)
           PYEOF
-
-      - name: Aenderungen committen
-        run: |
-          git config user.name  "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add index.html
-          git diff --staged --quiet && echo "Keine Aenderungen." && exit 0
-          git commit -m "Kalender aktualisiert $(date '+%d.%m.%Y')"
-          git push --force origin main
