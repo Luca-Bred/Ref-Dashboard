@@ -160,7 +160,7 @@ jobs:
               sc_c = sum(1 for e in events if e['type'] == 'schulung')
               print('OK ' + today + ': ' + str(sp_c) + ' Spiele, ' +
                     str(tr_c) + ' Trainings, ' + str(sc_c) + ' Schulungen')
-          else:
+else:
               print('API Fehler: ' + str(put_resp.status_code) + ' ' + put_resp.text[:200])
               sys.exit(1)
           PYEOF
