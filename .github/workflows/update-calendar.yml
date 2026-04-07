@@ -176,4 +176,4 @@ jobs:
           git add index.html
           git diff --staged --quiet && echo "Keine Aenderungen." && exit 0
           git commit -m "Kalender aktualisiert $(date '+%d.%m.%Y')"
-          git push --force-with-lease origin main || git push origin main
+          git push --force origin main
