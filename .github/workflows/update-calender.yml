@@ -2,15 +2,12 @@ name: Kalender automatisch aktualisieren
 
 on:
   schedule:
-    # Läuft täglich um 06:00 Uhr (UTC = 08:00 Uhr Deutschland)
     - cron: '0 6 * * *'
   workflow_dispatch:
-    # Auch manuell auslösbar über GitHub → Actions → Run workflow
 
 jobs:
   update:
     runs-on: ubuntu-latest
-
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v4
@@ -22,19 +19,18 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Abhängigkeiten installieren
-        run: pip install icalendar python-dateutil requests
+      - name: Abhaengigkeiten installieren
+        run: pip install requests
 
       - name: Kalender aktualisieren
         env:
-          ICAL_URL: ${{ secrets.ICAL_URL }}
           SHEETS_URL: ${{ secrets.SHEETS_URL }}
         run: python scripts/update_calendar.py
 
-      - name: Änderungen committen (nur wenn etwas geändert wurde)
+      - name: Aenderungen committen
         run: |
           git config user.name  "GitHub Actions"
           git config user.email "actions@github.com"
-          git add supplement-dashboard-schiedsrichter.html
-          git diff --staged --quiet || git commit -m "Kalender automatisch aktualisiert $(date '+%d.%m.%Y')"
+          git add index.html
+          git diff --staged --quiet || git commit -m "Kalender aktualisiert $(date '+%d.%m.%Y')"
           git push
