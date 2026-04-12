@@ -1532,11 +1532,7 @@ footer {
     <div class="header-left">
       <div class="header-eyebrow">Performance Dashboard</div>
       <h1 class="header-title">SR <span>Dashboard</span></h1>
-      <div class="header-stats">
-        <div class="hstat"><div class="hstat-val">10</div><div class="hstat-label">Spiele</div></div>
-        <div class="hstat"><div class="hstat-val">4</div><div class="hstat-label">Schulungen</div></div>
-        <div class="hstat next-game-trigger" id="hstat-naechstes" data-idx="0"><div class="hstat-val" style="color:var(--grass);font-size:14px">TSV Heimerdingen</div><div class="hstat-label">Nächstes Spiel · Heute 19:00</div></div>
-      </div>
+
     </div>
   </div>
 </header>
@@ -1677,7 +1673,7 @@ footer {
           <!-- Fahrtzeit / Abfahrt -->
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem">
             <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-family:'Barlow Condensed',sans-serif;margin-bottom:10px">Anreise</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
 
               <!-- Fahrtzeit -->
               <div>
@@ -1687,18 +1683,17 @@ footer {
                   oninput="snCalcAbfahrt()" onchange="snSaveFahrtzeit()">
               </div>
 
+              <!-- Ankunft (Zeit vor Anpfiff) -->
+              <div>
+                <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">Ankunft vor Anpfiff</div>
+                <input id="sn-ankunft" type="text" placeholder="1:15"
+                  style="width:100%;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:7px 10px;color:var(--text);font-size:14px;font-weight:600;font-family:'Barlow',sans-serif;outline:none;text-align:center"
+                  oninput="snCalcAbfahrt()" onchange="snSaveAnkunft()">
+              </div>
+
               <!-- Abfahrt -->
               <div>
-                <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">
-                  Abfahrt
-                  <span style="font-size:9px;color:var(--text-3);font-weight:400">
-                    (Puffer:
-                    <input id="sn-puffer" type="text" value="1:15"
-                      style="width:36px;background:transparent;border:none;border-bottom:1px dashed var(--border-med);color:var(--text-2);font-size:9px;font-family:'Barlow',sans-serif;outline:none;text-align:center;padding:0 2px"
-                      title="Zeit vor Anpfiff (Standard: 1:15)" oninput="snCalcAbfahrt()">
-                    h)
-                  </span>
-                </div>
+                <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">Abfahrt</div>
                 <div id="sn-abfahrt"
                   style="width:100%;background:var(--grass-dim);border:1px solid rgba(46,204,113,0.3);border-radius:var(--r-sm);padding:7px 10px;color:var(--grass);font-size:14px;font-weight:700;font-family:'Barlow',sans-serif;text-align:center;letter-spacing:.03em">
                   –
@@ -4538,13 +4533,13 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   function snCalcAbfahrt() {
     var anpfiff  = document.getElementById('sn-time');
     var fahrtEl  = document.getElementById('sn-fahrtzeit');
-    var pufferEl = document.getElementById('sn-puffer');
+    var pufferEl = document.getElementById('sn-ankunft');
     var abfEl    = document.getElementById('sn-abfahrt');
     if (!anpfiff || !fahrtEl || !pufferEl || !abfEl) return;
 
     var apStr = (anpfiff.textContent || '').replace(' Uhr','').trim(); // "17:30"
     var ftStr = fahrtEl.value.trim();   // "0:45"
-    var pfStr = pufferEl.value.trim();  // "1:15"
+    var pfStr = (pufferEl && pufferEl.value.trim()) || '1:15';
 
     function toMins(s) {
       var p = s.split(':');
@@ -4580,12 +4575,22 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     dbSave(payload);
   }
 
+  function snSaveAnkunft() {
+    if (!GAMES[snCurrentIdx]) return;
+    var key = 'sn-ankunft-' + GAMES[snCurrentIdx][0];
+    var val = document.getElementById('sn-ankunft').value;
+    var payload = {}; payload[key] = val;
+    dbSave(payload);
+  }
+
   function snLoadFahrtzeit(idx) {
     if (!GAMES[idx]) return;
-    var key  = 'sn-fahrt-' + GAMES[idx][0];
-    var val  = dbGet(key, '');
-    var el   = document.getElementById('sn-fahrtzeit');
-    if (el) { el.value = val; snCalcAbfahrt(); }
+    var date = GAMES[idx][0];
+    var fEl = document.getElementById('sn-fahrtzeit');
+    var aEl = document.getElementById('sn-ankunft');
+    if (fEl) fEl.value = dbGet('sn-fahrt-'   + date, '');
+    if (aEl) aEl.value = dbGet('sn-ankunft-' + date, '1:15');
+    snCalcAbfahrt();
   }
 
 </script>
