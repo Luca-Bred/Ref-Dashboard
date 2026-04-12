@@ -1554,9 +1554,9 @@ footer {
   <div class="next-game-trigger" data-idx="0" style="background:linear-gradient(135deg,rgba(46,204,113,0.12),rgba(46,204,113,0.04));border:1px solid rgba(46,204,113,0.3);border-radius:var(--r);overflow:hidden;margin-bottom:1rem;cursor:pointer;transition:border-color .2s;display:flex;align-items:stretch;">
     <div style="padding:1.5rem;flex:1">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--grass);margin-bottom:.4rem">Nächstes Spiel · Tippen für Details, Route &amp; Wetter</div>
-      <div id="hero-title" style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem">TSV Heimerdingen – TSV Ilshofen</div>
+      <div id="hero-title" style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem">FV Kirchheim - FC Mezopotamya Bietigheim</div>
       <div style="font-size:13px;color:var(--text-2);margin-bottom:.875rem"><span id="naechstes-datum">…</span></div>
-      <span id="hero-badge" style="background:var(--grass);color:#0a1f0e;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;font-family:'Barlow',sans-serif">…</span>
+      <span id="hero-badge" style="background:var(--grass);color:#0a1f0e;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;font-family:'Barlow',sans-serif">Heute</span>
     </div>
     <div style="width:160px;flex-shrink:0;position:relative;overflow:hidden">
       <img id="img-nextgame" src="img/sub7.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 35%">
@@ -3248,6 +3248,32 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
   // ── INIT ─────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function() {
+    // Hero-Card sofort mit korrektem nächsten Spiel befüllen
+    (function updateHero() {
+      if (typeof GAMES === 'undefined' || !GAMES.length) return;
+      var todayS = new Date().toISOString().slice(0,10);
+      var ng = null, ni = -1;
+      for (var i = 0; i < GAMES.length; i++) {
+        if (GAMES[i][0] >= todayS) { ng = GAMES[i]; ni = i; break; }
+      }
+      if (!ng) return;
+      var ML  = ['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+      var WD  = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+      var gd  = new Date(ng[0]);
+      var itd = (ng[0] === todayS);
+      var lbl = itd ? 'Heute' : (WD[gd.getDay()] + ', ' + gd.getDate() + '. ' + ML[gd.getMonth()]);
+      var cty = ng[3] ? ng[3].split(',').pop().replace(/[0-9]/g,'').trim() : '';
+      var cleanTitle = ng[1].replace(/ *\(.*?\) */g,'').trim();
+      var ht = document.getElementById('hero-title');
+      if (ht) ht.textContent = cleanTitle;
+      var hb = document.getElementById('hero-badge');
+      if (hb) hb.textContent = itd ? 'Heute' : lbl;
+      var nd = document.getElementById('naechstes-datum');
+      if (nd) nd.textContent = lbl + ' \u00b7 ' + ng[2] + ' Uhr' + (cty ? ' \u00b7 ' + cty : '') + (ng[5] ? ' \u00b7 ' + ng[5] : '');
+      var dl = document.getElementById('hero-date-line');
+      if (dl) dl.textContent = (itd ? 'Heute \u00b7 ' : lbl + ' \u00b7 ') + ng[2] + ' Uhr \u00b7 ' + cty;
+      document.querySelectorAll('.next-game-trigger').forEach(function(el){ el.setAttribute('data-idx', ni); });
+    })();
     // Load from Google Sheets first, then populate UI
     dbLoad(function() {
       srLoadNotes();
