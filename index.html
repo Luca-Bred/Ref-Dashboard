@@ -913,15 +913,19 @@ footer {
   transition: all .15s; cursor: pointer;
   font-family: 'Barlow', sans-serif;
 }
-.mlink-green { background: var(--grass-dim); color: var(--grass); border-color: rgba(46,204,113,0.3); }
-.mlink-green:hover { background: rgba(46,204,113,0.25); }
-.mlink-blue  { background: var(--blue-dim);  color: var(--blue);  border-color: rgba(74,144,217,0.3); }
-.mlink-blue:hover  { background: rgba(74,144,217,0.25); }
-.mlink-amber { background: var(--amber-dim); color: var(--amber); border-color: rgba(243,156,18,0.3); }
-.mlink-amber:hover { background: rgba(243,156,18,0.25); }
-.mlink-gray  { background: var(--surface2);  color: var(--text-2); }
-.mlink-teal  { background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(26,188,156,0.35); }
-.mlink-gray:hover  { background: var(--surface3); color: var(--text); }
+.mlink-green  { background: var(--grass-dim);  color: var(--grass);  border-color: rgba(46,204,113,0.3); }
+.mlink-green:hover  { background: rgba(46,204,113,0.25); }
+.mlink-blue   { background: var(--blue-dim);   color: var(--blue);   border-color: rgba(74,144,217,0.3); }
+.mlink-blue:hover   { background: rgba(74,144,217,0.25); }
+.mlink-amber  { background: var(--gold-dim);   color: var(--gold);   border-color: rgba(245,200,66,0.35); }
+.mlink-amber:hover  { background: rgba(245,200,66,0.2); }
+.mlink-gray   { background: var(--surface2);   color: var(--text-2); }
+.mlink-gray:hover   { background: var(--surface3); color: var(--text); }
+.mlink-teal   { background: var(--teal-dim);   color: var(--teal);   border-color: rgba(26,188,156,0.35); }
+.mlink-darkgreen { background: rgba(22,160,133,0.12); color: #0e7a4e; border-color: rgba(14,122,78,0.4); }
+.mlink-darkgreen:hover { background: rgba(22,160,133,0.22); }
+.mlink-purple { background: var(--purple-dim); color: var(--purple); border-color: rgba(155,89,182,0.35); }
+.mlink-purple:hover { background: rgba(155,89,182,0.25); }
 /* game modal specifics */
 .game-modal-grid {
   display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px;
@@ -1662,11 +1666,11 @@ footer {
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1.2;color:#fff;margin-bottom:.5rem" id="sn-title">–</div>
             <div style="font-size:12px;color:var(--text-2)" id="sn-meta">–</div>
             <div style="margin-top:.875rem;display:flex;gap:6px;flex-wrap:wrap" id="sn-links">
-              <a id="sn-maps" href="#" target="_blank" class="mlink mlink-green" style="font-size:11px;padding:5px 12px">&#x1F4CD; Route</a>
-              <a id="sn-fussball" href="#" target="_blank" class="mlink mlink-blue" style="font-size:11px;padding:5px 12px">⚽ fussball.de</a>
-              <a id="sn-weather" href="#" target="_blank" class="mlink mlink-amber" style="font-size:11px;padding:5px 12px">&#x2600; Wetter</a>
-              <a href="https://www.dfbnet.org/spielplus/login.do" target="_blank" class="mlink mlink-amber" style="font-size:11px;padding:5px 12px">📋 DFBnet</a>
-              <a href="https://my.refsix.com/#/ref/fixtures" target="_blank" class="mlink mlink-teal" style="font-size:11px;padding:5px 12px">⌚ RefSix</a>
+              <a id="sn-maps" href="#" target="_blank" class="mlink mlink-amber" style="font-size:11px;padding:5px 12px">&#x1F4CD; Route</a>
+              <a id="sn-fussball" href="#" target="_blank" class="mlink mlink-green" style="font-size:11px;padding:5px 12px">⚽ fussball.de</a>
+              <a id="sn-weather" href="#" target="_blank" class="mlink mlink-blue" style="font-size:11px;padding:5px 12px">&#x2600; Wetter</a>
+              <a href="https://www.dfbnet.org/spielplus/login.do" target="_blank" class="mlink mlink-darkgreen" style="font-size:11px;padding:5px 12px">📋 DFBnet</a>
+              <a href="https://my.refsix.com/#/ref/fixtures" target="_blank" class="mlink mlink-purple" style="font-size:11px;padding:5px 12px">⌚ RefSix</a>
             </div>
           </div>
           <!-- Info rows -->
@@ -2850,13 +2854,13 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       </div>
     </div>
     <div class="mfooter">
-      <a id="gm-maps"    class="mlink mlink-green" href="#" target="_blank" rel="noopener">&#x1F4CD; Route</a>
-      <a id="gm-fussball" class="mlink mlink-blue"  href="#" target="_blank" rel="noopener">⚽ fussball.de</a>
-      <a id="gm-weather" class="mlink mlink-amber"  href="#" target="_blank" rel="noopener">&#x2600; Wetter</a>
+      <a id="gm-maps"    class="mlink mlink-amber" href="#" target="_blank" rel="noopener">&#x1F4CD; Route</a>
+      <a id="gm-fussball" class="mlink mlink-green"  href="#" target="_blank" rel="noopener">⚽ fussball.de</a>
+      <a id="gm-weather" class="mlink mlink-blue"  href="#" target="_blank" rel="noopener">&#x2600; Wetter</a>
       <a id="gm-fupa-home" class="mlink mlink-gray" href="#" target="_blank" rel="noopener">FUPA Heim</a>
       <a id="gm-fupa-away" class="mlink mlink-gray" href="#" target="_blank" rel="noopener">FUPA Gast</a>
-      <a class="mlink mlink-amber" href="https://www.dfbnet.org/spielplus/login.do" target="_blank" rel="noopener">📋 DFBnet</a>
-      <a class="mlink mlink-teal" href="https://my.refsix.com/#/ref/fixtures" target="_blank" rel="noopener">⌚ RefSix</a>
+      <a class="mlink mlink-darkgreen" href="https://www.dfbnet.org/spielplus/login.do" target="_blank" rel="noopener">📋 DFBnet</a>
+      <a class="mlink mlink-purple" href="https://my.refsix.com/#/ref/fixtures" target="_blank" rel="noopener">⌚ RefSix</a>
     </div>
   </div>
 </div>
