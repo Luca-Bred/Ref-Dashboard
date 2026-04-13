@@ -3411,6 +3411,10 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   // Analyses, LP, EF, Bogen-Meta → dbSave/dbGet (Google Sheets = cross-device)
   var BCB_META_KEY = 'bcb_meta_v1'; // lightweight bogen metadata in Sheets (no base64)
 
+  // ── LP / EF Modul-Variablen – müssen VOR bcbLoadStore deklariert sein ──
+  var _lpState = null;
+  var _efState = null;
+
   function bcbLoadStore() {
     _lpState = null; _efState = null;
     // Load local PDF store (has base64)
@@ -3463,8 +3467,6 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; p[BCB_META_KEY] = meta;
     dbSave(p);
   }
-  var _lpState = null;
-  var _efState = null;
   function bcbLoadLP() {
     if (_lpState !== null) return _lpState;
     var d = dbGet('bcb_lp_v1', {summary:'', aspekte:[]});
