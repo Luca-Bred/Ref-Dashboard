@@ -1750,13 +1750,12 @@ footer {
       <div style="margin-top:.25rem;display:flex;flex-direction:column;gap:10px">
 
         <!-- Saison-Navigator -->
-        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1rem">
-          <button onclick="bcbChangeSeason(-1)" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s" onmouseover="this.style.borderColor='var(--grass)';this.style.color='var(--grass)'" onmouseout="this.style.borderColor='var(--border-med)';this.style.color='var(--text-2)'">&#x2190;</button>
-          <div style="text-align:center">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);letter-spacing:.03em" id="bcb-season-label">2025/26</div>
-            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Saison</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:.5rem 0 .25rem">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3)" id="bcb-season-label">Saison 2025/26</div>
+          <div style="display:flex;gap:6px">
+            <button onclick="bcbChangeSeason(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s" title="Vorherige Saison">&#8592;</button>
+            <button onclick="bcbChangeSeason(1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s" title="Nächste Saison">&#8594;</button>
           </div>
-          <button onclick="bcbChangeSeason(1)" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s" onmouseover="this.style.borderColor='var(--grass)';this.style.color='var(--grass)'" onmouseout="this.style.borderColor='var(--border-med)';this.style.color='var(--text-2)'">&#x2192;</button>
         </div>
 
         <!-- Stats row -->
@@ -3434,7 +3433,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (next < 0 || next >= BCB_SEASONS.length) return;
     bcbSeasonIdx = next;
     var lbl = document.getElementById('bcb-season-label');
-    if (lbl) lbl.textContent = BCB_SEASONS[bcbSeasonIdx];
+    if (lbl) lbl.textContent = 'Saison ' + BCB_SEASONS[bcbSeasonIdx];
     bcbRenderList();
     bcbUpdateStats();
   }
