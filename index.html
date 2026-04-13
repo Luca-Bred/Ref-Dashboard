@@ -3762,49 +3762,68 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       '5.2 Stellungsspiel',
       '6. Teamarbeit / Abseits'
     ];
+    var RUBRIK_BASELINES = [36,36,28,40,28,12,12,20,28];
 
     if (allA.length > 0) {
       html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px">'
         + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:10px">'
-        + '\u00d8 Rubrik-Bewertungen (1\u20136) \u00b7 <span style="color:var(--blue)">&#x2015;</span> Baseline = 4</div>';
+        + '\u00d8 Rubrik-Punkte \u00b7 <span style="color:var(--blue)">&#x2015;</span> Baseline</div>';
 
+      var totalAvgPts = 0;
       RUBRIK_NAMES.forEach(function(label, ni) {
+        var baseline = RUBRIK_BASELINES[ni];
+        var maxBar   = Math.round(baseline * 1.5);
         var entries = allA.map(function(a, ai) {
           var r = a.rubriken && a.rubriken[ni];
           if (!r) return null;
-          var bogen = bcbBoegen[ai] ? bcbBoegen[ai].name : 'Bogen '+(ai+1);
-          return { wert: r.wert || 4, abw: r.abweichung || '', bogen: bogen };
+          var punkte = (r.punkte != null) ? r.punkte : baseline + Math.round((r.wert - 4) * baseline * 0.1);
+          var bogen  = bcbBoegen[ai] ? bcbBoegen[ai].name : 'Bogen '+(ai+1);
+          return { punkte: punkte, wert: r.wert || 4, abw: r.abweichung || '', bogen: bogen };
         }).filter(Boolean);
 
         if (!entries.length) return;
-        var avg = entries.reduce(function(s,e){return s+e.wert;},0) / entries.length;
-        var pct = ((avg-1)/5)*100;
-        var col = avg >= 5 ? 'var(--grass)' : avg === 4 ? 'var(--blue)' : avg >= 3 ? 'var(--amber)' : 'var(--red)';
-        var delta = avg - 4;
-        var deltaStr = delta > 0 ? '+'+delta.toFixed(1) : delta < 0 ? delta.toFixed(1) : '';
-        var deltaCol = delta > 0 ? 'var(--grass)' : delta < 0 ? 'var(--red)' : '';
+        var avgPts = entries.reduce(function(s,e){return s+e.punkte;},0) / entries.length;
+        totalAvgPts += avgPts;
+        var pct   = Math.min(100, (avgPts / maxBar) * 100);
+        var blPct = (baseline / maxBar) * 100;
+        var abvBl = avgPts >= baseline;
+        var col   = abvBl ? 'var(--grass)' : 'var(--amber)';
+        var delta = avgPts - baseline;
+        var deltaStr = delta !== 0 ? (delta > 0 ? '+' : '') + delta.toFixed(1) : '';
         var abwNotes = entries.filter(function(e){ return e.wert !== 4 && e.abw; });
 
         html += '<div style="margin-bottom:10px">'
           + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
           +   '<span style="font-size:12px;color:var(--text-2);flex:1">' + bcbEsc(label) + '</span>'
-          +   (deltaStr ? '<span style="font-size:10px;font-weight:700;color:'+deltaCol+'">'+deltaStr+'</span>' : '')
-          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+col+'">'+avg.toFixed(1)+'</span>'
+          +   (deltaStr ? '<span style="font-size:10px;font-weight:700;color:'+(delta>0?'var(--grass)':'var(--amber)')+'">'+deltaStr+'</span>' : '')
+          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+col+'">'+avgPts.toFixed(1)+'</span>'
+          +   '<span style="font-size:10px;color:var(--text-3);margin-left:2px">/ '+baseline+'</span>'
           + '</div>'
-          + '<div style="position:relative;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:'+(abwNotes.length?'6px':'0')+'">'
-          +   '<div style="position:absolute;left:'+(((4-1)/5)*100).toFixed(1)+'%;width:2px;height:100%;background:var(--blue);opacity:.5"></div>'
+          + '<div style="position:relative;height:6px;background:var(--surface3);border-radius:3px;overflow:visible;margin-bottom:'+(abwNotes.length?'6px':'0')+'">'
           +   '<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+col+';border-radius:3px;transition:width .5s ease"></div>'
+          +   '<div style="position:absolute;top:-2px;left:'+blPct.toFixed(1)+'%;width:2px;height:10px;background:var(--blue);border-radius:1px;opacity:.7"></div>'
           + '</div>'
           + abwNotes.map(function(e){
-              var c = e.wert > 4 ? 'var(--grass)' : 'var(--red)';
+              var c = e.wert > 4 ? 'var(--grass)' : 'var(--amber)';
               var arr = e.wert > 4 ? '&#x2197;' : '&#x2198;';
               return '<div style="font-size:11px;line-height:1.5;padding:3px 6px;background:var(--surface3);border-radius:4px;border-left:2px solid '+c+';margin-bottom:3px">'
-                + '<span style="color:'+c+';font-weight:700;margin-right:4px">'+arr+' '+e.wert+'</span>'
+                + '<span style="color:'+c+';font-weight:700;margin-right:4px">'+arr+' '+e.punkte+'</span>'
                 + '<span style="color:var(--text-3);font-size:10px;margin-right:6px">('+bcbEsc(e.bogen)+')</span>'
                 + bcbEsc(e.abw)+'</div>';
             }).join('')
           + '</div>';
       });
+
+      // ── Ø Summe ──
+      var sumDelta = totalAvgPts - 240;
+      var sumCol   = sumDelta >= 0 ? 'var(--grass)' : 'var(--amber)';
+      html += '<div style="background:var(--surface3);border:1px solid var(--border-med);border-radius:6px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-top:6px">'
+        + '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">\u00d8 Gesamt</span>'
+        + '<span style="font-size:10px;font-weight:700;color:'+sumCol+'">'+(sumDelta>0?'+':'')+sumDelta.toFixed(1)+'</span>'
+        + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:15px;font-weight:700;color:'+sumCol+'">'+totalAvgPts.toFixed(1)+'</span>'
+        + '<span style="font-size:10px;color:var(--text-3);margin-left:2px">/ 240</span>'
+        + '</div>';
+
       html += '</div>';
     }
 
@@ -3961,33 +3980,51 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       + '</div>'
       + '</div>';
 
-    // ── Rubrik-Balken (7 Rubriken, mit Abweichungs-Tooltip) ──
+    // ── Rubrik-Balken mit Gesamtpunkten ──────────────────────
+    var RUBRIK_BASELINES = [36,36,28,40,28,12,12,20,28];
     var rubriken = a.rubriken || [];
     if (rubriken.length) {
+      var totalPunkte = 0;
+      var totalBaseline = 240;
       html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px">';
-      rubriken.forEach(function(r) {
-        var v   = r.wert || 4;
-        var pct = ((v - 1) / 5) * 100;
-        var col = v >= 5 ? 'var(--grass)' : v === 4 ? 'var(--blue)' : v === 3 ? 'var(--amber)' : 'var(--red)';
-        var delta = v - 4;
-        var deltaHtml = '';
-        if (delta > 0) deltaHtml = '<span style="font-size:10px;color:var(--grass);font-weight:700;margin-left:4px">+' + delta + '</span>';
-        else if (delta < 0) deltaHtml = '<span style="font-size:10px;color:var(--red);font-weight:700;margin-left:4px">' + delta + '</span>';
+      rubriken.forEach(function(r, ni) {
+        var baseline = RUBRIK_BASELINES[ni] || 36;
+        var maxBar   = Math.round(baseline * 1.5); // Platz für Aufwertungen
+        // Punkte aus JSON lesen, sonst aus wert schätzen
+        var punkte = (r.punkte != null) ? r.punkte : baseline + Math.round((r.wert - 4) * baseline * 0.1);
+        totalPunkte += punkte;
+        var pct  = Math.min(100, (punkte / maxBar) * 100);
+        var blPct = (baseline / maxBar) * 100;
+        var abvBl = punkte >= baseline;
+        var col  = abvBl ? 'var(--grass)' : 'var(--amber)';
+        var delta = punkte - baseline;
+        var deltaHtml = delta !== 0
+          ? '<span style="font-size:10px;font-weight:700;color:'+(delta>0?'var(--grass)':'var(--amber)')+';margin-left:4px">'+(delta>0?'+':'')+delta+'</span>'
+          : '';
         var abw = r.abweichung || '';
         html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px">'
           + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
           +   '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">' + bcbEsc(r.name) + '</span>'
           +   deltaHtml
-          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:' + col + '">' + v + '</span>'
+          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+col+'">' + punkte + '</span>'
+          +   '<span style="font-size:10px;color:var(--text-3);margin-left:2px">/ '+baseline+'</span>'
           + '</div>'
-          + '<div style="display:flex;align-items:center;gap:8px">'
-          +   '<div style="flex:1;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden">'
-          +     '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:2px;transition:width .5s ease"></div>'
-          +   '</div>'
+          + '<div style="position:relative;height:5px;background:var(--surface3);border-radius:3px;overflow:visible;margin-bottom:' + (abw ? '5px' : '0') + '">'
+          +   '<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+col+';border-radius:3px;transition:width .5s ease"></div>'
+          +   '<div style="position:absolute;top:-2px;left:'+blPct.toFixed(1)+'%;width:2px;height:9px;background:var(--blue);border-radius:1px;opacity:.7"></div>'
           + '</div>'
           + (abw ? '<div style="font-size:11px;color:var(--text-2);margin-top:5px;line-height:1.55;padding-top:5px;border-top:1px solid var(--border)">' + bcbEsc(abw) + '</div>' : '')
           + '</div>';
       });
+      // ── Summe ──
+      var sumDelta = totalPunkte - totalBaseline;
+      var sumCol   = sumDelta >= 0 ? 'var(--grass)' : 'var(--amber)';
+      html += '<div style="background:var(--surface3);border:1px solid var(--border-med);border-radius:6px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-top:4px">'
+        + '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">Gesamt</span>'
+        + '<span style="font-size:10px;font-weight:700;color:'+sumCol+'">'+(sumDelta>0?'+':'')+sumDelta+'</span>'
+        + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:15px;font-weight:700;color:'+sumCol+'">' + totalPunkte + '</span>'
+        + '<span style="font-size:10px;color:var(--text-3);margin-left:2px">/ 240</span>'
+        + '</div>';
       html += '</div>';
     }
 
