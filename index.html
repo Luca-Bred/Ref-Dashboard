@@ -3786,10 +3786,11 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         totalAvgPts += avgPts;
         var pct   = Math.min(100, (avgPts / maxBar) * 100);
         var blPct = (baseline / maxBar) * 100;
-        var abvBl = avgPts >= baseline;
-        var col   = abvBl ? 'var(--grass)' : 'var(--amber)';
+        var abvBl = avgPts > baseline;
+        var blBl  = Math.abs(avgPts - baseline) < 0.01;
+        var col   = abvBl ? 'var(--grass)' : blBl ? 'var(--text-3)' : 'var(--amber)';
         var delta = avgPts - baseline;
-        var deltaStr = delta !== 0 ? (delta > 0 ? '+' : '') + delta.toFixed(1) : '';
+        var deltaStr = delta > 0.01 ? '+'+delta.toFixed(1) : delta < -0.01 ? delta.toFixed(1) : '';
         var abwNotes = entries.filter(function(e){ return e.wert !== 4 && e.abw; });
 
         html += '<div style="margin-bottom:10px">'
@@ -3816,7 +3817,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
 
       // ── Ø Summe ──
       var sumDelta = totalAvgPts - 240;
-      var sumCol   = sumDelta >= 0 ? 'var(--grass)' : 'var(--amber)';
+      var sumCol   = sumDelta > 0.01 ? 'var(--grass)' : sumDelta < -0.01 ? 'var(--amber)' : 'var(--text-3)';
       html += '<div style="background:var(--surface3);border:1px solid var(--border-med);border-radius:6px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-top:6px">'
         + '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">\u00d8 Gesamt</span>'
         + '<span style="font-size:10px;font-weight:700;color:'+sumCol+'">'+(sumDelta>0?'+':'')+sumDelta.toFixed(1)+'</span>'
@@ -3995,11 +3996,14 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         totalPunkte += punkte;
         var pct  = Math.min(100, (punkte / maxBar) * 100);
         var blPct = (baseline / maxBar) * 100;
-        var abvBl = punkte >= baseline;
-        var col  = abvBl ? 'var(--grass)' : 'var(--amber)';
+        var abvBl = punkte > baseline;
+        var blBl  = punkte === baseline;
+        var col  = abvBl ? 'var(--grass)' : blBl ? 'var(--text-3)' : 'var(--amber)';
         var delta = punkte - baseline;
-        var deltaHtml = delta !== 0
-          ? '<span style="font-size:10px;font-weight:700;color:'+(delta>0?'var(--grass)':'var(--amber)')+';margin-left:4px">'+(delta>0?'+':'')+delta+'</span>'
+        var deltaHtml = delta > 0
+          ? '<span style="font-size:10px;font-weight:700;color:var(--grass);margin-left:4px">+' + delta + '</span>'
+          : delta < 0
+          ? '<span style="font-size:10px;font-weight:700;color:var(--amber);margin-left:4px">' + delta + '</span>'
           : '';
         var abw = r.abweichung || '';
         html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px">'
@@ -4018,7 +4022,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       });
       // ── Summe ──
       var sumDelta = totalPunkte - totalBaseline;
-      var sumCol   = sumDelta >= 0 ? 'var(--grass)' : 'var(--amber)';
+      var sumCol   = sumDelta > 0 ? 'var(--grass)' : sumDelta < 0 ? 'var(--amber)' : 'var(--text-3)';
       html += '<div style="background:var(--surface3);border:1px solid var(--border-med);border-radius:6px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-top:4px">'
         + '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">Gesamt</span>'
         + '<span style="font-size:10px;font-weight:700;color:'+sumCol+'">'+(sumDelta>0?'+':'')+sumDelta+'</span>'
