@@ -3006,7 +3006,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     Object.keys(payload).forEach(function(k){
       var val = typeof payload[k] === 'object' ? JSON.stringify(payload[k]) : payload[k];
       localStorage.setItem(k, val);
-      _cache[k] = val; // sofort im Memory-Cache aktualisieren
+      _cache[k] = val;
     });
     // Wenn URL hinterlegt: auch in Sheets speichern
     if (!SHEETS_URL) return;
@@ -3412,9 +3412,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   var BCB_META_KEY = 'bcb_meta_v1'; // lightweight bogen metadata in Sheets (no base64)
 
   function bcbLoadStore() {
-    // LP/EF Modul-Cache zurücksetzen → nächste bcbLoadLP/EF liest frisch aus Sheets
-    _lpState = null;
-    _efState = null;
+    _lpState = null; _efState = null;
     // Load local PDF store (has base64)
     var local = [];
     try { local = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) {}
@@ -3465,10 +3463,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; p[BCB_META_KEY] = meta;
     dbSave(p);
   }
-  // ── LP / EF: eigene Modul-Variablen für sofortigen Reset ────
   var _lpState = null;
   var _efState = null;
-
   function bcbLoadLP() {
     if (_lpState !== null) return _lpState;
     var d = dbGet('bcb_lp_v1', {summary:'', aspekte:[]});
@@ -3477,20 +3473,14 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     _lpState = d;
     return _lpState;
   }
-  function bcbSaveLP(d) {
-    _lpState = d;
-    dbSave({'bcb_lp_v1': d});
-  }
+  function bcbSaveLP(d) { _lpState = d; dbSave({'bcb_lp_v1': d}); }
   function bcbLoadEF() {
     if (_efState !== null) return _efState;
     var d = dbGet('bcb_ef_v1', []);
     _efState = Array.isArray(d) ? d : [];
     return _efState;
   }
-  function bcbSaveEF(d) {
-    _efState = d;
-    dbSave({'bcb_ef_v1': d});
-  }
+  function bcbSaveEF(d) { _efState = d; dbSave({'bcb_ef_v1': d}); }
 
   // File input handler
   // Wire up the file input (bcbLoadStore/Render handled by main dbLoad callback)
@@ -3762,76 +3752,50 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       '5.2 Stellungsspiel',
       '6. Teamarbeit / Abseits'
     ];
-    var RUBRIK_BASELINES = [36,36,28,40,28,12,12,20,28];
 
     if (allA.length > 0) {
       html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px">'
         + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;margin-bottom:10px">'
-        + '\u00d8 Rubrik-Punkte \u00b7 <span style="color:var(--blue)">&#x2015;</span> Baseline</div>';
+        + '\u00d8 Rubrik-Bewertungen (1\u20136) \u00b7 <span style="color:var(--blue)">&#x2015;</span> Baseline = 4</div>';
 
-      var totalAvgPts = 0;
       RUBRIK_NAMES.forEach(function(label, ni) {
-        var baseline = RUBRIK_BASELINES[ni];
-        var maxBar   = Math.round(baseline * 1.5);
         var entries = allA.map(function(a, ai) {
           var r = a.rubriken && a.rubriken[ni];
           if (!r) return null;
-          var punkte = (r.punkte != null) ? r.punkte : baseline + Math.round((r.wert - 4) * baseline * 0.1);
-          var bogen  = bcbBoegen[ai] ? bcbBoegen[ai].name : 'Bogen '+(ai+1);
-          return { punkte: punkte, wert: r.wert || 4, abw: r.abweichung || '', bogen: bogen };
+          var bogen = bcbBoegen[ai] ? bcbBoegen[ai].name : 'Bogen '+(ai+1);
+          return { wert: r.wert || 4, abw: r.abweichung || '', bogen: bogen };
         }).filter(Boolean);
 
         if (!entries.length) return;
-        var avgPts = entries.reduce(function(s,e){return s+e.punkte;},0) / entries.length;
-        totalAvgPts += avgPts;
-        var abvBl = avgPts > baseline;
-        var blBl  = Math.abs(avgPts - baseline) < 0.01;
-        var col   = abvBl ? 'var(--grass)' : blBl ? 'var(--text-3)' : 'var(--amber)';
-        var delta = avgPts - baseline;
+        var avg = entries.reduce(function(s,e){return s+e.wert;},0) / entries.length;
+        var baselinePct = 60; var stepPct = 15;
+        var pct = Math.max(0, Math.min(100, baselinePct + (avg - 4) * stepPct));
+        var col = avg > 4 ? 'var(--grass)' : avg === 4 ? 'var(--blue)' : 'var(--amber)';
+        var delta = avg - 4;
         var deltaStr = delta > 0.01 ? '+'+delta.toFixed(1) : delta < -0.01 ? delta.toFixed(1) : '';
-        var MAX_DEV_OV = 8;
-        var devPct = Math.min(Math.abs(delta) / MAX_DEV_OV * 50, 50);
-        var barLeft = abvBl ? '50%' : (50 - devPct).toFixed(1) + '%';
+        var deltaCol = delta > 0.01 ? 'var(--grass)' : delta < -0.01 ? 'var(--amber)' : '';
         var abwNotes = entries.filter(function(e){ return e.wert !== 4 && e.abw; });
 
         html += '<div style="margin-bottom:10px">'
           + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
           +   '<span style="font-size:12px;color:var(--text-2);flex:1">' + bcbEsc(label) + '</span>'
-          +   (deltaStr ? '<span style="font-size:10px;font-weight:700;color:'+(abvBl?'var(--grass)':'var(--amber)')+'">'+deltaStr+'</span>' : '')
-          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+col+'">'+avgPts.toFixed(1)+'</span>'
+          +   (deltaStr ? '<span style="font-size:10px;font-weight:700;color:'+deltaCol+'">'+deltaStr+'</span>' : '')
+          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+col+'">'+avg.toFixed(1)+'</span>'
           + '</div>'
           + '<div style="position:relative;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:'+(abwNotes.length?'6px':'0')+'">'
-          +   (blBl ? '' : '<div style="position:absolute;top:0;left:'+barLeft+';width:'+devPct.toFixed(1)+'%;height:100%;background:'+col+';transition:all .5s ease"></div>')
-          +   '<div style="position:absolute;top:0;left:50%;width:2px;height:100%;background:var(--text-3);opacity:.4;transform:translateX(-50%)"></div>'
+          +   '<div style="position:absolute;left:60%;width:2px;height:100%;background:var(--blue);opacity:.5"></div>'
+          +   '<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+col+';border-radius:3px;transition:width .5s ease"></div>'
           + '</div>'
           + abwNotes.map(function(e){
-              var c = e.wert > 4 ? 'var(--grass)' : 'var(--amber)';
+              var c = e.wert > 4 ? 'var(--grass)' : 'var(--red)';
               var arr = e.wert > 4 ? '&#x2197;' : '&#x2198;';
               return '<div style="font-size:11px;line-height:1.5;padding:3px 6px;background:var(--surface3);border-radius:4px;border-left:2px solid '+c+';margin-bottom:3px">'
-                + '<span style="color:'+c+';font-weight:700;margin-right:4px">'+arr+' '+e.punkte+'</span>'
+                + '<span style="color:'+c+';font-weight:700;margin-right:4px">'+arr+' '+e.wert+'</span>'
                 + '<span style="color:var(--text-3);font-size:10px;margin-right:6px">('+bcbEsc(e.bogen)+')</span>'
                 + bcbEsc(e.abw)+'</div>';
             }).join('')
           + '</div>';
       });
-
-      // ── Ø Summe ──
-      var sumDelta = totalAvgPts - 240;
-      var sumCol   = sumDelta > 0.01 ? 'var(--grass)' : sumDelta < -0.01 ? 'var(--amber)' : 'var(--text-3)';
-      var sumDevPct = Math.min(Math.abs(sumDelta) / (MAX_DEV_OV * 9) * 50, 50);
-      var sumBarLeft = sumDelta > 0 ? '50%' : (50 - sumDevPct).toFixed(1) + '%';
-      html += '<div style="background:var(--surface3);border:1px solid var(--border-med);border-radius:6px;padding:8px 10px;margin-top:6px">'
-        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
-        +   '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">\u00d8 Gesamt</span>'
-        +   (Math.abs(sumDelta) > 0.01 ? '<span style="font-size:10px;font-weight:700;color:'+sumCol+'">'+(sumDelta>0?'+':'')+sumDelta.toFixed(1)+'</span>' : '')
-        +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:15px;font-weight:700;color:'+sumCol+'">'+totalAvgPts.toFixed(1)+'</span>'
-        + '</div>'
-        + '<div style="position:relative;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden">'
-        +   (Math.abs(sumDelta) > 0.01 ? '<div style="position:absolute;top:0;left:'+sumBarLeft+';width:'+sumDevPct.toFixed(1)+'%;height:100%;background:'+sumCol+';transition:all .5s ease"></div>' : '')
-        +   '<div style="position:absolute;top:0;left:50%;width:2px;height:100%;background:var(--text-3);opacity:.4;transform:translateX(-50%)"></div>'
-        + '</div>'
-        + '</div>';
-
       html += '</div>';
     }
 
@@ -3988,63 +3952,37 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       + '</div>'
       + '</div>';
 
-    // ── Rubrik-Balken mit Gesamtpunkten ──────────────────────
-    var RUBRIK_BASELINES = [36,36,28,40,28,12,12,20,28];
+    // ── Rubrik-Balken (7 Rubriken, mit Abweichungs-Tooltip) ──
     var rubriken = a.rubriken || [];
     if (rubriken.length) {
-      var totalPunkte = 0;
-      var totalBaseline = 240;
-      var MAX_DEV = 8; // sichtbarer Bereich: ±8 Punkte um Baseline
       html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px">';
-      rubriken.forEach(function(r, ni) {
-        var baseline = RUBRIK_BASELINES[ni] || 36;
-        var punkte = (r.punkte != null) ? r.punkte : baseline + Math.round((r.wert - 4) * baseline * 0.1);
-        totalPunkte += punkte;
-        var delta  = punkte - baseline;
-        var abvBl  = delta > 0;
-        var blBl   = delta === 0;
-        var col    = abvBl ? 'var(--grass)' : blBl ? 'var(--text-3)' : 'var(--amber)';
-        // Bidirektionaler Balken: Mitte = Baseline, ±MAX_DEV skaliert auf ±50%
-        var devPct = Math.min(Math.abs(delta) / MAX_DEV * 50, 50);
-        var deltaHtml = delta > 0
-          ? '<span style="font-size:10px;font-weight:700;color:var(--grass);margin-left:4px">+' + delta + '</span>'
-          : delta < 0
-          ? '<span style="font-size:10px;font-weight:700;color:var(--amber);margin-left:4px">' + delta + '</span>'
-          : '';
+      rubriken.forEach(function(r) {
+        var v   = r.wert || 4;
+        // Skala: Baseline (4) = 60% Balkenbreite, jede Stufe = 15% (statt vorher ~20%)
+        // So sind +1 und -1 deutlich sichtbar, ohne das Baseline-Niveau zu verfälschen
+        var baselinePct = 60;
+        var stepPct     = 15;
+        var pct = Math.max(0, Math.min(100, baselinePct + (v - 4) * stepPct));
+        var col = v > 4 ? 'var(--grass)' : v === 4 ? 'var(--blue)' : 'var(--amber)';
+        var delta = v - 4;
+        var deltaHtml = '';
+        if (delta > 0) deltaHtml = '<span style="font-size:10px;color:var(--grass);font-weight:700;margin-left:4px">+' + delta + '</span>';
+        else if (delta < 0) deltaHtml = '<span style="font-size:10px;color:var(--amber);font-weight:700;margin-left:4px">' + delta + '</span>';
         var abw = r.abweichung || '';
-        // Bar: Mitte bei 50%, Abweichung füllt nach rechts (grün) oder links (amber)
-        var barLeft  = abvBl ? '50%' : (50 - devPct).toFixed(1) + '%';
-        var barWidth = devPct.toFixed(1) + '%';
         html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px">'
-          + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'
+          + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
           +   '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">' + bcbEsc(r.name) + '</span>'
           +   deltaHtml
-          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:'+col+'">' + punkte + '</span>'
+          +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:' + col + '">' + v + '</span>'
           + '</div>'
-          + '<div style="position:relative;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden">'
-          +   (blBl ? '' : '<div style="position:absolute;top:0;left:'+barLeft+';width:'+barWidth+';height:100%;background:'+col+';transition:all .5s ease"></div>')
-          +   '<div style="position:absolute;top:0;left:50%;width:2px;height:100%;background:var(--text-3);opacity:.4;transform:translateX(-50%)"></div>'
+          + '<div style="display:flex;align-items:center;gap:8px">'
+          +   '<div style="flex:1;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden">'
+          +     '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + col + ';border-radius:2px;transition:width .5s ease"></div>'
+          +   '</div>'
           + '</div>'
-          + (abw ? '<div style="font-size:11px;color:var(--text-2);margin-top:6px;line-height:1.55;padding-top:5px;border-top:1px solid var(--border)">' + bcbEsc(abw) + '</div>' : '')
+          + (abw ? '<div style="font-size:11px;color:var(--text-2);margin-top:5px;line-height:1.55;padding-top:5px;border-top:1px solid var(--border)">' + bcbEsc(abw) + '</div>' : '')
           + '</div>';
       });
-      // ── Summe ──
-      var sumDelta = totalPunkte - totalBaseline;
-      var sumCol   = sumDelta > 0 ? 'var(--grass)' : sumDelta < 0 ? 'var(--amber)' : 'var(--text-3)';
-      var sumDevPct = Math.min(Math.abs(sumDelta) / (MAX_DEV * 9) * 50, 50);
-      var sumBarLeft  = sumDelta > 0 ? '50%' : (50 - sumDevPct).toFixed(1) + '%';
-      html += '<div style="background:var(--surface3);border:1px solid var(--border-med);border-radius:6px;padding:8px 10px;margin-top:4px">'
-        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
-        +   '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);font-family:\'Barlow Condensed\',sans-serif;flex:1">Gesamt</span>'
-        +   (sumDelta !== 0 ? '<span style="font-size:10px;font-weight:700;color:'+sumCol+'">'+(sumDelta>0?'+':'')+sumDelta+'</span>' : '')
-        +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:15px;font-weight:700;color:'+sumCol+'">' + totalPunkte + '</span>'
-        + '</div>'
-        + '<div style="position:relative;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden">'
-        +   (sumDelta !== 0 ? '<div style="position:absolute;top:0;left:'+sumBarLeft+';width:'+sumDevPct.toFixed(1)+'%;height:100%;background:'+sumCol+';transition:all .5s ease"></div>' : '')
-        +   '<div style="position:absolute;top:0;left:50%;width:2px;height:100%;background:var(--text-3);opacity:.4;transform:translateX(-50%)"></div>'
-        + '</div>'
-        + '</div>';
-        + '</div>';
       html += '</div>';
     }
 
