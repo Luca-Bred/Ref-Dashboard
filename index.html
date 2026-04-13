@@ -1685,7 +1685,7 @@ footer {
 
               <!-- Ankunft (Zeit vor Anpfiff) -->
               <div>
-                <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">Ankunft vor Anpfiff</div>
+                <div style="font-size:10px;color:var(--text-3);margin-bottom:4px">Ankunft</div>
                 <input id="sn-ankunft" type="text" placeholder="1:15"
                   style="width:100%;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:7px 10px;color:var(--text);font-size:14px;font-weight:600;font-family:'Barlow',sans-serif;outline:none;text-align:center"
                   oninput="snCalcAbfahrt()" onchange="snSaveAnkunft()">
@@ -4573,7 +4573,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (!GAMES[snCurrentIdx]) return;
     var key = 'sn-fahrt-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-fahrtzeit').value;
-    var payload = {}; payload[key] = val;
+    // Prefix with 't:' so Google Sheets treats it as text, not a time value
+    var payload = {}; payload[key] = 't:' + val;
     dbSave(payload);
   }
 
@@ -4581,8 +4582,27 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (!GAMES[snCurrentIdx]) return;
     var key = 'sn-ankunft-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-ankunft').value;
-    var payload = {}; payload[key] = val;
+    var payload = {}; payload[key] = 't:' + val;
     dbSave(payload);
+  }
+
+  function snClean(raw, fallback) {
+    if (!raw) return fallback;
+    // Strip Google Sheets date conversion artifacts
+    if (typeof raw === 'string' && raw.indexOf('1899') >= 0) return fallback;
+    if (typeof raw === 'string' && raw.indexOf('T') >= 0 && raw.indexOf(':') >= 0) {
+      // ISO date string from Sheets - extract HH:MM part
+      var match = raw.match(/T(\d{2}):(\d{2})/);
+      if (match) {
+        var h = parseInt(match[1], 10);
+        var m = parseInt(match[2], 10);
+        return ('0'+h).slice(-2) + ':' + ('0'+m).slice(-2);
+      }
+      return fallback;
+    }
+    // Strip our own 't:' prefix
+    if (typeof raw === 'string' && raw.slice(0,2) === 't:') return raw.slice(2);
+    return raw;
   }
 
   function snLoadFahrtzeit(idx) {
@@ -4590,8 +4610,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var date = GAMES[idx][0];
     var fEl = document.getElementById('sn-fahrtzeit');
     var aEl = document.getElementById('sn-ankunft');
-    if (fEl) fEl.value = dbGet('sn-fahrt-'   + date, '');
-    if (aEl) aEl.value = dbGet('sn-ankunft-' + date, '1:15');
+    if (fEl) fEl.value = snClean(dbGet('sn-fahrt-'   + date, ''), '');
+    if (aEl) aEl.value = snClean(dbGet('sn-ankunft-' + date, ''), '1:15');
     snCalcAbfahrt();
   }
 
