@@ -2984,7 +2984,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   //  GOOGLE SHEETS SYNC
   //  Trage deine Web App URL hier ein nach dem Einrichten:
   // ══════════════════════════════════════════════════════════════
-  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwPV7_twk45P3OdkH5HAr4V3IXAy_j9c4njVWlPkAzxTz8M2-3UtkkT4jC4ZWHVIxLg/exec';
+  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxpGj8Gdw9tT_gZNc8EsOqNuNQN6RhvboNCN_ru9RwMimjOWQWL-Q7igHB7RHfmMaTj/exec';
 
   var _cache = {};  // lokaler Cache für offline-Betrieb
 
@@ -4574,7 +4574,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var key = 'sn-fahrt-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-fahrtzeit').value;
     // Prefix with 't:' so Google Sheets treats it as text, not a time value
-    var payload = {}; payload[key] = 't:' + val;
+    var payload = {}; payload[key] = val + ' ';
     dbSave(payload);
   }
 
@@ -4582,27 +4582,26 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (!GAMES[snCurrentIdx]) return;
     var key = 'sn-ankunft-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-ankunft').value;
-    var payload = {}; payload[key] = 't:' + val;
+    var payload = {}; payload[key] = val + ' ';
     dbSave(payload);
   }
 
   function snClean(raw, fallback) {
-    if (!raw) return fallback;
-    // Strip Google Sheets date conversion artifacts
-    if (typeof raw === 'string' && raw.indexOf('1899') >= 0) return fallback;
-    if (typeof raw === 'string' && raw.indexOf('T') >= 0 && raw.indexOf(':') >= 0) {
-      // ISO date string from Sheets - extract HH:MM part
-      var match = raw.match(/T(\d{2}):(\d{2})/);
-      if (match) {
-        var h = parseInt(match[1], 10);
-        var m = parseInt(match[2], 10);
-        return ('0'+h).slice(-2) + ':' + ('0'+m).slice(-2);
-      }
+    if (raw === null || raw === undefined || raw === '') return fallback;
+    var s = String(raw).trim();
+    if (!s) return fallback;
+    // Google Sheets converts "0:45" to a date - detect and ignore
+    if (s.indexOf('1899') >= 0 || s.indexOf('1900') >= 0) return fallback;
+    // ISO timestamp from Sheets cache - extract HH:MM
+    if (s.indexOf('T') >= 0 && s.indexOf(':') >= 0 && s.length > 10) {
+      var hm = s.match(/T(\d{2}):(\d{2})/);
+      if (hm) return ('0'+parseInt(hm[1],10)).slice(-2)+':'+('0'+parseInt(hm[2],10)).slice(-2);
       return fallback;
     }
-    // Strip our own 't:' prefix
-    if (typeof raw === 'string' && raw.slice(0,2) === 't:') return raw.slice(2);
-    return raw;
+    // Valid time format HH:MM or H:MM
+    if (/^\d{1,2}:\d{2}$/.test(s)) return s;
+    // Had trailing space (our save marker) - strip it
+    return s;
   }
 
   function snLoadFahrtzeit(idx) {
