@@ -1724,17 +1724,19 @@ footer {
         <div style="display:flex;flex-direction:column;gap:8px;height:100%">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;flex:1;display:flex;flex-direction:column">
             <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-family:'Barlow Condensed',sans-serif;margin-bottom:10px">Spielanalyse</div>
-            <div class="analysis-box-m">
-              <div class="analysis-lbl">Allgemeine Notizen</div>
-              <textarea id="sn-note-gen" class="analysis-ta" placeholder="Allgemeine Spielnotizen..."></textarea>
-            </div>
-            <div class="analysis-box-m" style="margin-top:8px">
-              <div class="analysis-lbl" id="sn-lbl-home">Heimmannschaft</div>
-              <textarea id="sn-note-home" class="analysis-ta" placeholder="Taktik, Besonderheiten..."></textarea>
-            </div>
-            <div class="analysis-box-m" style="margin-top:8px">
-              <div class="analysis-lbl" id="sn-lbl-away">Gastmannschaft</div>
-              <textarea id="sn-note-away" class="analysis-ta" placeholder="Taktik, Besonderheiten..."></textarea>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+              <div style="flex:1;display:flex;flex-direction:column">
+                <div class="analysis-lbl">Allgemeine Notizen</div>
+                <textarea id="sn-note-gen" class="analysis-ta" placeholder="Allgemeine Spielnotizen..." style="flex:1;resize:none;min-height:0"></textarea>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column">
+                <div class="analysis-lbl" id="sn-lbl-home">Heimmannschaft</div>
+                <textarea id="sn-note-home" class="analysis-ta" placeholder="Taktik, Besonderheiten..." style="flex:1;resize:none;min-height:0"></textarea>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column">
+                <div class="analysis-lbl" id="sn-lbl-away">Gastmannschaft</div>
+                <textarea id="sn-note-away" class="analysis-ta" placeholder="Taktik, Besonderheiten..." style="flex:1;resize:none;min-height:0"></textarea>
+              </div>
             </div>
             <button onclick="snSave()" class="save-btn" style="margin-top:10px">Speichern</button>
             <span id="sn-status" style="font-size:11px;color:var(--grass);margin-left:8px"></span>
