@@ -3002,9 +3002,11 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function dbSave(payload) {
-    // Immer lokal speichern (offline-Fallback)
+    // Immer lokal speichern + _cache sofort aktualisieren
     Object.keys(payload).forEach(function(k){
-      localStorage.setItem(k, typeof payload[k] === 'object' ? JSON.stringify(payload[k]) : payload[k]);
+      var val = typeof payload[k] === 'object' ? JSON.stringify(payload[k]) : payload[k];
+      localStorage.setItem(k, val);
+      _cache[k] = val; // sofort im Memory-Cache aktualisieren
     });
     // Wenn URL hinterlegt: auch in Sheets speichern
     if (!SHEETS_URL) return;
@@ -3410,6 +3412,9 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   var BCB_META_KEY = 'bcb_meta_v1'; // lightweight bogen metadata in Sheets (no base64)
 
   function bcbLoadStore() {
+    // LP/EF Modul-Cache zurücksetzen → nächste bcbLoadLP/EF liest frisch aus Sheets
+    _lpState = null;
+    _efState = null;
     // Load local PDF store (has base64)
     var local = [];
     try { local = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) {}
@@ -3460,18 +3465,32 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; p[BCB_META_KEY] = meta;
     dbSave(p);
   }
+  // ── LP / EF: eigene Modul-Variablen für sofortigen Reset ────
+  var _lpState = null;
+  var _efState = null;
+
   function bcbLoadLP() {
+    if (_lpState !== null) return _lpState;
     var d = dbGet('bcb_lp_v1', {summary:'', aspekte:[]});
     if (!d || typeof d !== 'object') d = {summary:'', aspekte:[]};
     if (!Array.isArray(d.aspekte)) d.aspekte = [];
-    return d;
+    _lpState = d;
+    return _lpState;
   }
-  function bcbSaveLP(d) { dbSave({'bcb_lp_v1': d}); }
+  function bcbSaveLP(d) {
+    _lpState = d;
+    dbSave({'bcb_lp_v1': d});
+  }
   function bcbLoadEF() {
+    if (_efState !== null) return _efState;
     var d = dbGet('bcb_ef_v1', []);
-    return Array.isArray(d) ? d : [];
+    _efState = Array.isArray(d) ? d : [];
+    return _efState;
   }
-  function bcbSaveEF(d) { dbSave({'bcb_ef_v1': d}); }
+  function bcbSaveEF(d) {
+    _efState = d;
+    dbSave({'bcb_ef_v1': d});
+  }
 
   // File input handler
   // Wire up the file input (bcbLoadStore/Render handled by main dbLoad callback)
