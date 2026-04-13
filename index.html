@@ -1749,6 +1749,16 @@ footer {
     <div id="sr-beobachtungen" class="slot-section">
       <div style="margin-top:.25rem;display:flex;flex-direction:column;gap:10px">
 
+        <!-- Saison-Navigator -->
+        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1rem">
+          <button onclick="bcbChangeSeason(-1)" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s" onmouseover="this.style.borderColor='var(--grass)';this.style.color='var(--grass)'" onmouseout="this.style.borderColor='var(--border-med)';this.style.color='var(--text-2)'">&#x2190;</button>
+          <div style="text-align:center">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);letter-spacing:.03em" id="bcb-season-label">2025/26</div>
+            <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Saison</div>
+          </div>
+          <button onclick="bcbChangeSeason(1)" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s" onmouseover="this.style.borderColor='var(--grass)';this.style.color='var(--grass)'" onmouseout="this.style.borderColor='var(--border-med)';this.style.color='var(--text-2)'">&#x2192;</button>
+        </div>
+
         <!-- Stats row -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">
@@ -3400,6 +3410,38 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     // beob-entwicklung textarea removed – EF now managed via bcbLoadEF()
   }
   // ── BCB SYSTEM ───────────────────────────────────────────────
+  // ── SAISON-NAVIGATION ────────────────────────────────────────
+  var BCB_SEASONS = ['2024/25','2025/26','2026/27','2027/28','2028/29','2029/30'];
+  var bcbSeasonIdx = 1; // Startet immer bei 2025/26
+
+  function bcbGetSeasonRange(idx) {
+    var startYear = 2024 + idx;
+    return { from: startYear+'-08-01', to: (startYear+1)+'-07-31' };
+  }
+  function bcbBogenInSeason(b, idx) {
+    var range = bcbGetSeasonRange(idx);
+    var a   = bcbAnalyses[b.id];
+    var dat = (a && typeof a === 'object' && a.spieldatum) ? a.spieldatum
+            : b.spieldatum ? b.spieldatum
+            : (b.date || '').slice(0,10);
+    if (dat && dat.indexOf('.') > 0) {
+      var p = dat.split('.'); dat = p[2]+'-'+p[1]+'-'+p[0];
+    }
+    return dat >= range.from && dat <= range.to;
+  }
+  function bcbChangeSeason(dir) {
+    var next = bcbSeasonIdx + dir;
+    if (next < 0 || next >= BCB_SEASONS.length) return;
+    bcbSeasonIdx = next;
+    var lbl = document.getElementById('bcb-season-label');
+    if (lbl) lbl.textContent = BCB_SEASONS[bcbSeasonIdx];
+    bcbRenderList();
+    bcbUpdateStats();
+  }
+  function bcbFilteredBoegen() {
+    return bcbBoegen.filter(function(b){ return bcbBogenInSeason(b, bcbSeasonIdx); });
+  }
+
   var BCB_STORE_KEY    = 'bcb_boegen_v3';
   var BCB_ANALYSIS_KEY = 'bcb_analyses_v3';
   var bcbBoegen        = [];
@@ -3539,11 +3581,16 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   function bcbRenderList() {
     var list = document.getElementById('bcb-list');
     if (!list) return;
-    if (bcbBoegen.length === 0) {
-      list.innerHTML = '<div id="bcb-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:12px;background:var(--surface2);border:1px dashed var(--border);border-radius:var(--r-sm)">Noch keine B\u00f6gen hochgeladen \u00b7 PDF-Datei hochladen um zu beginnen</div>';
+    var filtered = bcbFilteredBoegen();
+    if (filtered.length === 0) {
+      list.innerHTML = '<div id="bcb-empty" style="padding:20px;text-align:center;color:var(--text-3);font-size:12px;background:var(--surface2);border:1px dashed var(--border);border-radius:var(--r-sm)">'
+        + (bcbBoegen.length === 0
+          ? 'Noch keine B\u00f6gen hochgeladen \u00b7 PDF-Datei hochladen um zu beginnen'
+          : 'Keine Beobachtungsb\u00f6gen f\u00fcr Saison ' + BCB_SEASONS[bcbSeasonIdx])
+        + '</div>';
       return;
     }
-    list.innerHTML = bcbBoegen.map(function(b) {
+    list.innerHTML = filtered.map(function(b) {
       var a           = bcbAnalyses[b.id];
       var scoreHtml   = bcbScorePill(a);
       var statusHtml  = bcbStatusMeta(b.id);
@@ -3589,8 +3636,9 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function bcbUpdateStats() {
-    var n = bcbBoegen.length;
-    var scores = bcbBoegen.map(function(b){ var a = bcbAnalyses[b.id]; return (a && typeof a === 'object' && a.totalScore) ? a.totalScore : null; }).filter(function(x){ return x !== null; });
+    var filtered = bcbFilteredBoegen();
+    var n = filtered.length;
+    var scores = filtered.map(function(b){ var a = bcbAnalyses[b.id]; return (a && typeof a === 'object' && a.totalScore) ? a.totalScore : null; }).filter(function(x){ return x !== null; });
     var schnittEl = document.getElementById('beob-schnitt');
     var anzahlEl  = document.getElementById('beob-anzahl');
     var trendEl   = document.getElementById('beob-trend');
@@ -3623,7 +3671,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var bereiche = document.getElementById('beob-bereiche');
     if (!bereiche) return;
 
-    var allA = bcbBoegen.map(function(b){ return bcbAnalyses[b.id]; })
+    var allA = bcbFilteredBoegen().map(function(b){ return bcbAnalyses[b.id]; })
       .filter(function(a){ return a && typeof a === 'object' && a.rubriken; });
 
     var lp = bcbLoadLP();
