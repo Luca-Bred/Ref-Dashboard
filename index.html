@@ -3014,14 +3014,9 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
         if (res.ok && res.data) {
           _cache = res.data;
           callback(res.data);
-        } else {
-          callback({});
         }
       })
-      .catch(function(err){
-        console.warn('Sheets load failed:', err);
-        callback({});
-      });
+      .catch(function(){ callback({}); });
   }
 
   function dbSave(payload) {
@@ -3040,13 +3035,12 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function dbGet(key, fallback) {
-    var cached = _cache[key];
-    if (cached !== undefined && cached !== null && cached !== '') {
-      if (typeof cached === 'object') return cached;
-      try { return JSON.parse(cached); } catch(e) { return cached; }
+    // Erst aus Sheets-Cache, dann localStorage
+    if (_cache[key]) {
+      try { return JSON.parse(_cache[key]); } catch(e) { return _cache[key]; }
     }
     var v = localStorage.getItem(key);
-    if (v === null || v === undefined || v === '') return fallback;
+    if (!v) return fallback;
     try { return JSON.parse(v); } catch(e) { return v; }
   }
 
@@ -3345,12 +3339,9 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       bcbLoadStore();
       bcbRenderList();
       bcbUpdateStats();
-      // SR Nächstes Spiel: NACH Sheets-Load befüllen damit Analyse geladen ist
-      if (typeof GAMES !== 'undefined' && GAMES.length > 0) {
-        var ni = snFindNextGame();
-        snLoad(ni);
-        snLoadFahrtzeit(ni);
-      }
+      // SR Nächstes Spiel nach Sheets-Load neu befüllen (geräteübergreifende Daten)
+      snLoad(snFindNextGame());
+      snLoadFahrtzeit(snFindNextGame());
     });
     // Wire up game cards in SR
     document.querySelectorAll('.kal-card[data-idx]').forEach(function(card){
@@ -4490,12 +4481,6 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       }
     });
 
-    // SR Nächstes Spiel sofort befüllen (Fallback ohne Sheets)
-    if (typeof GAMES !== 'undefined' && GAMES.length > 0) {
-      var snI = snFindNextGame();
-      snLoad(snI);
-      snLoadFahrtzeit(snI);
-    }
     // Run default filter (upcoming)
     var firstFilter = document.querySelector('.kal-filter');
     if (firstFilter) filterKal('upcoming', firstFilter);
@@ -4685,7 +4670,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var key = 'sn-fahrt-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-fahrtzeit').value;
     // Prefix with 't:' so Google Sheets treats it as text, not a time value
-    var payload = {}; payload[key] = 'zeit:' + val;
+    var payload = {}; payload[key] = val + ' ';
     dbSave(payload);
   }
 
@@ -4693,7 +4678,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (!GAMES[snCurrentIdx]) return;
     var key = 'sn-ankunft-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-ankunft').value;
-    var payload = {}; payload[key] = 'zeit:' + val;
+    var payload = {}; payload[key] = val + ' ';
     dbSave(payload);
   }
 
@@ -4711,8 +4696,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     }
     // Valid time format HH:MM or H:MM
     if (/^\d{1,2}:\d{2}$/.test(s)) return s;
-    // Strip 'zeit:' prefix we add to prevent Sheets time conversion
-    if (s.slice(0,5) === 'zeit:') return s.slice(5);
+    // Had trailing space (our save marker) - strip it
     return s;
   }
 
@@ -4726,6 +4710,13 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     snCalcAbfahrt();
   }
 
+
+  // ── INIT: SR Nächstes Spiel nach Funktionsdefinition ────────
+  (function() {
+    var ni = snFindNextGame();
+    snLoad(ni);
+    snLoadFahrtzeit(ni);
+  })();
 </script>
 </body>
 </html>
