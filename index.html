@@ -4670,7 +4670,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var key = 'sn-fahrt-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-fahrtzeit').value;
     // Prefix with 't:' so Google Sheets treats it as text, not a time value
-    var payload = {}; payload[key] = val + ' ';
+    var payload = {}; payload[key] = '_' + val;
     dbSave(payload);
   }
 
@@ -4678,7 +4678,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (!GAMES[snCurrentIdx]) return;
     var key = 'sn-ankunft-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-ankunft').value;
-    var payload = {}; payload[key] = val + ' ';
+    var payload = {}; payload[key] = '_' + val;
     dbSave(payload);
   }
 
@@ -4694,9 +4694,10 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
       if (hm) return ('0'+parseInt(hm[1],10)).slice(-2)+':'+('0'+parseInt(hm[2],10)).slice(-2);
       return fallback;
     }
-    // Valid time format HH:MM or H:MM
+    // Strip underscore prefix we add to prevent Sheets time conversion
+    if (s.charAt(0) === '_') return s.slice(1);
+    // Valid time format HH:MM or H:MM already clean
     if (/^\d{1,2}:\d{2}$/.test(s)) return s;
-    // Had trailing space (our save marker) - strip it
     return s;
   }
 
