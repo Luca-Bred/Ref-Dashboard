@@ -3002,7 +3002,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   //  GOOGLE SHEETS SYNC
   //  Trage deine Web App URL hier ein nach dem Einrichten:
   // ══════════════════════════════════════════════════════════════
-  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwPV7_twk45P3OdkH5HAr4V3IXAy_j9c4njVWlPkAzxTz8M2-3UtkkT4jC4ZWHVIxLg/exec';
+  var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxpGj8Gdw9tT_gZNc8EsOqNuNQN6RhvboNCN_ru9RwMimjOWQWL-Q7igHB7RHfmMaTj/exec';
 
   var _cache = {};  // lokaler Cache für offline-Betrieb
 
@@ -3035,12 +3035,13 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
   }
 
   function dbGet(key, fallback) {
-    // Erst aus Sheets-Cache, dann localStorage
-    if (_cache[key]) {
-      try { return JSON.parse(_cache[key]); } catch(e) { return _cache[key]; }
+    var cached = _cache[key];
+    if (cached !== undefined && cached !== null && cached !== '') {
+      if (typeof cached === 'object') return cached;
+      try { return JSON.parse(cached); } catch(e) { return cached; }
     }
     var v = localStorage.getItem(key);
-    if (!v) return fallback;
+    if (v === null || v === undefined || v === '') return fallback;
     try { return JSON.parse(v); } catch(e) { return v; }
   }
 
@@ -4667,7 +4668,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     var key = 'sn-fahrt-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-fahrtzeit').value;
     // Prefix with 't:' so Google Sheets treats it as text, not a time value
-    var payload = {}; payload[key] = val + ' ';
+    var payload = {}; payload[key] = 'zeit:' + val;
     dbSave(payload);
   }
 
@@ -4675,7 +4676,7 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     if (!GAMES[snCurrentIdx]) return;
     var key = 'sn-ankunft-' + GAMES[snCurrentIdx][0];
     var val = document.getElementById('sn-ankunft').value;
-    var payload = {}; payload[key] = val + ' ';
+    var payload = {}; payload[key] = 'zeit:' + val;
     dbSave(payload);
   }
 
@@ -4693,7 +4694,8 @@ HIIT</div></div><div style="background:var(--surface);border:1px solid var(--bor
     }
     // Valid time format HH:MM or H:MM
     if (/^\d{1,2}:\d{2}$/.test(s)) return s;
-    // Had trailing space (our save marker) - strip it
+    // Strip 'zeit:' prefix we add to prevent Sheets time conversion
+    if (s.slice(0,5) === 'zeit:') return s.slice(5);
     return s;
   }
 
