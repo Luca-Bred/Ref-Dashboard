@@ -6306,16 +6306,31 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       var evs = (eventMap[ds] || []).filter(function(e) { return e.allDay; });
       var cell = document.createElement('div');
       cell.style.cssText = 'min-height:18px;display:flex;flex-direction:column;gap:2px;cursor:pointer';
-      cell.onclick = (function(dsInner) { return function() { planerOpenEventCreate(dsInner, true); }; })(ds);
+      cell.dataset.planerZone = 'allday';
+      cell.dataset.planerDate = ds;
+      cell.onclick = (function(dsInner) {
+        return function() {
+          if (planerConsumeSuppressClick()) return;
+          planerOpenEventCreate(dsInner, true);
+        };
+      })(ds);
       evs.forEach(function(ev) {
+        var movable = ev.type !== 'spiel';
         var chip = document.createElement('div');
         var chipC  = PLANER_TYPE_COLOR[ev.type] || 'var(--text-2)';
         var chipBg = PLANER_TYPE_BG[ev.type]    || 'var(--surface2)';
         chip.style.cssText = 'font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;'
           + 'background:' + chipBg + ';color:' + chipC + ';border:1px solid ' + chipC + ';'
-          + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer';
+          + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:' + (movable ? 'grab' : 'pointer');
         chip.textContent = ev.title;
-        chip.onclick = (function(e, dsInner) { return function(evt) { evt.stopPropagation(); planerOpenEventEditor(e, dsInner); }; })(ev, ds);
+        chip.onclick = (function(e, dsInner) {
+          return function(evt) {
+            evt.stopPropagation();
+            if (this._dragMoved) { this._dragMoved = false; return; }
+            planerOpenEventEditor(e, dsInner);
+          };
+        })(ev, ds);
+        if (movable) planerAttachDrag(chip, ev, ds); else planerAttachStatic(chip);
         cell.appendChild(chip);
       });
       allday.appendChild(cell);
@@ -6350,7 +6365,14 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
         + 'background-image:repeating-linear-gradient(to top, var(--border) 0, var(--border) 1px, transparent 1px, transparent '
         + (100 / totalHours) + '%);'
         + (isToday ? 'background-color:rgba(46,204,113,0.05);' : '');
-      col.onclick = (function(dsInner) { return function() { planerOpenEventCreate(dsInner); }; })(ds);
+      col.dataset.planerZone = 'hour';
+      col.dataset.planerDate = ds;
+      col.onclick = (function(dsInner) {
+        return function() {
+          if (planerConsumeSuppressClick()) return;
+          planerOpenEventCreate(dsInner);
+        };
+      })(ds);
 
       var evs = (eventMap[ds] || []).filter(function(e) { return !e.allDay; });
       evs.sort(function(a, b) { return a.startH - b.startH; });
@@ -6375,11 +6397,12 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
         var bg = PLANER_TYPE_BG[ev.type]    || 'var(--surface2)';
         var widthPct = 100 / laneCount;
 
+        var movable = ev.type !== 'spiel';
         var block = document.createElement('div');
         block.style.cssText = 'position:absolute;box-sizing:border-box;top:' + top + '%;height:' + height + '%;'
           + 'left:' + (ev._lane * widthPct) + '%;width:calc(' + widthPct + '% - 2px);'
           + 'background:' + bg + ';border-left:2px solid ' + c + ';border-radius:3px;'
-          + 'padding:2px 4px;overflow:hidden;cursor:pointer;min-height:14px;transition:filter .1s';
+          + 'padding:2px 4px;overflow:hidden;cursor:' + (movable ? 'grab' : 'pointer') + ';min-height:14px;transition:filter .1s';
         var shortTitle = ev.title;
         if (ev.type === 'spiel') {
           var teams = splitTeams(ev.title);
@@ -6391,7 +6414,14 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
           + (height > 6 ? '<div style="font-size:8px;color:var(--text-3);white-space:nowrap">' + ev.time + '</div>' : '');
         block.onmouseenter = function() { this.style.filter = 'brightness(1.25)'; };
         block.onmouseleave = function() { this.style.filter = 'none'; };
-        block.onclick = (function(e, dsInner) { return function(evt) { evt.stopPropagation(); planerOpenEventEditor(e, dsInner); }; })(ev, ds);
+        block.onclick = (function(e, dsInner) {
+          return function(evt) {
+            evt.stopPropagation();
+            if (this._dragMoved) { this._dragMoved = false; return; }
+            planerOpenEventEditor(e, dsInner);
+          };
+        })(ev, ds);
+        if (movable) planerAttachDrag(block, ev, ds); else planerAttachStatic(block);
         col.appendChild(block);
       });
 
@@ -6404,6 +6434,139 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
   // ── Termin-Editor (anlegen / bearbeiten / löschen) ──
   var _planerEditId = null;
+
+  // Verhindert, dass ein abgebrochener/fehlgeschlagener Zieh-Versuch (z.B. auf einem fixen
+  // Spiel-Block oder außerhalb einer gültigen Ablagezone losgelassen) versehentlich den
+  // "Neuer Termin"-Dialog der darunterliegenden Spalte/Zelle öffnet.
+  var _planerSuppressClick = false;
+  function planerMarkSuppressClick() {
+    _planerSuppressClick = true;
+    setTimeout(function() { _planerSuppressClick = false; }, 350); // Sicherheitsnetz, falls kein Klick folgt
+  }
+  function planerConsumeSuppressClick() {
+    if (_planerSuppressClick) { _planerSuppressClick = false; return true; }
+    return false;
+  }
+
+  // Fixe Blöcke (Spiele): kein Verschieben, aber ein Zieh-Versuch soll nicht versehentlich
+  // die "Neuer Termin"-Erstellung der darunterliegenden Spalte auslösen.
+  function planerAttachStatic(el) {
+    el.addEventListener('pointerdown', function(downEvt) {
+      var startX = downEvt.clientX, startY = downEvt.clientY;
+      function onMove(moveEvt) {
+        var dx = moveEvt.clientX - startX, dy = moveEvt.clientY - startY;
+        if ((Math.abs(dx) + Math.abs(dy)) > 6) {
+          planerMarkSuppressClick();
+          cleanup();
+        }
+      }
+      function cleanup() {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+      }
+      function onUp() { cleanup(); }
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  }
+
+  // Termin per Ziehen (Maus & Touch, via Pointer Events) auf ein neues Datum/Uhrzeit verschieben.
+  // Spiele werden nie als "movable" übergeben (siehe Aufrufer) und sind damit ausgeschlossen.
+  function planerAttachDrag(el, ev, ds) {
+    el.style.touchAction = 'none';
+    el.addEventListener('pointerdown', function(downEvt) {
+      if (downEvt.pointerType === 'mouse' && downEvt.button !== 0) return;
+      var startX = downEvt.clientX, startY = downEvt.clientY;
+      var moved = false;
+      var ghost = null;
+
+      function onMove(moveEvt) {
+        var dx = moveEvt.clientX - startX, dy = moveEvt.clientY - startY;
+        if (!moved && (Math.abs(dx) + Math.abs(dy)) > 6) {
+          moved = true;
+          el._dragMoved = true;
+          planerMarkSuppressClick();
+          el.style.opacity = '0.3';
+          ghost = document.createElement('div');
+          ghost.textContent = ev.title;
+          ghost.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;background:var(--surface2);'
+            + 'border:1px solid var(--border-hi);border-radius:4px;padding:3px 7px;font-size:10px;'
+            + 'font-weight:600;color:var(--text);box-shadow:0 4px 14px rgba(0,0,0,.4);white-space:nowrap;'
+            + 'max-width:180px;overflow:hidden;text-overflow:ellipsis';
+          document.body.appendChild(ghost);
+        }
+        if (ghost) {
+          ghost.style.left = (moveEvt.clientX + 12) + 'px';
+          ghost.style.top  = (moveEvt.clientY + 12) + 'px';
+        }
+      }
+
+      function onUp(upEvt) {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        el.style.opacity = '1';
+        if (ghost) ghost.remove();
+        if (!moved) return; // war nur ein Tap → normale Klick-Behandlung übernimmt onclick
+
+        var under = document.elementFromPoint(upEvt.clientX, upEvt.clientY);
+        var zoneEl = under && under.closest('[data-planer-zone]');
+        if (!zoneEl) return;
+
+        if (zoneEl.dataset.planerZone === 'hour') {
+          var totalHours = PLANER_GRID_END_H - PLANER_GRID_START_H;
+          var rect = zoneEl.getBoundingClientRect();
+          var frac = (upEvt.clientY - rect.top) / rect.height;
+          var hourAtDrop = PLANER_GRID_START_H + frac * totalHours;
+          hourAtDrop = Math.round(hourAtDrop * 4) / 4; // auf 15 Min runden
+          hourAtDrop = Math.max(PLANER_GRID_START_H, Math.min(PLANER_GRID_END_H - 0.25, hourAtDrop));
+          planerMoveEvent(ev.id, zoneEl.dataset.planerDate, hourAtDrop, (ev.endH - ev.startH) || 1, false);
+        } else if (zoneEl.dataset.planerZone === 'allday') {
+          planerMoveEvent(ev.id, zoneEl.dataset.planerDate, null, 0, true);
+        }
+      }
+
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  }
+
+  // Aktuelle Basisdaten eines Termins ermitteln (mit evtl. vorhandenem Override)
+  function planerFindBase(id) {
+    if (id.charAt(0) === 'c') {
+      var custom = planerLoadJSON(PLANER_CUSTOM_KEY, []);
+      for (var i = 0; i < custom.length; i++) { if (custom[i].id === id) return custom[i]; }
+      return null;
+    }
+    var overrides = planerLoadJSON(PLANER_OVERRIDES_KEY, {});
+    if (overrides[id]) return overrides[id];
+    var base = planerBaseEvents();
+    for (var j = 0; j < base.length; j++) { if (base[j].id === id) return base[j]; }
+    return null;
+  }
+
+  // Termin per Drag & Drop auf neues Datum/neue Uhrzeit verschieben (Spiele sind ausgeschlossen)
+  function planerMoveEvent(id, newDate, newStartH, duration, forceAllDay) {
+    var base = planerFindBase(id);
+    if (!base || base.type === 'spiel') return;
+    var updated = Object.assign({}, base, {date: newDate});
+    if (forceAllDay) {
+      updated.allDay = true; updated.start = null; updated.end = null;
+    } else {
+      updated.allDay = false;
+      updated.start = planerDecToH(newStartH);
+      updated.end   = planerDecToH(newStartH + (duration || 1));
+    }
+    if (id.charAt(0) === 'c') {
+      var custom = planerLoadJSON(PLANER_CUSTOM_KEY, []);
+      var idx = custom.findIndex(function(c) { return c.id === id; });
+      if (idx >= 0) { custom[idx] = updated; planerSaveJSON(PLANER_CUSTOM_KEY, custom); }
+    } else {
+      var overrides = planerLoadJSON(PLANER_OVERRIDES_KEY, {});
+      overrides[id] = updated;
+      planerSaveJSON(PLANER_OVERRIDES_KEY, overrides);
+    }
+    planerRenderWeek();
+  }
 
   function planerFillForm(f) {
     document.getElementById('pev-title').value   = f.title;
