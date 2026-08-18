@@ -2853,7 +2853,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   <div id="planer-kalender" class="slot-section active">
 
     <!-- Wochen-Navigation -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin:.75rem 0 1rem;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:.5rem 0 .625rem;gap:8px">
       <button onclick="planerWeekNav(-1)" style="width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0" title="Vorherige Woche">&#8592;</button>
       <div style="text-align:center">
         <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text);letter-spacing:.03em;text-transform:uppercase" id="planer-week-title">— —</div>
@@ -2863,7 +2863,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     </div>
 
     <!-- Legende -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;flex-wrap:wrap;gap:8px">
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--grass);display:inline-block"></span>Spiel</div>
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block"></span>Training</div>
@@ -4134,6 +4134,9 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       if (tabs.length > 0) tabs[0].classList.add('active');
     }
     if (id === 'trainingsplan') buildTpCalendar();
+    // Planer-Kalender erst beim Sichtbarwerden (neu) rendern, da die Zeilenhöhe von der
+    // tatsächlichen Position im Viewport abhängt (display:none liefert sonst top=0)
+    if (id === 'planer' && typeof planerRenderWeek === 'function') planerRenderWeek();
   }
 
   function showSlot(id, btn) {
@@ -6153,6 +6156,22 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   function planerFmtDate(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
+  // Zeilenhöhe des Stundenrasters: auf Tablet/Desktop an die verfügbare Höhe anpassen,
+  // damit alle Stunden ohne Scrollen sichtbar sind. Auf schmalen Screens (Handy) bleibt
+  // eine feste, gut lesbare Höhe – dort ist Scrollen ohnehin normales Verhalten.
+  function planerComputeRowPx(totalHours) {
+    var FIXED_MOBILE = 34;
+    if (window.innerWidth < 700) return FIXED_MOBILE;
+    var gridEl = document.getElementById('planer-week-grid');
+    // offsetParent ist null, solange der Planer-Tab (noch) nicht sichtbar ist (display:none) –
+    // in dem Fall wäre top fälschlich 0. Sicherer Default, echte Berechnung folgt beim Sichtbarwerden.
+    if (!gridEl || gridEl.offsetParent === null) return FIXED_MOBILE;
+    var top = gridEl.getBoundingClientRect().top;
+    var footerBuffer = 24; // etwas Luft zum unteren Viewport-Rand
+    var available = window.innerHeight - top - footerBuffer;
+    var rowPx = Math.floor(available / totalHours);
+    return Math.max(20, Math.min(40, rowPx));
+  }
   function planerMonday(d) {
     var x = new Date(d); x.setHours(0, 0, 0, 0);
     var dow = (x.getDay() + 6) % 7; // Mo=0 … So=6
@@ -6341,7 +6360,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
     // ── Stunden-Gitter ──
     var totalHours = PLANER_GRID_END_H - PLANER_GRID_START_H;
-    var rowPx = 34;
+    var rowPx = planerComputeRowPx(totalHours);
     var totalPx = totalHours * rowPx;
 
     var hourLabels = document.getElementById('planer-week-hourlabels');
@@ -6731,6 +6750,13 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
   // Initial rendern (beim Laden der Seite)
   planerRenderWeek();
+
+  // Bei Fenster-/Orientierungswechsel (z.B. iPad drehen) Stundenraster-Höhe neu berechnen
+  var _planerResizeT = null;
+  window.addEventListener('resize', function() {
+    clearTimeout(_planerResizeT);
+    _planerResizeT = setTimeout(planerRenderWeek, 150);
+  });
 
   // ══════════════════════════════════════
   // REGENERATION
