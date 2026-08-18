@@ -1616,11 +1616,6 @@ body.preview-tablet footer {
   .nav-group { flex-shrink: 0; }
   /* 7-col Woche/Kalender → kompakte Zellen */
   #hyrox-week-grid > div { min-height: 50px !important; padding: 4px 2px !important; }
-  #planer-cal-grid  > div { min-height: 42px !important; padding: 3px 2px !important; }
-  #planer-cal-grid  > div > div { font-size: 9px !important; }
-  #planer-cal-grid  > div > div:first-child { font-size: 11px !important; }
-  /* Kalender-Tag-Header */
-  #planer-kalender > div:nth-child(4) > div { font-size: 8px !important; padding: 3px 0 !important; }
 }
 /* ── iPad 431–1024px (echte Geräte) ── */
 @media (min-width: 431px) and (max-width: 1024px) {
@@ -1645,10 +1640,6 @@ body.preview-mobile .subnav { flex-wrap: nowrap; overflow-x: auto; scrollbar-wid
 body.preview-mobile .subnav::-webkit-scrollbar { display: none; }
 body.preview-mobile .nav-group { flex-shrink: 0; }
 body.preview-mobile #hyrox-week-grid > div { min-height: 50px !important; padding: 4px 2px !important; }
-body.preview-mobile #planer-cal-grid  > div { min-height: 42px !important; padding: 3px 2px !important; }
-body.preview-mobile #planer-cal-grid  > div > div { font-size: 9px !important; }
-body.preview-mobile #planer-cal-grid  > div > div:first-child { font-size: 11px !important; }
-body.preview-mobile #planer-kalender > div:nth-child(4) > div { font-size: 8px !important; padding: 3px 0 !important; }
 
 /* ── Preview-Tablet (Simulation auf Desktop) ─── */
 body.preview-tablet .rsp-3      { grid-template-columns: 1fr 1fr !important; }
@@ -2858,14 +2849,17 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     </div>
   </div>
 
-  <!-- ── 1. KALENDER (Monatsansicht) ── -->
+  <!-- ── 1. KALENDER (Wochenansicht, Stunden von unten nach oben) ── -->
   <div id="planer-kalender" class="slot-section active">
 
-    <!-- Monat-Navigation -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin:.75rem 0 1rem">
-      <button onclick="planerCalNav(-1)" style="width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s" title="Vorheriger Monat">&#8592;</button>
-      <div style="font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:var(--text);letter-spacing:.04em;text-transform:uppercase" id="planer-cal-title">— —</div>
-      <button onclick="planerCalNav(+1)" style="width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s" title="Nächster Monat">&#8594;</button>
+    <!-- Wochen-Navigation -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:.75rem 0 1rem;gap:8px">
+      <button onclick="planerWeekNav(-1)" style="width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0" title="Vorherige Woche">&#8592;</button>
+      <div style="text-align:center">
+        <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text);letter-spacing:.03em;text-transform:uppercase" id="planer-week-title">— —</div>
+        <button onclick="planerGoToday()" style="margin-top:2px;background:none;border:none;color:var(--text-3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;padding:0">Heute</button>
+      </div>
+      <button onclick="planerWeekNav(+1)" style="width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0" title="Nächste Woche">&#8594;</button>
     </div>
 
     <!-- Legende -->
@@ -2875,23 +2869,33 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span>Privat</div>
     </div>
 
-    <!-- Wochentag-Header -->
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px">
-      <div style="text-align:center;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);padding:4px 0">Mo</div>
-      <div style="text-align:center;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);padding:4px 0">Di</div>
-      <div style="text-align:center;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);padding:4px 0">Mi</div>
-      <div style="text-align:center;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);padding:4px 0">Do</div>
-      <div style="text-align:center;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);padding:4px 0">Fr</div>
-      <div style="text-align:center;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--amber);padding:4px 0">Sa</div>
-      <div style="text-align:center;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--amber);padding:4px 0">So</div>
+    <!-- Wochenraster -->
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <div style="min-width:600px">
+        <!-- Tages-Header -->
+        <div id="planer-week-header" style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px;margin-bottom:3px"></div>
+        <!-- Ganztägig-Zeile -->
+        <div id="planer-week-allday" style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px;margin-bottom:4px"></div>
+        <!-- Stunden-Gitter (unten = früh, oben = spät) -->
+        <div style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px">
+          <div id="planer-week-hourlabels" style="position:relative"></div>
+          <div id="planer-week-grid" style="grid-column:2/9;position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
+        </div>
+      </div>
     </div>
 
-    <!-- Kalender-Gitter -->
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px" id="planer-cal-grid"></div>
+  </div>
 
-    <!-- Tages-Detail (aufgeklappt beim Klick) -->
-    <div id="planer-cal-detail" style="display:none;margin-top:1rem;background:var(--surface);border:1px solid var(--border-med);border-radius:var(--r);padding:1rem;animation:fadeUp .15s ease"></div>
-
+  <!-- Termin-Detail Modal -->
+  <div id="planer-event-modal" class="modal-overlay" onclick="if(event.target===this)planerEventModalClose()">
+    <div class="modal-box" style="max-width:440px">
+      <div class="mhdr">
+        <div class="mhdr-eyebrow" id="planer-event-eyebrow">Termin</div>
+        <div class="mhdr-title" id="planer-event-title">—</div>
+        <button class="m-close" onclick="planerEventModalClose()">✕</button>
+      </div>
+      <div class="mbody" id="planer-event-content"></div>
+    </div>
   </div>
 
   <!-- ── 2. ERNÄHRUNG (verschoben aus altem Tab) ── -->
@@ -3970,20 +3974,21 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 </div>
 
 <script>
+  // 7. Feld = Abpfiff/Ende (für Wochenkalender), identisch zu den in SR › Termine hinterlegten Endzeiten
   var GAMES = [
-    ["2026-07-04", "PSG Fellbach - FK Schwampel (Herren Freizeitsport)", "15:00", "Tournonstr., 70736 Fellbach", "Rasenplatz Schmiden", "Rasenplatz"],
-    ["2026-07-12", "Regionaltermin Eglosheim", "08:00", "", "", ""],
-    ["2026-07-23", "SC Korb - TSV Waldhausen (Herren)", "19:30", "Brucknerstr., 71404 Korb", "Rasenplatz Korb", "Rasenplatz"],
-    ["2026-08-23", "SG Bettringen 1885 e.V. II - SGM Hohenstadt/Untergröningen (Herren)", "13:00", "Wolf-Hirth-Str. 55, 73529 Schwäbisch Gmünd", "Kunstrasenplatz Bettringen", "Kunstrasenplatz"],
-    ["2026-08-29", "SV Fellbach I - SSV Reutlingen 1905 Fußball (A-Junioren)", "10:00", "Esslinger Str. 118, 70734 Fellbach", "Kunstrasen 1 Fellbach", "Kunstrasenplatz"],
-    ["2026-09-06", "FC Marbach - FSV 08 Bietigheim-Bissingen II (Herren)", "15:00", "Sportgelände Leiselstein, 71672 Marbach", "Hainbuch Stadion", "Rasenplatz"],
-    ["2026-09-13", "SGM MassenbachHausen - TG Böckingen (Herren)", "15:00", "Heilbronner Str. 56, 74252 Massenbachhausen", "Massenbachhausen Rasen 1", "Rasenplatz"],
-    ["2026-09-20", "TV Echterdingen II - SpVgg Holzgerlingen (Herren)", "13:00", "Leinfelder Str. 101, 70771 Leinfelden-Echterdingen", "Rasenpl. Sportpark Goldäcker", "Rasenplatz"],
-    ["2026-09-27", "SG Oppenweiler-Strümpfelbach - VfL Mainhardt (Herren)", "16:00", "Rohrbachweg 68, 71570 Oppenweiler", "Rasenplatz Oppenweiler", "Rasenplatz"],
-    ["2026-10-04", "SV Pattonville - TSV Bönnigheim (Herren)", "15:00", "John-F.-Kennedy-Allee 8, 70806 Kornwestheim", "Kunstrasenplatz Pattonville", "Kunstrasenplatz"],
-    ["2026-10-11", "Aramäer Heilbronn - FSV Schwaigern (Herren)", "15:00", "Max-von-Laue-Str. 1-3, 74081 Heilbronn", "Sontheim Schulrasenplatz", "Rasenplatz"],
-    ["2026-11-21", "FV 08 Unterkochen - FV Viktoria Wasseralfingen (Herren)", "14:30", "Häselbach , 73432 Aalen", "Häselbachstadion Unterkochen", "Rasenplatz"],
-    ["2026-11-21", "FV 08 Unterkochen - FV Viktoria Wasseralfingen (Herren)", "14:30", "Häselbach, 73432 Aalen", "Kunstrasen Häselbachstadion", "Kunstrasenplatz"]
+    ["2026-07-04", "PSG Fellbach - FK Schwampel (Herren Freizeitsport)", "15:00", "Tournonstr., 70736 Fellbach", "Rasenplatz Schmiden", "Rasenplatz", "17:25"],
+    ["2026-07-12", "Regionaltermin Eglosheim", "08:00", "", "", "", "16:00"],
+    ["2026-07-23", "SC Korb - TSV Waldhausen (Herren)", "19:30", "Brucknerstr., 71404 Korb", "Rasenplatz Korb", "Rasenplatz", "21:10"],
+    ["2026-08-23", "SG Bettringen 1885 e.V. II - SGM Hohenstadt/Untergröningen (Herren)", "13:00", "Wolf-Hirth-Str. 55, 73529 Schwäbisch Gmünd", "Kunstrasenplatz Bettringen", "Kunstrasenplatz", "14:45"],
+    ["2026-08-29", "SV Fellbach I - SSV Reutlingen 1905 Fußball (A-Junioren)", "10:00", "Esslinger Str. 118, 70734 Fellbach", "Kunstrasen 1 Fellbach", "Kunstrasenplatz", "11:40"],
+    ["2026-09-06", "FC Marbach - FSV 08 Bietigheim-Bissingen II (Herren)", "15:00", "Sportgelände Leiselstein, 71672 Marbach", "Hainbuch Stadion", "Rasenplatz", "16:45"],
+    ["2026-09-13", "SGM MassenbachHausen - TG Böckingen (Herren)", "15:00", "Heilbronner Str. 56, 74252 Massenbachhausen", "Massenbachhausen Rasen 1", "Rasenplatz", "16:45"],
+    ["2026-09-20", "TV Echterdingen II - SpVgg Holzgerlingen (Herren)", "13:00", "Leinfelder Str. 101, 70771 Leinfelden-Echterdingen", "Rasenpl. Sportpark Goldäcker", "Rasenplatz", "14:40"],
+    ["2026-09-27", "SG Oppenweiler-Strümpfelbach - VfL Mainhardt (Herren)", "16:00", "Rohrbachweg 68, 71570 Oppenweiler", "Rasenplatz Oppenweiler", "Rasenplatz", "17:45"],
+    ["2026-10-04", "SV Pattonville - TSV Bönnigheim (Herren)", "15:00", "John-F.-Kennedy-Allee 8, 70806 Kornwestheim", "Kunstrasenplatz Pattonville", "Kunstrasenplatz", "16:45"],
+    ["2026-10-11", "Aramäer Heilbronn - FSV Schwaigern (Herren)", "15:00", "Max-von-Laue-Str. 1-3, 74081 Heilbronn", "Sontheim Schulrasenplatz", "Rasenplatz", "16:45"],
+    ["2026-11-21", "FV 08 Unterkochen - FV Viktoria Wasseralfingen (Herren)", "14:30", "Häselbach , 73432 Aalen", "Häselbachstadion Unterkochen", "Rasenplatz", "16:15"],
+    ["2026-11-21", "FV 08 Unterkochen - FV Viktoria Wasseralfingen (Herren)", "14:30", "Häselbach, 73432 Aalen", "Kunstrasen Häselbachstadion", "Kunstrasenplatz", "16:15"]
   ];
   var GAMES_DATES = ["2026-07-04", "2026-07-12", "2026-07-23", "2026-08-23", "2026-08-29", "2026-09-06", "2026-09-13", "2026-09-20", "2026-09-27", "2026-10-04", "2026-10-11", "2026-11-21", "2026-11-21"];
 
@@ -5809,8 +5814,10 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     hyroxRenderWeek();
   };
   window.hyroxRenderWeek = function(){
-    document.getElementById('hyrox-kw-label').textContent='KW '+_hyroxKw+' '+_hyroxYear;
+    var kwLabel=document.getElementById('hyrox-kw-label');
+    if(kwLabel) kwLabel.textContent='KW '+_hyroxKw+' '+_hyroxYear;
     var grid=document.getElementById('hyrox-week-grid');
+    if(!grid) return;
     var days=['Mo','Di','Mi','Do','Fr','Sa','So'];
     var types=['Ruhetag','Lauf','Kraft','Ruhetag','HYROX','Ruhetag','Lauf'];
     var colors=['var(--surface2)','var(--teal-dim)','var(--blue-dim)','var(--surface2)','var(--grass-dim)','var(--surface2)','var(--teal-dim)'];
@@ -6043,7 +6050,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   buildHyroxWorkout();
 
   // ══════════════════════════════════════
-  // PLANER – Monatskalender
+  // PLANER – Wochenkalender
   // ══════════════════════════════════════
 
   // Trainings-Termine (aus SR-Termine übernommen)
@@ -6066,194 +6073,234 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     {date:"2026-08-22",title:"Hochzeit 💍",time:"14:00 Uhr"}
   ];
 
-  // Monats-Navigation
-  var _planerCalYear  = new Date().getFullYear();
-  var _planerCalMonth = new Date().getMonth(); // 0-basiert
-
   var _MONTH_NAMES = ['Januar','Februar','März','April','Mai','Juni',
                       'Juli','August','September','Oktober','November','Dezember'];
   var _DAY_NAMES   = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 
-  // Alle Termine als Map aufbauen: {"YYYY-MM-DD": [{title,time,type}, ...]}
+  // Stunden-Rahmen des Rasters: 06:00 (unten) bis 23:00 (oben)
+  var PLANER_GRID_START_H = 6;
+  var PLANER_GRID_END_H   = 23;
+  var PLANER_TYPE_COLOR = {spiel:'var(--grass)', training:'var(--teal)', privat:'var(--amber)'};
+  var PLANER_TYPE_BG    = {spiel:'var(--grass-dim)', training:'var(--teal-dim)', privat:'var(--amber-dim)'};
+  var PLANER_TYPE_LABEL = {spiel:'Spiel', training:'Training', privat:'Privat'};
+
+  function planerHToDec(hhmm) {
+    var p = String(hhmm).split(':');
+    return parseInt(p[0], 10) + (parseInt(p[1], 10) || 0) / 60;
+  }
+  function planerFmtDate(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function planerMonday(d) {
+    var x = new Date(d); x.setHours(0, 0, 0, 0);
+    var dow = (x.getDay() + 6) % 7; // Mo=0 … So=6
+    x.setDate(x.getDate() - dow);
+    return x;
+  }
+  function planerISOWeek(date) {
+    var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    var dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  }
+
+  // Alle Termine als Map aufbauen: {"YYYY-MM-DD": [{title,time,type,startH,endH,allDay,venue,address}, ...]}
   function planerBuildEventMap() {
     var map = {};
-    function add(dateStr, title, time, type) {
+    function add(dateStr, ev) {
       if (!map[dateStr]) map[dateStr] = [];
-      map[dateStr].push({title:title, time:time, type:type});
+      map[dateStr].push(ev);
     }
-    // SR-Spiele aus GAMES-Array
+    // SR-Spiele aus GAMES-Array (identisch zu SR › Termine)
     if (typeof GAMES !== 'undefined') {
-      GAMES.forEach(function(g) { add(g[0], g[1], g[2], 'spiel'); });
+      GAMES.forEach(function(g) {
+        var start = planerHToDec(g[2]);
+        var end   = g[6] ? planerHToDec(g[6]) : start + 1.75;
+        add(g[0], {
+          title: g[1], time: g[2] + ' – ' + (g[6] || ''), type: 'spiel',
+          startH: start, endH: end, allDay: false, venue: g[4], address: g[3]
+        });
+      });
     }
     // Trainings
-    PLANER_TRAINING.forEach(function(t) { add(t.date, t.title, t.time, 'training'); });
+    PLANER_TRAINING.forEach(function(t) {
+      var parts = t.time.split(/\s*[–—-]\s*/);
+      var start = planerHToDec(parts[0]);
+      var end   = parts[1] ? planerHToDec(parts[1]) : start + 1;
+      add(t.date, {title: t.title, time: t.time, type: 'training', startH: start, endH: end, allDay: false});
+    });
     // Privat
-    PLANER_PRIVAT.forEach(function(p) { add(p.date, p.title, p.time, 'privat'); });
+    PLANER_PRIVAT.forEach(function(p) {
+      if (/ganzt/i.test(p.time)) {
+        add(p.date, {title: p.title, time: p.time, type: 'privat', allDay: true});
+      } else {
+        var m = p.time.match(/(\d{1,2}):(\d{2})/);
+        var start = m ? (parseInt(m[1], 10) + parseInt(m[2], 10) / 60) : 12;
+        add(p.date, {title: p.title, time: p.time, type: 'privat', startH: start, endH: start + 2, allDay: false});
+      }
+    });
     return map;
   }
 
-  window.planerCalNav = function(dir) {
-    _planerCalMonth += dir;
-    if (_planerCalMonth < 0)  { _planerCalMonth = 11; _planerCalYear--; }
-    if (_planerCalMonth > 11) { _planerCalMonth = 0;  _planerCalYear++; }
-    planerRenderCal();
+  // Wochen-Navigation
+  var _planerWeekStart = planerMonday(new Date());
+
+  window.planerWeekNav = function(dir) {
+    _planerWeekStart.setDate(_planerWeekStart.getDate() + dir * 7);
+    planerRenderWeek();
+  };
+  window.planerGoToday = function() {
+    _planerWeekStart = planerMonday(new Date());
+    planerRenderWeek();
   };
 
-  window.planerRenderCal = function() {
-    var year  = _planerCalYear;
-    var month = _planerCalMonth;
+  window.planerRenderWeek = function() {
+    var start = new Date(_planerWeekStart);
+    var days = [];
+    for (var i = 0; i < 7; i++) { var dd = new Date(start); dd.setDate(start.getDate() + i); days.push(dd); }
+    var end = days[6];
+    var kw  = planerISOWeek(start);
+    var sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+    var titleStr = start.getDate() + '.' + (sameMonth ? '' : ' ' + _MONTH_NAMES[start.getMonth()])
+      + ' – ' + end.getDate() + '. ' + _MONTH_NAMES[end.getMonth()] + ' ' + end.getFullYear() + ' · KW ' + kw;
+    document.getElementById('planer-week-title').textContent = titleStr;
 
-    document.getElementById('planer-cal-title').textContent =
-      _MONTH_NAMES[month] + ' ' + year;
+    var eventMap = planerBuildEventMap();
+    var today = new Date(); today.setHours(0, 0, 0, 0);
 
-    var eventMap   = planerBuildEventMap();
-    var today      = new Date(); today.setHours(0,0,0,0);
-    var daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    // Wochentag des 1. (Mo=0 … So=6)
-    var firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
-
-    var grid = document.getElementById('planer-cal-grid');
-    grid.innerHTML = '';
-
-    // Leere Zellen vor dem 1.
-    for (var i = 0; i < firstDow; i++) {
-      var empty = document.createElement('div');
-      empty.style.cssText = 'min-height:64px;';
-      grid.appendChild(empty);
-    }
-
-    // Tages-Zellen
-    for (var d = 1; d <= daysInMonth; d++) {
-      var mm      = String(month + 1).padStart(2, '0');
-      var dd      = String(d).padStart(2, '0');
-      var dateStr = year + '-' + mm + '-' + dd;
-
-      var cellDate = new Date(year, month, d);
-      var isToday  = cellDate.getTime() === today.getTime();
-      var dow      = cellDate.getDay(); // 0=So,6=Sa
-      var isWeekend= (dow === 0 || dow === 6);
-      var evs      = eventMap[dateStr] || [];
-
+    // ── Tages-Header ──
+    var header = document.getElementById('planer-week-header');
+    header.innerHTML = '';
+    header.appendChild(document.createElement('div'));
+    days.forEach(function(d) {
+      var isToday = d.getTime() === today.getTime();
       var cell = document.createElement('div');
-      var bg = isToday
-        ? 'rgba(46,204,113,0.13)'
-        : evs.length ? 'var(--surface2)' : 'var(--surface)';
-      var border = isToday
-        ? '1px solid rgba(46,204,113,0.55)'
-        : evs.length ? '1px solid var(--border-med)' : '1px solid var(--border)';
-
-      cell.style.cssText = [
-        'background:' + bg,
-        'border:' + border,
-        'border-radius:var(--r-xs)',
-        'padding:5px 4px 5px 6px',
-        'min-height:64px',
-        'cursor:' + (evs.length ? 'pointer' : 'default'),
-        'transition:border-color .15s,background .15s',
-        'overflow:hidden',
-        'display:flex',
-        'flex-direction:column',
-        'gap:3px'
-      ].join(';');
-
-      // Tageszahl
-      var numEl = document.createElement('div');
-      var numColor = isToday ? 'var(--grass)'
-        : isWeekend ? 'var(--amber)'
-        : evs.length ? 'var(--text)' : 'var(--text-3)';
-      numEl.style.cssText = 'font-family:"Inter",sans-serif;font-size:13px;font-weight:'
-        + (isToday || evs.length ? '700' : '400') + ';color:' + numColor + ';line-height:1;flex-shrink:0;';
-      numEl.textContent = d;
-      cell.appendChild(numEl);
-
-      // Ereignis-Chips (max. 2 sichtbar, Rest als "+N")
-      evs.slice(0, 2).forEach(function(ev) {
-        var chip = document.createElement('div');
-        var c = ev.type === 'spiel' ? 'var(--grass)'
-          : ev.type === 'training' ? 'var(--teal)' : 'var(--amber)';
-        var dot = ev.type === 'spiel' ? '⚽' : ev.type === 'training' ? '🏃' : '📅';
-        chip.style.cssText = 'font-size:9px;font-weight:600;color:' + c
-          + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;';
-        // Kurz-Label
-        var label = ev.type === 'spiel'
-          ? dot + ' ' + ev.title.split(' - ')[0]
-          : dot + ' ' + ev.title;
-        chip.textContent = label;
-        chip.title = ev.title + ' · ' + ev.time;
-        cell.appendChild(chip);
-      });
-      if (evs.length > 2) {
-        var more = document.createElement('div');
-        more.style.cssText = 'font-size:9px;color:var(--text-3);';
-        more.textContent = '+' + (evs.length - 2) + ' mehr';
-        cell.appendChild(more);
-      }
-
-      // Klick → Detail anzeigen
-      if (evs.length) {
-        (function(ds, events) {
-          cell.onclick = function() { planerShowDayDetail(ds, events); };
-          cell.onmouseenter = function() { this.style.borderColor = 'var(--border-hi)'; };
-          cell.onmouseleave = function() {
-            this.style.borderColor = isToday ? 'rgba(46,204,113,0.55)' : 'var(--border-med)';
-          };
-        })(dateStr, evs);
-      }
-
-      grid.appendChild(cell);
-    }
-
-    // Detail-Bereich zurücksetzen
-    var det = document.getElementById('planer-cal-detail');
-    det.style.display = 'none';
-    det.innerHTML = '';
-  };
-
-  window.planerShowDayDetail = function(dateStr, events) {
-    var det = document.getElementById('planer-cal-detail');
-    var d   = new Date(dateStr + 'T00:00:00');
-    var label = _DAY_NAMES[d.getDay()] + ', ' + d.getDate()
-      + '. ' + _MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
-
-    var typeColor = {spiel:'var(--grass)', training:'var(--teal)', privat:'var(--amber)'};
-    var typeBg    = {spiel:'var(--grass-dim)', training:'var(--teal-dim)', privat:'var(--amber-dim)'};
-    var typeIcon  = {spiel:'⚽', training:'🏃', privat:'📅'};
-    var typeLabel = {spiel:'Spiel', training:'Training', privat:'Privat'};
-
-    var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">'
-      + '<div style="font-family:\'Inter\',sans-serif;font-size:13px;font-weight:700;'
-      + 'text-transform:uppercase;letter-spacing:.08em;color:var(--text-2)">' + label + '</div>'
-      + '<button onclick="document.getElementById(\'planer-cal-detail\').style.display=\'none\'" '
-      + 'style="background:none;border:none;color:var(--text-3);font-size:16px;cursor:pointer;'
-      + 'line-height:1;padding:0 2px">✕</button></div>';
-
-    events.forEach(function(ev) {
-      var c  = typeColor[ev.type]  || 'var(--text-2)';
-      var bg = typeBg[ev.type]     || 'var(--surface2)';
-      var ic = typeIcon[ev.type]   || '📅';
-      var tl = typeLabel[ev.type]  || ev.type;
-      html += '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;'
-        + 'background:' + bg + ';border:1px solid ' + c + ';border-left:3px solid ' + c + ';'
-        + 'border-radius:var(--r-xs);margin-bottom:6px">'
-        + '<span style="font-size:16px;flex-shrink:0">' + ic + '</span>'
-        + '<div style="flex:1;min-width:0">'
-        + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
-        + '<span style="font-size:13px;font-weight:600;color:var(--text)">' + ev.title + '</span>'
-        + '<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;'
-        + 'background:' + bg + ';color:' + c + ';border:1px solid ' + c + '">' + tl + '</span>'
-        + '</div>'
-        + '<div style="font-size:11px;color:var(--text-3);margin-top:3px">🕐 ' + ev.time + '</div>'
-        + '</div></div>';
+      cell.style.cssText = 'text-align:center;padding:4px 0;border-radius:var(--r-xs);'
+        + (isToday ? 'background:rgba(46,204,113,0.13);border:1px solid rgba(46,204,113,0.4);' : '');
+      cell.innerHTML = '<div style="font-family:\'Inter\',sans-serif;font-size:10px;font-weight:700;'
+        + 'text-transform:uppercase;letter-spacing:.06em;color:' + (isToday ? 'var(--grass)' : 'var(--text-3)') + '">'
+        + _DAY_NAMES[d.getDay()] + '</div>'
+        + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:700;'
+        + 'color:' + (isToday ? 'var(--grass)' : 'var(--text)') + '">' + d.getDate() + '</div>';
+      header.appendChild(cell);
     });
 
-    det.innerHTML = html;
-    det.style.display = 'block';
-    det.scrollIntoView({behavior:'smooth', block:'nearest'});
+    // ── Ganztägig-Zeile ──
+    var allday = document.getElementById('planer-week-allday');
+    allday.innerHTML = '';
+    var gutterLbl = document.createElement('div');
+    gutterLbl.style.cssText = 'font-size:8px;color:var(--text-3);display:flex;align-items:center;justify-content:flex-end;padding-right:3px;text-align:right';
+    gutterLbl.textContent = 'ganzt.';
+    allday.appendChild(gutterLbl);
+    days.forEach(function(d) {
+      var ds = planerFmtDate(d);
+      var evs = (eventMap[ds] || []).filter(function(e) { return e.allDay; });
+      var cell = document.createElement('div');
+      cell.style.cssText = 'min-height:18px;display:flex;flex-direction:column;gap:2px';
+      evs.forEach(function(ev) {
+        var chip = document.createElement('div');
+        chip.style.cssText = 'font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;'
+          + 'background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3);'
+          + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer';
+        chip.textContent = ev.title;
+        chip.onclick = (function(e, dsInner) { return function() { planerOpenEvent(e, dsInner); }; })(ev, ds);
+        cell.appendChild(chip);
+      });
+      allday.appendChild(cell);
+    });
+
+    // ── Stunden-Gitter ──
+    var totalHours = PLANER_GRID_END_H - PLANER_GRID_START_H;
+    var rowPx = 34;
+    var totalPx = totalHours * rowPx;
+
+    var hourLabels = document.getElementById('planer-week-hourlabels');
+    hourLabels.style.height = totalPx + 'px';
+    hourLabels.innerHTML = '';
+    for (var h = PLANER_GRID_START_H; h <= PLANER_GRID_END_H; h++) {
+      var top = (PLANER_GRID_END_H - h) / totalHours * 100;
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'position:absolute;left:0;right:3px;top:' + top + '%;transform:translateY(-50%);'
+        + 'font-size:9px;color:var(--text-3);text-align:right;white-space:nowrap';
+      lbl.textContent = String(h).padStart(2, '0') + ':00';
+      hourLabels.appendChild(lbl);
+    }
+
+    var grid = document.getElementById('planer-week-grid');
+    grid.style.height = totalPx + 'px';
+    grid.innerHTML = '';
+
+    days.forEach(function(d) {
+      var ds = planerFmtDate(d);
+      var isToday = d.getTime() === today.getTime();
+      var col = document.createElement('div');
+      col.style.cssText = 'position:relative;border-left:1px solid var(--border);'
+        + 'background-image:repeating-linear-gradient(to top, var(--border) 0, var(--border) 1px, transparent 1px, transparent '
+        + (100 / totalHours) + '%);'
+        + (isToday ? 'background-color:rgba(46,204,113,0.05);' : '');
+
+      var evs = (eventMap[ds] || []).filter(function(e) { return !e.allDay; });
+      evs.sort(function(a, b) { return a.startH - b.startH; });
+
+      // einfache Spalten-Zuordnung bei zeitlicher Überlappung
+      var lanesEnd = [];
+      evs.forEach(function(ev) {
+        var lane = 0;
+        while (lanesEnd[lane] !== undefined && lanesEnd[lane] > ev.startH) lane++;
+        ev._lane = lane;
+        lanesEnd[lane] = ev.endH;
+      });
+      var laneCount = lanesEnd.length || 1;
+
+      evs.forEach(function(ev) {
+        var s = Math.max(ev.startH, PLANER_GRID_START_H);
+        var e = Math.min(ev.endH, PLANER_GRID_END_H);
+        if (e <= s) return;
+        var top    = (PLANER_GRID_END_H - e) / totalHours * 100;
+        var height = (e - s) / totalHours * 100;
+        var c  = PLANER_TYPE_COLOR[ev.type] || 'var(--text-2)';
+        var bg = PLANER_TYPE_BG[ev.type]    || 'var(--surface2)';
+        var widthPct = 100 / laneCount;
+
+        var block = document.createElement('div');
+        block.style.cssText = 'position:absolute;box-sizing:border-box;top:' + top + '%;height:' + height + '%;'
+          + 'left:' + (ev._lane * widthPct) + '%;width:calc(' + widthPct + '% - 2px);'
+          + 'background:' + bg + ';border-left:2px solid ' + c + ';border-radius:3px;'
+          + 'padding:2px 4px;overflow:hidden;cursor:pointer;min-height:14px;transition:filter .1s';
+        var shortTitle = ev.type === 'spiel' ? ev.title.split(' - ')[0] : ev.title;
+        block.innerHTML = '<div style="font-size:9px;font-weight:700;color:' + c + ';white-space:nowrap;'
+          + 'overflow:hidden;text-overflow:ellipsis;line-height:1.3">' + shortTitle + '</div>'
+          + (height > 6 ? '<div style="font-size:8px;color:var(--text-3);white-space:nowrap">' + ev.time + '</div>' : '');
+        block.onmouseenter = function() { this.style.filter = 'brightness(1.25)'; };
+        block.onmouseleave = function() { this.style.filter = 'none'; };
+        block.onclick = (function(e, dsInner) { return function() { planerOpenEvent(e, dsInner); }; })(ev, ds);
+        col.appendChild(block);
+      });
+
+      grid.appendChild(col);
+    });
+  };
+
+  window.planerOpenEvent = function(ev, dateStr) {
+    var d = new Date(dateStr + 'T00:00:00');
+    var dateLabel = _DAY_NAMES[d.getDay()] + ', ' + d.getDate() + '. ' + _MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+    document.getElementById('planer-event-eyebrow').textContent = (PLANER_TYPE_LABEL[ev.type] || ev.type) + ' · ' + dateLabel;
+    document.getElementById('planer-event-title').textContent = ev.title;
+
+    var html = '<div style="font-size:12px;color:var(--text-2);margin-bottom:8px">🕐 ' + (ev.allDay ? 'Ganztägig' : ev.time) + '</div>';
+    if (ev.venue || ev.address) {
+      html += '<div style="font-size:12px;color:var(--text-2)">📍 ' + [ev.venue, ev.address].filter(Boolean).join(' · ') + '</div>';
+    }
+    document.getElementById('planer-event-content').innerHTML = html;
+    document.getElementById('planer-event-modal').classList.add('is-open');
+  };
+  window.planerEventModalClose = function() {
+    document.getElementById('planer-event-modal').classList.remove('is-open');
   };
 
   // Initial rendern (beim Laden der Seite)
-  planerRenderCal();
+  planerRenderWeek();
 
   // ══════════════════════════════════════
   // REGENERATION
