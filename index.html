@@ -2867,6 +2867,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--grass);display:inline-block"></span>Spiel</div>
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block"></span>Training</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block"></span>Kraft</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--purple);display:inline-block"></span>Ausdauer</div>
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span>Privat</div>
       </div>
       <button onclick="planerOpenEventCreate()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text);font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;white-space:nowrap">+ Termin</button>
@@ -2885,6 +2887,12 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
           <div id="planer-week-grid" style="grid-column:2/9;position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
         </div>
       </div>
+    </div>
+
+    <!-- Mahlzeiten -->
+    <div style="margin-top:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Mahlzeiten</div>
+      <div id="planer-meal-grid" style="min-width:600px"></div>
     </div>
 
   </div>
@@ -2908,6 +2916,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
               <select id="pev-type" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
                 <option value="spiel">Spiel</option>
                 <option value="training">Training</option>
+                <option value="kraft">Kraft</option>
+                <option value="ausdauer">Ausdauer</option>
                 <option value="privat">Privat</option>
               </select>
             </div>
@@ -4391,6 +4401,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     dbLoad(function() {
       srLoadNotes();
       loadMeals();
+      // Kalender-Termine (inkl. Overrides/eigene Termine) und Mahlzeiten mit Sheets-Daten neu rendern
+      if (typeof planerRenderWeek === 'function') planerRenderWeek();
       lpLoad();
       // BCB: Analysen + LP + EF aus Sheets laden, Bögen aus localStorage
       bcbLoadStore();
@@ -6131,8 +6143,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   // Stunden-Rahmen des Rasters: 06:00 (oben) bis 23:00 (unten)
   var PLANER_GRID_START_H = 6;
   var PLANER_GRID_END_H   = 23;
-  var PLANER_TYPE_COLOR = {spiel:'var(--grass)', training:'var(--teal)', privat:'var(--amber)'};
-  var PLANER_TYPE_BG    = {spiel:'var(--grass-dim)', training:'var(--teal-dim)', privat:'var(--amber-dim)'};
+  var PLANER_TYPE_COLOR = {spiel:'var(--grass)', training:'var(--teal)', kraft:'var(--blue)', ausdauer:'var(--purple)', privat:'var(--amber)'};
+  var PLANER_TYPE_BG    = {spiel:'var(--grass-dim)', training:'var(--teal-dim)', kraft:'var(--blue-dim)', ausdauer:'var(--purple-dim)', privat:'var(--amber-dim)'};
 
   function planerHToDec(hhmm) {
     var p = String(hhmm).split(':');
@@ -6160,14 +6172,16 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   var PLANER_DELETED_KEY   = 'planer-cal-deleted';   // [id, ...]
   var PLANER_CUSTOM_KEY    = 'planer-cal-custom';    // [{id,date,title,type,allDay,start,end,venue,address}, ...]
 
+  // Läuft über dieselbe dbGet/dbSave-Schicht wie die SR-Notizen: localStorage als
+  // Sofort-/Offline-Fallback, plus Sync über die hinterlegte Google-Sheets-Web-App
+  // (falls SHEETS_URL gesetzt ist) für geräteübergreifenden Zugriff.
   function planerLoadJSON(key, fallback) {
-    try {
-      var v = JSON.parse(localStorage.getItem(key));
-      return v == null ? fallback : v;
-    } catch (e) { return fallback; }
+    var v = dbGet(key, fallback);
+    return v == null ? fallback : v;
   }
   function planerSaveJSON(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+    var p = {}; p[key] = val;
+    dbSave(p);
   }
   function planerNewId() {
     return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -6295,14 +6309,31 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       var evs = (eventMap[ds] || []).filter(function(e) { return e.allDay; });
       var cell = document.createElement('div');
       cell.style.cssText = 'min-height:18px;display:flex;flex-direction:column;gap:2px;cursor:pointer';
-      cell.onclick = (function(dsInner) { return function() { planerOpenEventCreate(dsInner, true); }; })(ds);
+      cell.dataset.planerZone = 'allday';
+      cell.dataset.planerDate = ds;
+      cell.onclick = (function(dsInner) {
+        return function() {
+          if (planerConsumeSuppressClick()) return;
+          planerOpenEventCreate(dsInner, true);
+        };
+      })(ds);
       evs.forEach(function(ev) {
+        var movable = ev.type !== 'spiel';
         var chip = document.createElement('div');
+        var chipC  = PLANER_TYPE_COLOR[ev.type] || 'var(--text-2)';
+        var chipBg = PLANER_TYPE_BG[ev.type]    || 'var(--surface2)';
         chip.style.cssText = 'font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;'
-          + 'background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3);'
-          + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer';
+          + 'background:' + chipBg + ';color:' + chipC + ';border:1px solid ' + chipC + ';'
+          + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:' + (movable ? 'grab' : 'pointer');
         chip.textContent = ev.title;
-        chip.onclick = (function(e, dsInner) { return function(evt) { evt.stopPropagation(); planerOpenEventEditor(e, dsInner); }; })(ev, ds);
+        chip.onclick = (function(e, dsInner) {
+          return function(evt) {
+            evt.stopPropagation();
+            if (this._dragMoved) { this._dragMoved = false; return; }
+            planerOpenEventEditor(e, dsInner);
+          };
+        })(ev, ds);
+        if (movable) planerAttachDrag(chip, ev, ds); else planerAttachStatic(chip);
         cell.appendChild(chip);
       });
       allday.appendChild(cell);
@@ -6337,7 +6368,14 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
         + 'background-image:repeating-linear-gradient(to top, var(--border) 0, var(--border) 1px, transparent 1px, transparent '
         + (100 / totalHours) + '%);'
         + (isToday ? 'background-color:rgba(46,204,113,0.05);' : '');
-      col.onclick = (function(dsInner) { return function() { planerOpenEventCreate(dsInner); }; })(ds);
+      col.dataset.planerZone = 'hour';
+      col.dataset.planerDate = ds;
+      col.onclick = (function(dsInner) {
+        return function() {
+          if (planerConsumeSuppressClick()) return;
+          planerOpenEventCreate(dsInner);
+        };
+      })(ds);
 
       var evs = (eventMap[ds] || []).filter(function(e) { return !e.allDay; });
       evs.sort(function(a, b) { return a.startH - b.startH; });
@@ -6362,27 +6400,176 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
         var bg = PLANER_TYPE_BG[ev.type]    || 'var(--surface2)';
         var widthPct = 100 / laneCount;
 
+        var movable = ev.type !== 'spiel';
         var block = document.createElement('div');
         block.style.cssText = 'position:absolute;box-sizing:border-box;top:' + top + '%;height:' + height + '%;'
           + 'left:' + (ev._lane * widthPct) + '%;width:calc(' + widthPct + '% - 2px);'
           + 'background:' + bg + ';border-left:2px solid ' + c + ';border-radius:3px;'
-          + 'padding:2px 4px;overflow:hidden;cursor:pointer;min-height:14px;transition:filter .1s';
-        var shortTitle = ev.type === 'spiel' ? ev.title.split(' - ')[0] : ev.title;
-        block.innerHTML = '<div style="font-size:9px;font-weight:700;color:' + c + ';white-space:nowrap;'
-          + 'overflow:hidden;text-overflow:ellipsis;line-height:1.3">' + shortTitle + '</div>'
+          + 'padding:2px 4px;overflow:hidden;cursor:' + (movable ? 'grab' : 'pointer') + ';min-height:14px;transition:filter .1s';
+        var shortTitle = ev.title;
+        if (ev.type === 'spiel') {
+          var teams = splitTeams(ev.title);
+          if (teams.home && teams.away) shortTitle = teams.home + ' – ' + teams.away;
+        }
+        block.innerHTML = '<div style="font-size:9px;font-weight:700;color:' + c + ';'
+          + 'display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;'
+          + 'overflow:hidden;line-height:1.3">' + shortTitle + '</div>'
           + (height > 6 ? '<div style="font-size:8px;color:var(--text-3);white-space:nowrap">' + ev.time + '</div>' : '');
         block.onmouseenter = function() { this.style.filter = 'brightness(1.25)'; };
         block.onmouseleave = function() { this.style.filter = 'none'; };
-        block.onclick = (function(e, dsInner) { return function(evt) { evt.stopPropagation(); planerOpenEventEditor(e, dsInner); }; })(ev, ds);
+        block.onclick = (function(e, dsInner) {
+          return function(evt) {
+            evt.stopPropagation();
+            if (this._dragMoved) { this._dragMoved = false; return; }
+            planerOpenEventEditor(e, dsInner);
+          };
+        })(ev, ds);
+        if (movable) planerAttachDrag(block, ev, ds); else planerAttachStatic(block);
         col.appendChild(block);
       });
 
       grid.appendChild(col);
     });
+
+    _planerLastDays = days;
+    planerRenderMealGrid(days);
   };
 
   // ── Termin-Editor (anlegen / bearbeiten / löschen) ──
   var _planerEditId = null;
+
+  // Verhindert, dass ein abgebrochener/fehlgeschlagener Zieh-Versuch (z.B. auf einem fixen
+  // Spiel-Block oder außerhalb einer gültigen Ablagezone losgelassen) versehentlich den
+  // "Neuer Termin"-Dialog der darunterliegenden Spalte/Zelle öffnet.
+  var _planerSuppressClick = false;
+  function planerMarkSuppressClick() {
+    _planerSuppressClick = true;
+    setTimeout(function() { _planerSuppressClick = false; }, 350); // Sicherheitsnetz, falls kein Klick folgt
+  }
+  function planerConsumeSuppressClick() {
+    if (_planerSuppressClick) { _planerSuppressClick = false; return true; }
+    return false;
+  }
+
+  // Fixe Blöcke (Spiele): kein Verschieben, aber ein Zieh-Versuch soll nicht versehentlich
+  // die "Neuer Termin"-Erstellung der darunterliegenden Spalte auslösen.
+  function planerAttachStatic(el) {
+    el.addEventListener('pointerdown', function(downEvt) {
+      var startX = downEvt.clientX, startY = downEvt.clientY;
+      function onMove(moveEvt) {
+        var dx = moveEvt.clientX - startX, dy = moveEvt.clientY - startY;
+        if ((Math.abs(dx) + Math.abs(dy)) > 6) {
+          planerMarkSuppressClick();
+          cleanup();
+        }
+      }
+      function cleanup() {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+      }
+      function onUp() { cleanup(); }
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  }
+
+  // Termin per Ziehen (Maus & Touch, via Pointer Events) auf ein neues Datum/Uhrzeit verschieben.
+  // Spiele werden nie als "movable" übergeben (siehe Aufrufer) und sind damit ausgeschlossen.
+  function planerAttachDrag(el, ev, ds) {
+    el.style.touchAction = 'none';
+    el.addEventListener('pointerdown', function(downEvt) {
+      if (downEvt.pointerType === 'mouse' && downEvt.button !== 0) return;
+      var startX = downEvt.clientX, startY = downEvt.clientY;
+      var moved = false;
+      var ghost = null;
+
+      function onMove(moveEvt) {
+        var dx = moveEvt.clientX - startX, dy = moveEvt.clientY - startY;
+        if (!moved && (Math.abs(dx) + Math.abs(dy)) > 6) {
+          moved = true;
+          el._dragMoved = true;
+          planerMarkSuppressClick();
+          el.style.opacity = '0.3';
+          ghost = document.createElement('div');
+          ghost.textContent = ev.title;
+          ghost.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;background:var(--surface2);'
+            + 'border:1px solid var(--border-hi);border-radius:4px;padding:3px 7px;font-size:10px;'
+            + 'font-weight:600;color:var(--text);box-shadow:0 4px 14px rgba(0,0,0,.4);white-space:nowrap;'
+            + 'max-width:180px;overflow:hidden;text-overflow:ellipsis';
+          document.body.appendChild(ghost);
+        }
+        if (ghost) {
+          ghost.style.left = (moveEvt.clientX + 12) + 'px';
+          ghost.style.top  = (moveEvt.clientY + 12) + 'px';
+        }
+      }
+
+      function onUp(upEvt) {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        el.style.opacity = '1';
+        if (ghost) ghost.remove();
+        if (!moved) return; // war nur ein Tap → normale Klick-Behandlung übernimmt onclick
+
+        var under = document.elementFromPoint(upEvt.clientX, upEvt.clientY);
+        var zoneEl = under && under.closest('[data-planer-zone]');
+        if (!zoneEl) return;
+
+        if (zoneEl.dataset.planerZone === 'hour') {
+          var totalHours = PLANER_GRID_END_H - PLANER_GRID_START_H;
+          var rect = zoneEl.getBoundingClientRect();
+          var frac = (upEvt.clientY - rect.top) / rect.height;
+          var hourAtDrop = PLANER_GRID_START_H + frac * totalHours;
+          hourAtDrop = Math.round(hourAtDrop * 4) / 4; // auf 15 Min runden
+          hourAtDrop = Math.max(PLANER_GRID_START_H, Math.min(PLANER_GRID_END_H - 0.25, hourAtDrop));
+          planerMoveEvent(ev.id, zoneEl.dataset.planerDate, hourAtDrop, (ev.endH - ev.startH) || 1, false);
+        } else if (zoneEl.dataset.planerZone === 'allday') {
+          planerMoveEvent(ev.id, zoneEl.dataset.planerDate, null, 0, true);
+        }
+      }
+
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  }
+
+  // Aktuelle Basisdaten eines Termins ermitteln (mit evtl. vorhandenem Override)
+  function planerFindBase(id) {
+    if (id.charAt(0) === 'c') {
+      var custom = planerLoadJSON(PLANER_CUSTOM_KEY, []);
+      for (var i = 0; i < custom.length; i++) { if (custom[i].id === id) return custom[i]; }
+      return null;
+    }
+    var overrides = planerLoadJSON(PLANER_OVERRIDES_KEY, {});
+    if (overrides[id]) return overrides[id];
+    var base = planerBaseEvents();
+    for (var j = 0; j < base.length; j++) { if (base[j].id === id) return base[j]; }
+    return null;
+  }
+
+  // Termin per Drag & Drop auf neues Datum/neue Uhrzeit verschieben (Spiele sind ausgeschlossen)
+  function planerMoveEvent(id, newDate, newStartH, duration, forceAllDay) {
+    var base = planerFindBase(id);
+    if (!base || base.type === 'spiel') return;
+    var updated = Object.assign({}, base, {date: newDate});
+    if (forceAllDay) {
+      updated.allDay = true; updated.start = null; updated.end = null;
+    } else {
+      updated.allDay = false;
+      updated.start = planerDecToH(newStartH);
+      updated.end   = planerDecToH(newStartH + (duration || 1));
+    }
+    if (id.charAt(0) === 'c') {
+      var custom = planerLoadJSON(PLANER_CUSTOM_KEY, []);
+      var idx = custom.findIndex(function(c) { return c.id === id; });
+      if (idx >= 0) { custom[idx] = updated; planerSaveJSON(PLANER_CUSTOM_KEY, custom); }
+    } else {
+      var overrides = planerLoadJSON(PLANER_OVERRIDES_KEY, {});
+      overrides[id] = updated;
+      planerSaveJSON(PLANER_OVERRIDES_KEY, overrides);
+    }
+    planerRenderWeek();
+  }
 
   function planerFillForm(f) {
     document.getElementById('pev-title').value   = f.title;
@@ -6483,6 +6670,64 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     planerEventModalClose();
     planerRenderWeek();
   };
+
+  // ── Mahlzeiten (Frühstück/Mittag/Abend je Wochentag) ──
+  var _planerLastDays = null;
+  var _PLANER_MEALS = [['fruehstueck', 'Frühstück'], ['mittag', 'Mittagessen'], ['abend', 'Abendessen']];
+  var _PLANER_MEAL_COLS = '78px repeat(7,1fr)';
+
+  window.planerSaveMeal = function(meal, dateStr, val) {
+    var key = 'sr-meal-date-' + dateStr + '-' + meal;
+    var p = {}; p[key] = val;
+    dbSave(p);
+  };
+
+  function planerRenderMealGrid(days) {
+    var wrap = document.getElementById('planer-meal-grid');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+
+    // Tages-Header
+    var header = document.createElement('div');
+    header.style.cssText = 'display:grid;grid-template-columns:' + _PLANER_MEAL_COLS + ';gap:6px;margin-bottom:6px';
+    header.appendChild(document.createElement('div'));
+    days.forEach(function(d) {
+      var isToday = d.getTime() === today.getTime();
+      var cell = document.createElement('div');
+      cell.style.cssText = 'text-align:center;font-family:\'Inter\',sans-serif;font-size:9px;font-weight:700;'
+        + 'text-transform:uppercase;letter-spacing:.06em;color:' + (isToday ? 'var(--grass)' : 'var(--text-3)');
+      cell.textContent = _DAY_NAMES[d.getDay()] + ' ' + d.getDate();
+      header.appendChild(cell);
+    });
+    wrap.appendChild(header);
+
+    // Eine Zeile je Mahlzeit, eine Spalte je Wochentag
+    _PLANER_MEALS.forEach(function(pair) {
+      var mealKey = pair[0], mealLabel = pair[1];
+      var row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:' + _PLANER_MEAL_COLS + ';gap:6px;margin-bottom:8px';
+
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;'
+        + 'color:var(--text-3);font-family:\'Inter\',sans-serif;padding-top:8px';
+      lbl.textContent = mealLabel;
+      row.appendChild(lbl);
+
+      days.forEach(function(d) {
+        var ds = planerFmtDate(d);
+        var ta = document.createElement('textarea');
+        ta.value = dbGet('sr-meal-date-' + ds + '-' + mealKey, '') || '';
+        ta.placeholder = '—';
+        ta.style.cssText = 'width:100%;box-sizing:border-box;min-height:44px;background:var(--surface2);'
+          + 'border:1px solid var(--border);border-radius:var(--r-xs);padding:5px 6px;color:var(--text);'
+          + 'font-size:11px;font-family:\'Inter\',sans-serif;resize:vertical;outline:none';
+        ta.onchange = (function(dsInner) { return function() { planerSaveMeal(mealKey, dsInner, this.value); }; })(ds);
+        row.appendChild(ta);
+      });
+      wrap.appendChild(row);
+    });
+  }
 
   // Initial rendern (beim Laden der Seite)
   planerRenderWeek();
