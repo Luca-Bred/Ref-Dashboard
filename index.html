@@ -4401,7 +4401,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     dbLoad(function() {
       srLoadNotes();
       loadMeals();
-      if (typeof planerRefreshMealGrid === 'function') planerRefreshMealGrid();
+      // Kalender-Termine (inkl. Overrides/eigene Termine) und Mahlzeiten mit Sheets-Daten neu rendern
+      if (typeof planerRenderWeek === 'function') planerRenderWeek();
       lpLoad();
       // BCB: Analysen + LP + EF aus Sheets laden, Bögen aus localStorage
       bcbLoadStore();
@@ -6171,14 +6172,16 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   var PLANER_DELETED_KEY   = 'planer-cal-deleted';   // [id, ...]
   var PLANER_CUSTOM_KEY    = 'planer-cal-custom';    // [{id,date,title,type,allDay,start,end,venue,address}, ...]
 
+  // Läuft über dieselbe dbGet/dbSave-Schicht wie die SR-Notizen: localStorage als
+  // Sofort-/Offline-Fallback, plus Sync über die hinterlegte Google-Sheets-Web-App
+  // (falls SHEETS_URL gesetzt ist) für geräteübergreifenden Zugriff.
   function planerLoadJSON(key, fallback) {
-    try {
-      var v = JSON.parse(localStorage.getItem(key));
-      return v == null ? fallback : v;
-    } catch (e) { return fallback; }
+    var v = dbGet(key, fallback);
+    return v == null ? fallback : v;
   }
   function planerSaveJSON(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+    var p = {}; p[key] = val;
+    dbSave(p);
   }
   function planerNewId() {
     return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -6725,11 +6728,6 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       wrap.appendChild(row);
     });
   }
-
-  // Nach Sheets-Sync (dbLoad) mit aktuellen Werten neu befüllen
-  window.planerRefreshMealGrid = function() {
-    if (_planerLastDays) planerRenderMealGrid(_planerLastDays);
-  };
 
   // Initial rendern (beim Laden der Seite)
   planerRenderWeek();
