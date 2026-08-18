@@ -2343,6 +2343,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       </div>
       </div>
       </div>
+      </div>
     </div>
 
   </div>
@@ -4037,19 +4038,19 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 <script>
   // 7. Feld = Abpfiff/Ende (für Wochenkalender), identisch zu den in SR › Termine hinterlegten Endzeiten
   var GAMES = [
-    ["2026-07-04", "PSG Fellbach - FK Schwampel (Herren Freizeitsport)", "15:00", "Tournonstr., 70736 Fellbach", "Rasenplatz Schmiden", "Rasenplatz", "17:25"],
-    ["2026-07-12", "Regionaltermin Eglosheim", "08:00", "", "", "", "16:00"],
-    ["2026-07-23", "SC Korb - TSV Waldhausen (Herren)", "19:30", "Brucknerstr., 71404 Korb", "Rasenplatz Korb", "Rasenplatz", "21:10"],
-    ["2026-08-23", "SG Bettringen 1885 e.V. II - SGM Hohenstadt/Untergröningen (Herren)", "13:00", "Wolf-Hirth-Str. 55, 73529 Schwäbisch Gmünd", "Kunstrasenplatz Bettringen", "Kunstrasenplatz", "14:45"],
-    ["2026-08-29", "SV Fellbach I - SSV Reutlingen 1905 Fußball (A-Junioren)", "10:00", "Esslinger Str. 118, 70734 Fellbach", "Kunstrasen 1 Fellbach", "Kunstrasenplatz", "11:40"],
-    ["2026-09-06", "FC Marbach - FSV 08 Bietigheim-Bissingen II (Herren)", "15:00", "Sportgelände Leiselstein, 71672 Marbach", "Hainbuch Stadion", "Rasenplatz", "16:45"],
-    ["2026-09-13", "SGM MassenbachHausen - TG Böckingen (Herren)", "15:00", "Heilbronner Str. 56, 74252 Massenbachhausen", "Massenbachhausen Rasen 1", "Rasenplatz", "16:45"],
-    ["2026-09-20", "TV Echterdingen II - SpVgg Holzgerlingen (Herren)", "13:00", "Leinfelder Str. 101, 70771 Leinfelden-Echterdingen", "Rasenpl. Sportpark Goldäcker", "Rasenplatz", "14:40"],
-    ["2026-09-27", "SG Oppenweiler-Strümpfelbach - VfL Mainhardt (Herren)", "16:00", "Rohrbachweg 68, 71570 Oppenweiler", "Rasenplatz Oppenweiler", "Rasenplatz", "17:45"],
-    ["2026-10-04", "SV Pattonville - TSV Bönnigheim (Herren)", "15:00", "John-F.-Kennedy-Allee 8, 70806 Kornwestheim", "Kunstrasenplatz Pattonville", "Kunstrasenplatz", "16:45"],
-    ["2026-10-11", "Aramäer Heilbronn - FSV Schwaigern (Herren)", "15:00", "Max-von-Laue-Str. 1-3, 74081 Heilbronn", "Sontheim Schulrasenplatz", "Rasenplatz", "16:45"],
-    ["2026-11-21", "FV 08 Unterkochen - FV Viktoria Wasseralfingen (Herren)", "14:30", "Häselbach , 73432 Aalen", "Häselbachstadion Unterkochen", "Rasenplatz", "16:15"],
-    ["2026-11-21", "FV 08 Unterkochen - FV Viktoria Wasseralfingen (Herren)", "14:30", "Häselbach, 73432 Aalen", "Kunstrasen Häselbachstadion", "Kunstrasenplatz", "16:15"]
+    ["2026-07-04", "PSG Fellbach - FK Schwampel (Herren Freizeitsport)", "15:00", "Tournonstr., 70736 Fellbach", "Rasenplatz Schmiden", "Rasenplatz"],
+    ["2026-07-12", "Regionaltermin Eglosheim", "08:00", "", "", ""],
+    ["2026-07-23", "SC Korb - TSV Waldhausen (Herren)", "19:30", "Brucknerstr., 71404 Korb", "Rasenplatz Korb", "Rasenplatz"],
+    ["2026-08-23", "SG Bettringen 1885 e.V. II - SGM Hohenstadt/Untergröningen (Herren)", "13:00", "Wolf-Hirth-Str. 55, 73529 Schwäbisch Gmünd", "Kunstrasenplatz Bettringen", "Kunstrasenplatz"],
+    ["2026-08-29", "SV Fellbach I - SSV Reutlingen 1905 Fußball (A-Junioren)", "10:00", "Esslinger Str. 118, 70734 Fellbach", "Kunstrasen 1 Fellbach", "Kunstrasenplatz"],
+    ["2026-09-06", "FC Marbach - FSV 08 Bietigheim-Bissingen II (Herren)", "15:00", "Sportgelände Leiselstein, 71672 Marbach", "Hainbuch Stadion", "Rasenplatz"],
+    ["2026-09-13", "SGM MassenbachHausen - TG Böckingen (Herren)", "15:00", "Heilbronner Str. 56, 74252 Massenbachhausen", "Massenbachhausen Rasen 1", "Rasenplatz"],
+    ["2026-09-20", "TV Echterdingen II - SpVgg Holzgerlingen (Herren)", "13:00", "Leinfelder Str. 101, 70771 Leinfelden-Echterdingen", "Rasenpl. Sportpark Goldäcker", "Rasenplatz"],
+    ["2026-09-27", "SG Oppenweiler-Strümpfelbach - VfL Mainhardt (Herren)", "16:00", "Rohrbachweg 68, 71570 Oppenweiler", "Rasenplatz Oppenweiler", "Rasenplatz"],
+    ["2026-10-04", "SV Pattonville - TSV Bönnigheim (Herren)", "15:00", "John-F.-Kennedy-Allee 8, 70806 Kornwestheim", "Kunstrasenplatz Pattonville", "Kunstrasenplatz"],
+    ["2026-10-11", "Aramäer Heilbronn - FSV Schwaigern (Herren)", "15:00", "Max-von-Laue-Str. 1-3, 74081 Heilbronn", "Sontheim Schulrasenplatz", "Rasenplatz"],
+    ["2026-11-21", "FV 08 Unterkochen - FV Viktoria Wasseralfingen (Herren)", "14:30", "Häselbach , 73432 Aalen", "Häselbachstadion Unterkochen", "Rasenplatz"],
+    ["2026-11-21", "FV 08 Unterkochen - FV Viktoria Wasseralfingen (Herren)", "14:30", "Häselbach, 73432 Aalen", "Kunstrasen Häselbachstadion", "Kunstrasenplatz"]
   ];
   var GAMES_DATES = ["2026-07-04", "2026-07-12", "2026-07-23", "2026-08-23", "2026-08-29", "2026-09-06", "2026-09-13", "2026-09-20", "2026-09-27", "2026-10-04", "2026-10-11", "2026-11-21", "2026-11-21"];
 
