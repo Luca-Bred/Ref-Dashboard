@@ -2863,10 +2863,13 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     </div>
 
     <!-- Legende -->
-    <div style="display:flex;gap:12px;margin-bottom:.75rem;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--grass);display:inline-block"></span>Spiel</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block"></span>Training</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span>Privat</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--grass);display:inline-block"></span>Spiel</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block"></span>Training</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span>Privat</div>
+      </div>
+      <button onclick="planerOpenEventCreate()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text);font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;white-space:nowrap">+ Termin</button>
     </div>
 
     <!-- Wochenraster -->
@@ -2876,7 +2879,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
         <div id="planer-week-header" style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px;margin-bottom:3px"></div>
         <!-- Ganztägig-Zeile -->
         <div id="planer-week-allday" style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px;margin-bottom:4px"></div>
-        <!-- Stunden-Gitter (unten = früh, oben = spät) -->
+        <!-- Stunden-Gitter (oben = früh, unten = spät) -->
         <div style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px">
           <div id="planer-week-hourlabels" style="position:relative"></div>
           <div id="planer-week-grid" style="grid-column:2/9;position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
@@ -2886,15 +2889,63 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
   </div>
 
-  <!-- Termin-Detail Modal -->
+  <!-- Termin-Editor Modal -->
   <div id="planer-event-modal" class="modal-overlay" onclick="if(event.target===this)planerEventModalClose()">
     <div class="modal-box" style="max-width:440px">
       <div class="mhdr">
         <div class="mhdr-eyebrow" id="planer-event-eyebrow">Termin</div>
-        <div class="mhdr-title" id="planer-event-title">—</div>
         <button class="m-close" onclick="planerEventModalClose()">✕</button>
       </div>
-      <div class="mbody" id="planer-event-content"></div>
+      <div class="mbody">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Titel</label>
+            <input type="text" id="pev-title" placeholder="z. B. SR Training" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1">
+              <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Typ</label>
+              <select id="pev-type" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
+                <option value="spiel">Spiel</option>
+                <option value="training">Training</option>
+                <option value="privat">Privat</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Datum</label>
+              <input type="date" id="pev-date" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);cursor:pointer">
+            <input type="checkbox" id="pev-allday" onchange="planerToggleAllDay()"> Ganztägig
+          </label>
+          <div id="pev-time-row" style="display:flex;gap:8px">
+            <div style="flex:1">
+              <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Start</label>
+              <input type="time" id="pev-start" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
+            </div>
+            <div style="flex:1">
+              <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Ende</label>
+              <input type="time" id="pev-end" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Ort (optional)</label>
+            <input type="text" id="pev-venue" placeholder="z. B. Rasenplatz Korb" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
+          </div>
+          <div>
+            <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Adresse (optional)</label>
+            <input type="text" id="pev-address" placeholder="z. B. Brucknerstr., 71404 Korb" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:1.1rem">
+          <button id="pev-delete-btn" onclick="planerDeleteEvent()" style="background:none;border:1px solid rgba(231,76,60,0.4);color:#e74c3c;font-size:12px;font-weight:600;padding:7px 12px;border-radius:6px;cursor:pointer">Löschen</button>
+          <div style="display:flex;gap:8px">
+            <button onclick="planerEventModalClose()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:7px 14px;border-radius:6px;cursor:pointer">Abbrechen</button>
+            <button onclick="planerSaveEvent()" style="background:var(--grass);border:1px solid var(--grass);color:#04140c;font-size:12px;font-weight:700;padding:7px 14px;border-radius:6px;cursor:pointer">Speichern</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -6077,12 +6128,11 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
                       'Juli','August','September','Oktober','November','Dezember'];
   var _DAY_NAMES   = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 
-  // Stunden-Rahmen des Rasters: 06:00 (unten) bis 23:00 (oben)
+  // Stunden-Rahmen des Rasters: 06:00 (oben) bis 23:00 (unten)
   var PLANER_GRID_START_H = 6;
   var PLANER_GRID_END_H   = 23;
   var PLANER_TYPE_COLOR = {spiel:'var(--grass)', training:'var(--teal)', privat:'var(--amber)'};
   var PLANER_TYPE_BG    = {spiel:'var(--grass-dim)', training:'var(--teal-dim)', privat:'var(--amber-dim)'};
-  var PLANER_TYPE_LABEL = {spiel:'Spiel', training:'Training', privat:'Privat'};
 
   function planerHToDec(hhmm) {
     var p = String(hhmm).split(':');
@@ -6105,40 +6155,87 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
   }
 
-  // Alle Termine als Map aufbauen: {"YYYY-MM-DD": [{title,time,type,startH,endH,allDay,venue,address}, ...]}
-  function planerBuildEventMap() {
-    var map = {};
-    function add(dateStr, ev) {
-      if (!map[dateStr]) map[dateStr] = [];
-      map[dateStr].push(ev);
-    }
+  // ── Persistenz (localStorage): Bearbeitungen/Löschungen eingebauter Termine + eigene Termine ──
+  var PLANER_OVERRIDES_KEY = 'planer-cal-overrides'; // {id: {title,type,date,allDay,start,end,venue,address}}
+  var PLANER_DELETED_KEY   = 'planer-cal-deleted';   // [id, ...]
+  var PLANER_CUSTOM_KEY    = 'planer-cal-custom';    // [{id,date,title,type,allDay,start,end,venue,address}, ...]
+
+  function planerLoadJSON(key, fallback) {
+    try {
+      var v = JSON.parse(localStorage.getItem(key));
+      return v == null ? fallback : v;
+    } catch (e) { return fallback; }
+  }
+  function planerSaveJSON(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+  function planerNewId() {
+    return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+  function planerDecToH(dec) {
+    var h = Math.floor(dec), m = Math.round((dec - h) * 60);
+    if (m === 60) { h++; m = 0; }
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+
+  // Basis-Termine (eingebaut) als einheitliche {id,date,title,type,allDay,start,end,venue,address}-Objekte
+  function planerBaseEvents() {
+    var list = [];
     // SR-Spiele aus GAMES-Array (identisch zu SR › Termine)
     if (typeof GAMES !== 'undefined') {
-      GAMES.forEach(function(g) {
-        var start = planerHToDec(g[2]);
-        var end   = g[6] ? planerHToDec(g[6]) : start + 1.75;
-        add(g[0], {
-          title: g[1], time: g[2] + ' – ' + (g[6] || ''), type: 'spiel',
-          startH: start, endH: end, allDay: false, venue: g[4], address: g[3]
-        });
+      GAMES.forEach(function(g, i) {
+        list.push({id: 'g' + i, date: g[0], title: g[1], type: 'spiel', allDay: false, start: g[2], end: g[6] || null, venue: g[4], address: g[3]});
       });
     }
     // Trainings
-    PLANER_TRAINING.forEach(function(t) {
+    PLANER_TRAINING.forEach(function(t, i) {
       var parts = t.time.split(/\s*[–—-]\s*/);
-      var start = planerHToDec(parts[0]);
-      var end   = parts[1] ? planerHToDec(parts[1]) : start + 1;
-      add(t.date, {title: t.title, time: t.time, type: 'training', startH: start, endH: end, allDay: false});
+      list.push({id: 't' + i, date: t.date, title: t.title, type: 'training', allDay: false, start: parts[0], end: parts[1] || null});
     });
     // Privat
-    PLANER_PRIVAT.forEach(function(p) {
+    PLANER_PRIVAT.forEach(function(p, i) {
       if (/ganzt/i.test(p.time)) {
-        add(p.date, {title: p.title, time: p.time, type: 'privat', allDay: true});
+        list.push({id: 'p' + i, date: p.date, title: p.title, type: 'privat', allDay: true});
       } else {
         var m = p.time.match(/(\d{1,2}):(\d{2})/);
-        var start = m ? (parseInt(m[1], 10) + parseInt(m[2], 10) / 60) : 12;
-        add(p.date, {title: p.title, time: p.time, type: 'privat', startH: start, endH: start + 2, allDay: false});
+        var start = m ? (String(m[1]).padStart(2, '0') + ':' + m[2]) : '12:00';
+        list.push({id: 'p' + i, date: p.date, title: p.title, type: 'privat', allDay: false, start: start, end: null});
       }
+    });
+    return list;
+  }
+
+  function planerNormalizeEvent(base) {
+    var ev = {id: base.id, title: base.title, type: base.type, allDay: !!base.allDay, venue: base.venue || '', address: base.address || ''};
+    if (ev.allDay) {
+      ev.time = 'Ganztägig';
+    } else {
+      var startStr = base.start || '00:00';
+      ev.startH = planerHToDec(startStr);
+      ev.endH   = base.end ? planerHToDec(base.end) : ev.startH + (base.type === 'spiel' ? 1.75 : 1);
+      ev.time   = startStr + ' – ' + (base.end || planerDecToH(ev.endH));
+    }
+    return ev;
+  }
+
+  // Alle Termine als Map aufbauen: {"YYYY-MM-DD": [{id,title,time,type,startH,endH,allDay,venue,address}, ...]}
+  // berücksichtigt lokale Bearbeitungen/Löschungen/eigene Termine aus localStorage
+  function planerBuildEventMap() {
+    var overrides = planerLoadJSON(PLANER_OVERRIDES_KEY, {});
+    var deleted   = planerLoadJSON(PLANER_DELETED_KEY, []);
+    var custom    = planerLoadJSON(PLANER_CUSTOM_KEY, []);
+
+    var all = planerBaseEvents()
+      .filter(function(e) { return deleted.indexOf(e.id) === -1; })
+      .map(function(e) { return overrides[e.id] ? overrides[e.id] : e; })
+      .concat(custom);
+
+    var map = {};
+    all.forEach(function(base) {
+      if (!base.date) return;
+      var ev = planerNormalizeEvent(base);
+      if (!map[base.date]) map[base.date] = [];
+      map[base.date].push(ev);
     });
     return map;
   }
@@ -6197,14 +6294,15 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       var ds = planerFmtDate(d);
       var evs = (eventMap[ds] || []).filter(function(e) { return e.allDay; });
       var cell = document.createElement('div');
-      cell.style.cssText = 'min-height:18px;display:flex;flex-direction:column;gap:2px';
+      cell.style.cssText = 'min-height:18px;display:flex;flex-direction:column;gap:2px;cursor:pointer';
+      cell.onclick = (function(dsInner) { return function() { planerOpenEventCreate(dsInner, true); }; })(ds);
       evs.forEach(function(ev) {
         var chip = document.createElement('div');
         chip.style.cssText = 'font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;'
           + 'background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3);'
           + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer';
         chip.textContent = ev.title;
-        chip.onclick = (function(e, dsInner) { return function() { planerOpenEvent(e, dsInner); }; })(ev, ds);
+        chip.onclick = (function(e, dsInner) { return function(evt) { evt.stopPropagation(); planerOpenEventEditor(e, dsInner); }; })(ev, ds);
         cell.appendChild(chip);
       });
       allday.appendChild(cell);
@@ -6219,7 +6317,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     hourLabels.style.height = totalPx + 'px';
     hourLabels.innerHTML = '';
     for (var h = PLANER_GRID_START_H; h <= PLANER_GRID_END_H; h++) {
-      var top = (PLANER_GRID_END_H - h) / totalHours * 100;
+      var top = (h - PLANER_GRID_START_H) / totalHours * 100;
       var lbl = document.createElement('div');
       lbl.style.cssText = 'position:absolute;left:0;right:3px;top:' + top + '%;transform:translateY(-50%);'
         + 'font-size:9px;color:var(--text-3);text-align:right;white-space:nowrap';
@@ -6235,10 +6333,11 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       var ds = planerFmtDate(d);
       var isToday = d.getTime() === today.getTime();
       var col = document.createElement('div');
-      col.style.cssText = 'position:relative;border-left:1px solid var(--border);'
+      col.style.cssText = 'position:relative;border-left:1px solid var(--border);cursor:pointer;'
         + 'background-image:repeating-linear-gradient(to top, var(--border) 0, var(--border) 1px, transparent 1px, transparent '
         + (100 / totalHours) + '%);'
         + (isToday ? 'background-color:rgba(46,204,113,0.05);' : '');
+      col.onclick = (function(dsInner) { return function() { planerOpenEventCreate(dsInner); }; })(ds);
 
       var evs = (eventMap[ds] || []).filter(function(e) { return !e.allDay; });
       evs.sort(function(a, b) { return a.startH - b.startH; });
@@ -6257,7 +6356,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
         var s = Math.max(ev.startH, PLANER_GRID_START_H);
         var e = Math.min(ev.endH, PLANER_GRID_END_H);
         if (e <= s) return;
-        var top    = (PLANER_GRID_END_H - e) / totalHours * 100;
+        var top    = (s - PLANER_GRID_START_H) / totalHours * 100;
         var height = (e - s) / totalHours * 100;
         var c  = PLANER_TYPE_COLOR[ev.type] || 'var(--text-2)';
         var bg = PLANER_TYPE_BG[ev.type]    || 'var(--surface2)';
@@ -6274,7 +6373,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
           + (height > 6 ? '<div style="font-size:8px;color:var(--text-3);white-space:nowrap">' + ev.time + '</div>' : '');
         block.onmouseenter = function() { this.style.filter = 'brightness(1.25)'; };
         block.onmouseleave = function() { this.style.filter = 'none'; };
-        block.onclick = (function(e, dsInner) { return function() { planerOpenEvent(e, dsInner); }; })(ev, ds);
+        block.onclick = (function(e, dsInner) { return function(evt) { evt.stopPropagation(); planerOpenEventEditor(e, dsInner); }; })(ev, ds);
         col.appendChild(block);
       });
 
@@ -6282,21 +6381,107 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     });
   };
 
-  window.planerOpenEvent = function(ev, dateStr) {
-    var d = new Date(dateStr + 'T00:00:00');
-    var dateLabel = _DAY_NAMES[d.getDay()] + ', ' + d.getDate() + '. ' + _MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear();
-    document.getElementById('planer-event-eyebrow').textContent = (PLANER_TYPE_LABEL[ev.type] || ev.type) + ' · ' + dateLabel;
-    document.getElementById('planer-event-title').textContent = ev.title;
+  // ── Termin-Editor (anlegen / bearbeiten / löschen) ──
+  var _planerEditId = null;
 
-    var html = '<div style="font-size:12px;color:var(--text-2);margin-bottom:8px">🕐 ' + (ev.allDay ? 'Ganztägig' : ev.time) + '</div>';
-    if (ev.venue || ev.address) {
-      html += '<div style="font-size:12px;color:var(--text-2)">📍 ' + [ev.venue, ev.address].filter(Boolean).join(' · ') + '</div>';
-    }
-    document.getElementById('planer-event-content').innerHTML = html;
+  function planerFillForm(f) {
+    document.getElementById('pev-title').value   = f.title;
+    document.getElementById('pev-type').value    = f.type;
+    document.getElementById('pev-date').value    = f.date;
+    document.getElementById('pev-allday').checked = f.allDay;
+    document.getElementById('pev-start').value   = f.start;
+    document.getElementById('pev-end').value     = f.end;
+    document.getElementById('pev-venue').value   = f.venue;
+    document.getElementById('pev-address').value = f.address;
+    planerToggleAllDay();
+  }
+
+  window.planerToggleAllDay = function() {
+    var allDay = document.getElementById('pev-allday').checked;
+    document.getElementById('pev-time-row').style.display = allDay ? 'none' : 'flex';
+  };
+
+  window.planerOpenEventEditor = function(ev, dateStr) {
+    _planerEditId = ev.id;
+    var parts = ev.allDay ? ['', ''] : ev.time.split(' – ');
+    document.getElementById('planer-event-eyebrow').textContent = 'Termin bearbeiten';
+    planerFillForm({
+      title: ev.title, type: ev.type, date: dateStr, allDay: ev.allDay,
+      start: parts[0] || '', end: parts[1] || '', venue: ev.venue || '', address: ev.address || ''
+    });
+    document.getElementById('pev-delete-btn').style.display = 'inline-block';
     document.getElementById('planer-event-modal').classList.add('is-open');
   };
+
+  window.planerOpenEventCreate = function(dateStr, allDay) {
+    _planerEditId = null;
+    document.getElementById('planer-event-eyebrow').textContent = 'Neuer Termin';
+    planerFillForm({
+      title: '', type: 'training', date: dateStr || planerFmtDate(new Date()),
+      allDay: !!allDay, start: '', end: '', venue: '', address: ''
+    });
+    document.getElementById('pev-delete-btn').style.display = 'none';
+    document.getElementById('planer-event-modal').classList.add('is-open');
+  };
+
   window.planerEventModalClose = function() {
     document.getElementById('planer-event-modal').classList.remove('is-open');
+  };
+
+  window.planerSaveEvent = function() {
+    var title   = document.getElementById('pev-title').value.trim();
+    var type    = document.getElementById('pev-type').value;
+    var date    = document.getElementById('pev-date').value;
+    var allDay  = document.getElementById('pev-allday').checked;
+    var start   = document.getElementById('pev-start').value;
+    var end     = document.getElementById('pev-end').value;
+    var venue   = document.getElementById('pev-venue').value.trim();
+    var address = document.getElementById('pev-address').value.trim();
+
+    if (!title || !date) { alert('Bitte Titel und Datum angeben.'); return; }
+    if (!allDay && !start) { alert('Bitte eine Startzeit angeben oder „Ganztägig“ aktivieren.'); return; }
+
+    var isCustom = _planerEditId && _planerEditId.charAt(0) === 'c';
+    var obj = {
+      id: _planerEditId || planerNewId(), date: date, title: title, type: type, allDay: allDay,
+      start: allDay ? null : start, end: allDay ? null : (end || null), venue: venue, address: address
+    };
+
+    if (_planerEditId && !isCustom) {
+      // Bearbeitung eines eingebauten Termins (Spiel/Training/Privat) → als Override speichern
+      var overrides = planerLoadJSON(PLANER_OVERRIDES_KEY, {});
+      overrides[_planerEditId] = obj;
+      planerSaveJSON(PLANER_OVERRIDES_KEY, overrides);
+    } else {
+      // Neuer oder bereits eigener Termin
+      var custom = planerLoadJSON(PLANER_CUSTOM_KEY, []);
+      var idx = custom.findIndex(function(c) { return c.id === obj.id; });
+      if (idx >= 0) custom[idx] = obj; else custom.push(obj);
+      planerSaveJSON(PLANER_CUSTOM_KEY, custom);
+    }
+
+    planerEventModalClose();
+    planerRenderWeek();
+  };
+
+  window.planerDeleteEvent = function() {
+    if (!_planerEditId) return;
+    if (!confirm('Diesen Termin wirklich löschen?')) return;
+
+    if (_planerEditId.charAt(0) === 'c') {
+      var custom = planerLoadJSON(PLANER_CUSTOM_KEY, []).filter(function(c) { return c.id !== _planerEditId; });
+      planerSaveJSON(PLANER_CUSTOM_KEY, custom);
+    } else {
+      var deleted = planerLoadJSON(PLANER_DELETED_KEY, []);
+      if (deleted.indexOf(_planerEditId) === -1) deleted.push(_planerEditId);
+      planerSaveJSON(PLANER_DELETED_KEY, deleted);
+      var overrides = planerLoadJSON(PLANER_OVERRIDES_KEY, {});
+      delete overrides[_planerEditId];
+      planerSaveJSON(PLANER_OVERRIDES_KEY, overrides);
+    }
+
+    planerEventModalClose();
+    planerRenderWeek();
   };
 
   // Initial rendern (beim Laden der Seite)
