@@ -2867,6 +2867,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--grass);display:inline-block"></span>Spiel</div>
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block"></span>Training</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block"></span>Kraft</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--purple);display:inline-block"></span>Ausdauer</div>
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span>Privat</div>
       </div>
       <button onclick="planerOpenEventCreate()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text);font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;white-space:nowrap">+ Termin</button>
@@ -2908,6 +2910,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
               <select id="pev-type" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:7px 9px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none">
                 <option value="spiel">Spiel</option>
                 <option value="training">Training</option>
+                <option value="kraft">Kraft</option>
+                <option value="ausdauer">Ausdauer</option>
                 <option value="privat">Privat</option>
               </select>
             </div>
@@ -6131,8 +6135,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   // Stunden-Rahmen des Rasters: 06:00 (oben) bis 23:00 (unten)
   var PLANER_GRID_START_H = 6;
   var PLANER_GRID_END_H   = 23;
-  var PLANER_TYPE_COLOR = {spiel:'var(--grass)', training:'var(--teal)', privat:'var(--amber)'};
-  var PLANER_TYPE_BG    = {spiel:'var(--grass-dim)', training:'var(--teal-dim)', privat:'var(--amber-dim)'};
+  var PLANER_TYPE_COLOR = {spiel:'var(--grass)', training:'var(--teal)', kraft:'var(--blue)', ausdauer:'var(--purple)', privat:'var(--amber)'};
+  var PLANER_TYPE_BG    = {spiel:'var(--grass-dim)', training:'var(--teal-dim)', kraft:'var(--blue-dim)', ausdauer:'var(--purple-dim)', privat:'var(--amber-dim)'};
 
   function planerHToDec(hhmm) {
     var p = String(hhmm).split(':');
@@ -6298,8 +6302,10 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       cell.onclick = (function(dsInner) { return function() { planerOpenEventCreate(dsInner, true); }; })(ds);
       evs.forEach(function(ev) {
         var chip = document.createElement('div');
+        var chipC  = PLANER_TYPE_COLOR[ev.type] || 'var(--text-2)';
+        var chipBg = PLANER_TYPE_BG[ev.type]    || 'var(--surface2)';
         chip.style.cssText = 'font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;'
-          + 'background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3);'
+          + 'background:' + chipBg + ';color:' + chipC + ';border:1px solid ' + chipC + ';'
           + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer';
         chip.textContent = ev.title;
         chip.onclick = (function(e, dsInner) { return function(evt) { evt.stopPropagation(); planerOpenEventEditor(e, dsInner); }; })(ev, ds);
