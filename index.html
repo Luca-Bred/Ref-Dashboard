@@ -6373,9 +6373,14 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
           + 'left:' + (ev._lane * widthPct) + '%;width:calc(' + widthPct + '% - 2px);'
           + 'background:' + bg + ';border-left:2px solid ' + c + ';border-radius:3px;'
           + 'padding:2px 4px;overflow:hidden;cursor:pointer;min-height:14px;transition:filter .1s';
-        var shortTitle = ev.type === 'spiel' ? ev.title.split(' - ')[0] : ev.title;
-        block.innerHTML = '<div style="font-size:9px;font-weight:700;color:' + c + ';white-space:nowrap;'
-          + 'overflow:hidden;text-overflow:ellipsis;line-height:1.3">' + shortTitle + '</div>'
+        var shortTitle = ev.title;
+        if (ev.type === 'spiel') {
+          var teams = splitTeams(ev.title);
+          if (teams.home && teams.away) shortTitle = teams.home + ' – ' + teams.away;
+        }
+        block.innerHTML = '<div style="font-size:9px;font-weight:700;color:' + c + ';'
+          + 'display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;'
+          + 'overflow:hidden;line-height:1.3">' + shortTitle + '</div>'
           + (height > 6 ? '<div style="font-size:8px;color:var(--text-3);white-space:nowrap">' + ev.time + '</div>' : '');
         block.onmouseenter = function() { this.style.filter = 'brightness(1.25)'; };
         block.onmouseleave = function() { this.style.filter = 'none'; };
