@@ -2890,25 +2890,9 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     </div>
 
     <!-- Mahlzeiten -->
-    <div style="margin-top:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem">
-        <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3)">Mahlzeiten</div>
-        <span id="planer-meal-date-label" style="font-size:11px;color:var(--text-3)">—</span>
-      </div>
-      <div class="rsp-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-        <div>
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Frühstück</div>
-          <textarea id="planer-meal-fruehstueck" style="width:100%;min-height:52px;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:6px 8px;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="planerSaveMeal('fruehstueck',this.value)"></textarea>
-        </div>
-        <div>
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Mittagessen</div>
-          <textarea id="planer-meal-mittag" style="width:100%;min-height:52px;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:6px 8px;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="planerSaveMeal('mittag',this.value)"></textarea>
-        </div>
-        <div>
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Abendessen</div>
-          <textarea id="planer-meal-abend" style="width:100%;min-height:52px;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:6px 8px;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="planerSaveMeal('abend',this.value)"></textarea>
-        </div>
-      </div>
+    <div style="margin-top:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.875rem">Mahlzeiten</div>
+      <div id="planer-meal-grid" style="min-width:600px"></div>
     </div>
 
   </div>
@@ -4417,7 +4401,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     dbLoad(function() {
       srLoadNotes();
       loadMeals();
-      if (typeof planerLoadMeals === 'function') planerLoadMeals();
+      if (typeof planerRefreshMealGrid === 'function') planerRefreshMealGrid();
       lpLoad();
       // BCB: Analysen + LP + EF aus Sheets laden, Bögen aus localStorage
       bcbLoadStore();
@@ -6413,6 +6397,9 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
       grid.appendChild(col);
     });
+
+    _planerLastDays = days;
+    planerRenderMealGrid(days);
   };
 
   // ── Termin-Editor (anlegen / bearbeiten / löschen) ──
@@ -6518,30 +6505,71 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     planerRenderWeek();
   };
 
-  // Initial rendern (beim Laden der Seite)
-  planerRenderWeek();
+  // ── Mahlzeiten (Frühstück/Mittag/Abend je Wochentag) ──
+  var _planerLastDays = null;
+  var _PLANER_MEALS = [['fruehstueck', 'Frühstück'], ['mittag', 'Mittagessen'], ['abend', 'Abendessen']];
+  var _PLANER_MEAL_COLS = '78px repeat(7,1fr)';
 
-  // ── Mahlzeiten (heute) ──
-  function planerMealDateStr() { return planerFmtDate(new Date()); }
-  window.planerSaveMeal = function(meal, val) {
-    var key = 'sr-meal-date-' + planerMealDateStr() + '-' + meal;
+  window.planerSaveMeal = function(meal, dateStr, val) {
+    var key = 'sr-meal-date-' + dateStr + '-' + meal;
     var p = {}; p[key] = val;
     dbSave(p);
   };
-  function planerLoadMeals() {
-    var ds = planerMealDateStr();
-    var lbl = document.getElementById('planer-meal-date-label');
-    if (lbl) {
-      var d = new Date(ds + 'T00:00:00');
-      lbl.textContent = 'Heute · ' + _DAY_NAMES[d.getDay()] + ', ' + d.getDate() + '. ' + _MONTH_NAMES[d.getMonth()];
-    }
-    ['fruehstueck', 'mittag', 'abend'].forEach(function(m) {
-      var v = dbGet('sr-meal-date-' + ds + '-' + m, '');
-      var el = document.getElementById('planer-meal-' + m);
-      if (el) el.value = v || '';
+
+  function planerRenderMealGrid(days) {
+    var wrap = document.getElementById('planer-meal-grid');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+
+    // Tages-Header
+    var header = document.createElement('div');
+    header.style.cssText = 'display:grid;grid-template-columns:' + _PLANER_MEAL_COLS + ';gap:6px;margin-bottom:6px';
+    header.appendChild(document.createElement('div'));
+    days.forEach(function(d) {
+      var isToday = d.getTime() === today.getTime();
+      var cell = document.createElement('div');
+      cell.style.cssText = 'text-align:center;font-family:\'Inter\',sans-serif;font-size:9px;font-weight:700;'
+        + 'text-transform:uppercase;letter-spacing:.06em;color:' + (isToday ? 'var(--grass)' : 'var(--text-3)');
+      cell.textContent = _DAY_NAMES[d.getDay()] + ' ' + d.getDate();
+      header.appendChild(cell);
+    });
+    wrap.appendChild(header);
+
+    // Eine Zeile je Mahlzeit, eine Spalte je Wochentag
+    _PLANER_MEALS.forEach(function(pair) {
+      var mealKey = pair[0], mealLabel = pair[1];
+      var row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:' + _PLANER_MEAL_COLS + ';gap:6px;margin-bottom:8px';
+
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;'
+        + 'color:var(--text-3);font-family:\'Inter\',sans-serif;padding-top:8px';
+      lbl.textContent = mealLabel;
+      row.appendChild(lbl);
+
+      days.forEach(function(d) {
+        var ds = planerFmtDate(d);
+        var ta = document.createElement('textarea');
+        ta.value = dbGet('sr-meal-date-' + ds + '-' + mealKey, '') || '';
+        ta.placeholder = '—';
+        ta.style.cssText = 'width:100%;box-sizing:border-box;min-height:44px;background:var(--surface2);'
+          + 'border:1px solid var(--border);border-radius:var(--r-xs);padding:5px 6px;color:var(--text);'
+          + 'font-size:11px;font-family:\'Inter\',sans-serif;resize:vertical;outline:none';
+        ta.onchange = (function(dsInner) { return function() { planerSaveMeal(mealKey, dsInner, this.value); }; })(ds);
+        row.appendChild(ta);
+      });
+      wrap.appendChild(row);
     });
   }
-  planerLoadMeals();
+
+  // Nach Sheets-Sync (dbLoad) mit aktuellen Werten neu befüllen
+  window.planerRefreshMealGrid = function() {
+    if (_planerLastDays) planerRenderMealGrid(_planerLastDays);
+  };
+
+  // Initial rendern (beim Laden der Seite)
+  planerRenderWeek();
 
   // ══════════════════════════════════════
   // REGENERATION
