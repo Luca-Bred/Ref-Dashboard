@@ -2879,7 +2879,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
         <div id="planer-week-header" style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px;margin-bottom:3px"></div>
         <!-- Ganztägig-Zeile -->
         <div id="planer-week-allday" style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px;margin-bottom:4px"></div>
-        <!-- Stunden-Gitter (unten = früh, oben = spät) -->
+        <!-- Stunden-Gitter (oben = früh, unten = spät) -->
         <div style="display:grid;grid-template-columns:38px repeat(7,1fr);gap:2px">
           <div id="planer-week-hourlabels" style="position:relative"></div>
           <div id="planer-week-grid" style="grid-column:2/9;position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
@@ -6128,7 +6128,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
                       'Juli','August','September','Oktober','November','Dezember'];
   var _DAY_NAMES   = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 
-  // Stunden-Rahmen des Rasters: 06:00 (unten) bis 23:00 (oben)
+  // Stunden-Rahmen des Rasters: 06:00 (oben) bis 23:00 (unten)
   var PLANER_GRID_START_H = 6;
   var PLANER_GRID_END_H   = 23;
   var PLANER_TYPE_COLOR = {spiel:'var(--grass)', training:'var(--teal)', privat:'var(--amber)'};
@@ -6317,7 +6317,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     hourLabels.style.height = totalPx + 'px';
     hourLabels.innerHTML = '';
     for (var h = PLANER_GRID_START_H; h <= PLANER_GRID_END_H; h++) {
-      var top = (PLANER_GRID_END_H - h) / totalHours * 100;
+      var top = (h - PLANER_GRID_START_H) / totalHours * 100;
       var lbl = document.createElement('div');
       lbl.style.cssText = 'position:absolute;left:0;right:3px;top:' + top + '%;transform:translateY(-50%);'
         + 'font-size:9px;color:var(--text-3);text-align:right;white-space:nowrap';
@@ -6356,7 +6356,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
         var s = Math.max(ev.startH, PLANER_GRID_START_H);
         var e = Math.min(ev.endH, PLANER_GRID_END_H);
         if (e <= s) return;
-        var top    = (PLANER_GRID_END_H - e) / totalHours * 100;
+        var top    = (s - PLANER_GRID_START_H) / totalHours * 100;
         var height = (e - s) / totalHours * 100;
         var c  = PLANER_TYPE_COLOR[ev.type] || 'var(--text-2)';
         var bg = PLANER_TYPE_BG[ev.type]    || 'var(--surface2)';
