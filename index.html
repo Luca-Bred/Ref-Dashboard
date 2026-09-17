@@ -4040,6 +4040,15 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   ];
   var GAMES_DATES = ["2026-07-23", "2026-08-23", "2026-08-29", "2026-08-30", "2026-09-06", "2026-09-09", "2026-09-12", "2026-09-13", "2026-09-16", "2026-09-20", "2026-09-23", "2026-09-27", "2026-09-30", "2026-10-04", "2026-10-11", "2026-10-14", "2026-10-24", "2026-10-28", "2026-11-11", "2026-11-21", "2026-11-25", "2026-12-05", "2026-12-09"];
 
+  // Das GAMES-Array wird von einem externen Skript automatisiert befüllt und enthält
+  // dabei nicht nur echte Spiele, sondern auch SR-Trainings/Schulungen (z.B.
+  // ["2026-09-30", "SR-Training", ...]). Für "Nächstes Spiel" & Co. sollen ausschließlich
+  // echte Spiele berücksichtigt werden – dieser Filter erkennt und sortiert Nicht-Spiele aus.
+  function gameIsRealMatch(g) {
+    var title = (g && g[1]) || '';
+    return !/training|schulung|lehrgang|fortbildung/i.test(title);
+  }
+
   // ══════════════════════════════════════════════════════════════
   //  GOOGLE SHEETS SYNC
   //  Trage deine Web App URL hier ein nach dem Einrichten:
@@ -4370,7 +4379,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       var todayS = new Date().toISOString().slice(0,10);
       var ng = null, ni = -1;
       for (var i = 0; i < GAMES.length; i++) {
-        if (GAMES[i][0] >= todayS) { ng = GAMES[i]; ni = i; break; }
+        if (GAMES[i][0] >= todayS && gameIsRealMatch(GAMES[i])) { ng = GAMES[i]; ni = i; break; }
       }
       if (!ng) return;
       var ML  = ['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -5489,7 +5498,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     var nextIdx  = -1;
     if (typeof GAMES !== 'undefined') {
       for (var i = 0; i < GAMES.length; i++) {
-        if (GAMES[i][0] >= todayStr) {
+        if (GAMES[i][0] >= todayStr && gameIsRealMatch(GAMES[i])) {
           nextGame = GAMES[i];
           nextIdx  = i;
           break;
@@ -5559,7 +5568,10 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   function snFindNextGame() {
     var today = new Date().toISOString().slice(0,10);
     for (var i = 0; i < GAMES.length; i++) {
-      if (GAMES[i][0] >= today) return i;
+      if (GAMES[i][0] >= today && gameIsRealMatch(GAMES[i])) return i;
+    }
+    for (var j = GAMES.length - 1; j >= 0; j--) {
+      if (gameIsRealMatch(GAMES[j])) return j;
     }
     return GAMES.length - 1;
   }
@@ -5592,7 +5604,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     if (counter) var today2 = new Date().toISOString().slice(0,10);
       var futureCount = 0; var futurePos = 0;
       for (var ci = 0; ci < GAMES.length; ci++) {
-        if (GAMES[ci][0] >= today2) {
+        if (GAMES[ci][0] >= today2 && gameIsRealMatch(GAMES[ci])) {
           futureCount++;
           if (ci <= idx) futurePos = futureCount;
         }
@@ -5633,9 +5645,9 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     // Nav arrows
     var today3 = new Date().toISOString().slice(0,10);
       var hasPrev = false;
-      for (var pi = idx-1; pi >= 0; pi--) { if (GAMES[pi][0] >= today3) { hasPrev = true; break; } }
+      for (var pi = idx-1; pi >= 0; pi--) { if (GAMES[pi][0] >= today3 && gameIsRealMatch(GAMES[pi])) { hasPrev = true; break; } }
       var hasNext = false;
-      for (var ni = idx+1; ni < GAMES.length; ni++) { if (GAMES[ni][0] >= today3) { hasNext = true; break; } }
+      for (var ni = idx+1; ni < GAMES.length; ni++) { if (GAMES[ni][0] >= today3 && gameIsRealMatch(GAMES[ni])) { hasNext = true; break; } }
       if (el('sn-prev')) el('sn-prev').style.opacity = hasPrev ? '1' : '0.3';
       if (el('sn-next')) el('sn-next').style.opacity = hasNext ? '1' : '0.3';
     
@@ -5655,8 +5667,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   function snNavigate(dir) {
     var today = new Date().toISOString().slice(0,10);
     var newIdx = snCurrentIdx + dir;
-    // Skip past games when navigating forward
-    while (newIdx >= 0 && newIdx < GAMES.length && GAMES[newIdx][0] < today) {
+    // Vergangene Spiele und Nicht-Spiele (SR-Training etc.) beim Navigieren überspringen
+    while (newIdx >= 0 && newIdx < GAMES.length && (GAMES[newIdx][0] < today || !gameIsRealMatch(GAMES[newIdx]))) {
       newIdx += dir;
     }
     if (newIdx < 0 || newIdx >= GAMES.length) return;
@@ -6204,10 +6216,12 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   // Basis-Termine (eingebaut) als einheitliche {id,date,title,type,allDay,start,end,venue,address}-Objekte
   function planerBaseEvents() {
     var list = [];
-    // SR-Spiele aus GAMES-Array (identisch zu SR › Termine)
+    // SR-Spiele aus GAMES-Array (identisch zu SR › Termine). Enthält automatisiert auch
+    // Nicht-Spiele wie "SR-Training" – diese werden als Training statt Spiel eingeordnet.
     if (typeof GAMES !== 'undefined') {
       GAMES.forEach(function(g, i) {
-        list.push({id: 'g' + i, date: g[0], title: g[1], type: 'spiel', allDay: false, start: g[2], end: g[6] || null, venue: g[4], address: g[3]});
+        var isMatch = gameIsRealMatch(g);
+        list.push({id: 'g' + i, date: g[0], title: g[1], type: isMatch ? 'spiel' : 'training', allDay: false, start: g[2], end: g[6] || null, venue: isMatch ? g[4] : undefined, address: isMatch ? g[3] : undefined});
       });
     }
     // Trainings
