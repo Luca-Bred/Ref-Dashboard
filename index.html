@@ -2921,879 +2921,37 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     </div>
   </div>
 
-  <!-- ── 2. ERNÄHRUNG (verschoben aus altem Tab) ── -->
+  <!-- ── 2. ERNÄHRUNG: REZEPTE ── -->
   <div id="planer-ernaehrung" class="slot-section">
     <div class="subnav">
       <div class="nav-group">
-        <span class="nav-group-label">Ernährung</span>
-        <button class="sub-tab active" onclick="showErnaehrungSlot('essensplan',this)">Essensplan</button>
-        <button class="sub-tab" onclick="showErnaehrungSlot('supplements-tab',this)">Supplements</button>
-        <button class="sub-tab" onclick="showErnaehrungSlot('matchday-tab',this)">Matchday</button>
-      </div>
-    </div>
-    <div id="essensplan" class="slot-section active">
-    <div style="font-size:12px;color:var(--text-2);padding:10px 14px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);border-left:3px solid var(--grass);margin-bottom:1rem;line-height:1.6">Wochenplan Mo–So. Empfohlenes Essen basiert auf der Tagesbelastung. Trage dein tatssächliches Essen im Eingabefeld ein.</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border)">
-          <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Montag</div>
-          <span style="font-size:11px;color:var(--text-3)">Pull + Auslaufen</span>
-        </div>
-        <div class="rsp-meal-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)">
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Frühstück</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Haferflocken + Ei + Erdnussbutter</div>
-            <textarea id="meal-mo-fr" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('mo','fr',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Mittagessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Hähnchen + Reis + Gemüse</div>
-            <textarea id="meal-mo-mi" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('mo','mi',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Post-Workout</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Whey-Shake + Banane</div>
-            <textarea id="meal-mo-pw" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('mo','pw',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Abendessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Lachs + Süßkartoffeln</div>
-            <textarea id="meal-mo-ab" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('mo','ab',this.value)"></textarea>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border)">
-          <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Dienstag</div>
-          <span style="font-size:11px;color:var(--text-3)">Beine</span>
-        </div>
-        <div class="rsp-meal-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)">
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Frühstück</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Rührer + Vollkornbrot + Avocado</div>
-            <textarea id="meal-di-fr" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('di','fr',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Mittagessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Rind + Pasta + Salat</div>
-            <textarea id="meal-di-mi" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('di','mi',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Post-Workout</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Whey + Haferflocken</div>
-            <textarea id="meal-di-pw" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('di','pw',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Abendessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Hähnchen + Quinoa + Brokkoli</div>
-            <textarea id="meal-di-ab" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('di','ab',this.value)"></textarea>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border)">
-          <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Mittwoch</div>
-          <span style="font-size:11px;color:var(--text-3)">Push + Zone 2-3</span>
-        </div>
-        <div class="rsp-meal-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)">
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Frühstück</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Haferflocken + Milch + Banane</div>
-            <textarea id="meal-mi-fr" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('mi','fr',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Mittagessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Fisch + Reis + Spinat</div>
-            <textarea id="meal-mi-mi" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('mi','mi',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Post-Workout</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Whey + Reiswaffel</div>
-            <textarea id="meal-mi-pw" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('mi','pw',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Abendessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Magerquark + Beeren + Nüsse</div>
-            <textarea id="meal-mi-ab" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('mi','ab',this.value)"></textarea>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border)">
-          <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Donnerstag</div>
-          <span style="font-size:11px;color:var(--text-3)">Pause</span>
-        </div>
-        <div class="rsp-meal-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)">
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Frühstück</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Joghurt + Granola + Obst</div>
-            <textarea id="meal-do-fr" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('do','fr',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Mittagessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Omelett + Vollkornbrot</div>
-            <textarea id="meal-do-mi" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('do','mi',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Post-Workout</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">–</div>
-            <textarea id="meal-do-pw" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('do','pw',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Abendessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Suppe + Vollkornbrot</div>
-            <textarea id="meal-do-ab" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('do','ab',this.value)"></textarea>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border)">
-          <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Freitag</div>
-          <span style="font-size:11px;color:var(--text-3)">Oberkörper + HIIT</span>
-        </div>
-        <div class="rsp-meal-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)">
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Frühstück</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Haferflocken + Protein-Pulver + Beeren</div>
-            <textarea id="meal-fr-fr" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('fr','fr',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Mittagessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Hähnchen + Basmatireis + Gemüse</div>
-            <textarea id="meal-fr-mi" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('fr','mi',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Post-Workout</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Whey + Kohlenhydrate</div>
-            <textarea id="meal-fr-pw" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('fr','pw',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Abendessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Lachs + Kartoffeln + Salat</div>
-            <textarea id="meal-fr-ab" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('fr','ab',this.value)"></textarea>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border)">
-          <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Samstag</div>
-          <span style="font-size:11px;color:var(--text-3)">Pause</span>
-        </div>
-        <div class="rsp-meal-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)">
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Frühstück</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Joghurt + Honig + Nüsse</div>
-            <textarea id="meal-sa-fr" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('sa','fr',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Mittagessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Vollkorn-Sandwich + Salat</div>
-            <textarea id="meal-sa-mi" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('sa','mi',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Post-Workout</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">–</div>
-            <textarea id="meal-sa-pw" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('sa','pw',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Abendessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Hähnchen + Gemüse + Quinoa</div>
-            <textarea id="meal-sa-ab" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('sa','ab',this.value)"></textarea>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--surface);border:1px solid rgba(46,204,113,0.4);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.625rem 1rem;background:rgba(46,204,113,0.08);border-bottom:1px solid var(--border)">
-          <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--grass)">Sonntag</div>
-          <span style="font-size:11px;color:var(--grass)">Spieltag</span>
-        </div>
-        <div class="rsp-meal-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)">
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Frühstück</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Haferflocken + Milch + Banane (3-4h vor)</div>
-            <textarea id="meal-so-fr" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('so','fr',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Mittagessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Pasta/Reis + Hähnchen (2-3h vor)</div>
-            <textarea id="meal-so-mi" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('so','mi',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Post-Workout</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">4 Fuel Recharge → Whey-Shake</div>
-            <textarea id="meal-so-pw" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('so','pw',this.value)"></textarea>
-          </div>
-          <div style="padding:.75rem;border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:5px;font-family:'Inter',sans-serif">Abendessen</div>
-            <div style="font-size:11px;color:var(--text-3);margin-bottom:5px;line-height:1.4;font-style:italic">Vollwertige Erholungsmahlzeit</div>
-            <textarea id="meal-so-ab" style="width:100%;min-height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:4px 6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;resize:vertical;outline:none" placeholder="Gegessen..." onchange="saveMeal('so','ab',this.value)"></textarea>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-    <div id="supplements-tab" class="slot-section">
-    <div class="subnav">
-      <div class="nav-group">
-        <span class="nav-group-label">Alltag</span>
-        <button class="sub-tab active" onclick="showInnerSlot('morgens', this)">Morgens</button>
-        <button class="sub-tab" onclick="showInnerSlot('abends', this)">Abends</button>
-      </div>
-      <div class="nav-group">
-        <span class="nav-group-label">Gym</span>
-        <button class="sub-tab" onclick="showInnerSlot('pre-gym', this)">Pre</button>
-        <button class="sub-tab" onclick="showInnerSlot('waehrend-gym', this)">Während</button>
-        <button class="sub-tab" onclick="showInnerSlot('post-gym', this)">After</button>
-      </div>
-      <div class="nav-group">
-        <span class="nav-group-label">Lauf</span>
-        <button class="sub-tab" onclick="showInnerSlot('pre-lauf', this)">Pre</button>
-        <button class="sub-tab" onclick="showInnerSlot('post-lauf', this)">After</button>
-      </div>
-      <div class="nav-group">
-        <span class="nav-group-label">HIIT</span>
-        <button class="sub-tab" onclick="showInnerSlot('pre-hiit', this)">Pre</button>
-        <button class="sub-tab" onclick="showInnerSlot('post-hiit', this)">After</button>
-      </div>
-      <div class="nav-group">
-        <span class="nav-group-label">Matchday</span>
-        <button class="sub-tab" onclick="showInnerSlot('md-supp-90', this)">–90 Min</button>
-        <button class="sub-tab" onclick="showInnerSlot('md-supp-pre', this)">Anpfiff</button>
-        <button class="sub-tab" onclick="showInnerSlot('md-supp-ht', this)">Halbzeit</button>
-        <button class="sub-tab" onclick="showInnerSlot('md-supp-post1', this)">Abpfiff</button>
-        <button class="sub-tab" onclick="showInnerSlot('md-supp-post2', this)">+30–60 Min</button>
+        <span class="nav-group-label">Rezepte</span>
+        <button class="sub-tab active" onclick="showErnaehrungSlot('rezepte-fruehstueck',this)">Frühstück</button>
+        <button class="sub-tab" onclick="showErnaehrungSlot('rezepte-mittagessen',this)">Mittagessen</button>
+        <button class="sub-tab" onclick="showErnaehrungSlot('rezepte-abendessen',this)">Abendessen</button>
+        <button class="sub-tab" onclick="showErnaehrungSlot('rezepte-snack',this)">Snack</button>
       </div>
     </div>
 
-    <!-- MORGENS -->
-    <div id="morgens" class="inner-slot active">
-      <div class="intro-bar">Täglicher Basis-Stack – unabhängig vom Trainingstag. Kreatin und Kollagen nüchtern oder zum Frühstück. Omega-3 und D3/K2 immer zur fetthaltigen Mahlzeit. Erdnussbutter-Porridge mit Milch reicht vollständig für die Fettbasis.</div>
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Kreatin (CREAFAST)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">3–5 g täglich · Zeitpunkt irrelevant, Konstanz entscheidend</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Füllt Phosphokreatin-Speicher auf – direkter Treibstoff für Anstrengungen unter 10 Sekunden. Mehr Kraft pro Satz im Gym, längere Sprintleistung auf Maximalgeschwindigkeit. 4 Krafteinheiten + 20 Sprints/Spiel profitieren direkt.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Bestens erforschtes Supplement überhaupt. Wirkt nach 3–4 Wochen voll – nicht sporadisch nehmen. Leichte Wassereinlagerungen in Woche 1 normal. <b>Nicht mit großen Koffeinmengen mischen</b> – reduziert Absorption leicht.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text">Rotes Fleisch (Rind, Wild) enthält ~2 g Kreatin/500 g. Tägliche 3–5 g über Ernährung: nicht realistisch erreichbar. <span class="av av-nein">Kein Ersatz</span></div></div>
-        </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Kollagen + Vitamin C</div><div class="badges"><span class="badge b-ext">Extern</span><span class="badge b-top">Must-have (Knie)</span></div></div>
-          <div class="dose">10 g Kollagen-Peptide (Fortigel/UC-II) + 50–100 mg Vit. C · 30–60 Min vor Training</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Liefert Glycin, Prolin, Hydroxyprolin – Bausteine von Knorpel und Sehnen. Normales Whey enthält davon kaum etwas. Direkte Unterstützung des Grad-2-Knorpelschadens im linken Knie. Anschließende Belastung triggert Synthesereaktion im Gewebe.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Mit 22 + Grad-2-Schaden bestes Zeitfenster: körpereigene Kollagensynthese läuft auf Hochtouren und kann verstärkt werden. <b>Vitamin C ist nicht optional</b> – ohne es verpufft ein großer Teil des Effekts biochemisch. Extern kaufen: Sunday Natural, Naturtreu (Fortigel-basiert).</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Selbst gekochte Knochenbrühe</b> (mind. 8–12 Std.) enthält natürliche Kollagen-Peptide und Glycin. <span class="av av-ok">Gute Ergänzung</span> – Dosierung unkontrollierbar, kein Fortigel-Extrakt. Kombinierbar, kein vollständiger Ersatz.</div></div>
-          <div class="warn-box">Vor dem Training einnehmen, nicht danach · Vitamin C immer dazu · nicht als Abend-Option verschieben</div>
-        </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Omega-3 (OMEGA 3++)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">2–3 g EPA/DHA täglich · zur fetthaltigen Mahlzeit (Frühstück mit EB + Milch reicht)</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">EPA/DHA werden in Zellmembranen eingebaut, regulieren Entzündungsreaktion nach Training. Weniger Muskelkater, weniger Gelenksteifigkeit am Folgetag. Langfristiger Knorpelschutz. Verbessert Herzratenvariabilität → messbar bessere Erholung.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Fettlöslich – braucht Nahrungsfett zur Resorption. Erdnussbutter + Milch reicht vollständig. Wirkt nach 4–6 Wochen kumulativ – wer nach 2 Wochen abbricht, sieht keinen Effekt. Konstanz ist alles.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Fetter Fisch 3×/Woche</b> (Lachs, Makrele, Hering) liefert ausreichend EPA/DHA wenn konsequent eingehalten. <span class="av av-gut">Echter Ersatz möglich</span> – die meisten halten es nicht konsequent genug durch.</div></div>
-        </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Vitamin D3 + K2</div><div class="badges"><span class="badge b-ext">Extern</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">2.000–4.000 IE D3 + 100 µg K2 täglich · zur Mahlzeit mit Fett</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">D3 beeinflusst Muskelkraft, Immunfunktion, Stimmung und Hormonhaushalt. K2 steuert Calcium in Knochen statt Arterien. Für Athleten mit Herbst/Winter-Saison in Deutschland unverzichtbar.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">~80% der Deutschen haben Vitamin-D-Mangel – bei Sportlern mit Indoor-Training noch ausgeprägter. <b>Nicht bei NAMEDSPORT erhältlich.</b> Sunday Natural, Naturtreu oder Apotheke. Blutwert einmal jährlich prüfen (25-OH-D).</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Sonne</b> (20–30 Min mittags auf Arme/Beine, Mai–September). <span class="av av-ok">Saisonaler Ersatz</span> – Oktober bis April in Deutschland nicht ausreichend. Supplement in der Saison nicht verzichtbar.</div></div>
-        </div>
-
-      </div>
+    <div id="rezepte-fruehstueck" class="slot-section active">
+      <div id="rezepte-list-fruehstueck" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
+      <button onclick="rezepteAdd('fruehstueck')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
     </div>
 
-    <!-- ABENDS -->
-    <div id="abends" class="inner-slot">
-      <div class="intro-bar">Abend-Stack – beide Produkte entfalten ihre Wirkung über Nacht. Regeneration passiert im Schlaf. Magnesium und Ashwagandha ergänzen sich ideal und können zusammen eingenommen werden.</div>
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Magnesium Liquid + Vitamin B6</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">1 Ampulle täglich · 30–60 Min vor dem Schlafen · niemals morgens</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Reguliert Muskelentspannung, Nervensignale und Schlaftiefe. Bei Sportlern häufigster Mangelmineralstoff – geht durch Schweiß verloren. B6 verbessert Aufnahme in die Zelle. Krämpf-Prävention, tieferer Schlaf, schnellere Nervenregeneration.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Sedierende Wirkung – morgens kontraproduktiv, abends ideal. Liquid-Form besser resorbierbar als Oxid-Tabletten aus dem Drogeriemarkt. Bei 7+ Einheiten/Woche erheblicher Mehrbedarf, der über Ernährung kaum zu decken ist.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Kürbiskerne, Cashews, Mandeln, dunkle Schokolade 85%+, Spinat.</b> <span class="av av-ok">Teilweise Ergänzung</span> – bei hohem Trainingsvolumen reicht Ernährung allein selten. Beides kombinieren ist optimal.</div></div>
-          <div class="warn-box">Nicht morgens – sedierende Wirkung kontraproduktiv am Anfang des Tages</div>
-        </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Ashwagandha (KSM-66 oder Sensoril)</div><div class="badges"><span class="badge b-ext">Extern</span><span class="badge b-ok">Empfohlen</span></div></div>
-          <div class="dose">300–600 mg KSM-66 täglich · abends · Wirkung nach 4–8 Wochen</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Senkt Cortisol (chronischer Stressmarker bei hohem Trainingsvolumen), verbessert Schlafqualität und Erholungstiefe, erhöht in Studien die VO2max leicht. Adaptogen – wirkt kumulativ über Wochen, nicht akut.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">7+ Einheiten/Woche + Beruf + Spielstress = dauerhaft erhöhtes Cortisol. Das hemmt Muskelaufbau, Schlaf und Immunsystem gleichzeitig. <b>Nur KSM-66 oder Sensoril-Extrakte</b> – nicht generisches Pulver mit unklarem Wirkstoffgehalt.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Schlafhygiene</b> (feste Zeiten, kühles Zimmer, kein Bildschirm 30 Min vor Bett) + <b>Kälteanwendungen</b> (kalte Dusche post-training) haben ähnliche Cortisol-senkende Effekte. <span class="av av-gut">Echte Alternative</span> – wenn Schlaf bereits gut ist, ist Ashwagandha optional.</div></div>
-        </div>
-
-      </div>
+    <div id="rezepte-mittagessen" class="slot-section">
+      <div id="rezepte-list-mittagessen" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
+      <button onclick="rezepteAdd('mittagessen')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
     </div>
 
-    <!-- PRE GYM -->
-    <div id="pre-gym" class="inner-slot">
-      <div class="intro-bar">Krafteinheit (Pull / Beine / Push / Oberkörper). Ziel: maximale Intensität, kein voller Magen. Kreatin wurde bereits morgens genommen. Die meisten Athleten brauchen pre-gym keine Supplements wenn die letzte Mahlzeit &lt;3 Stunden zurückliegt.</div>
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Kollagen + Vitamin C (falls morgens verpasst)</div><div class="badges"><span class="badge b-ext">Extern</span><span class="badge b-top">Timing-kritisch</span></div></div>
-          <div class="dose">30–60 Min vor der Einheit nachholen wenn morgens nicht genommen</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Warum pre-gym</div><div class="col-text">Die anschließende mechanische Belastung triggert die Kollagensynthese im Knorpel. Ohne vorherige Einnahme verpufft der Effekt. Das ist bei Kollagen das einzige Supplement wo der Zeitpunkt wirklich entscheidend ist.</div></div>
-            <div><div class="col-label">Praxis</div><div class="col-text">Wenn Gym morgens: Kollagen bereits beim Frühstück erledigt. Wenn Gym abends: Kollagen + Vit. C 30–60 Min vorher nachholen. Magnesium trotzdem erst vor dem Schlafen.</div></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">ISONAM Energy (nur bei Nüchterntraining)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Situativ</span></div></div>
-          <div class="dose">Nur wenn letzte Mahlzeit >3 Stunden zurückliegt</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Schnelle Carbs kurz vor der Einheit wenn Glykogenspeicher leer sind. Verhindert Leistungseinbruch – besonders bei Bein- oder Pull-Tag relevant wo die Grundlast hoch ist.</div></div>
-            <div><div class="col-label">Wann nicht</div><div class="col-text">Für normales Krafttraining nicht nötig – Wasser reicht bei normaler Ernährung vollständig. Nur als Notlösung bei echtem Nüchterntraining.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Banane + Reiswaffel</b> 30 Min vorher. <span class="av av-gut">Vollständiger Ersatz</span> – gleiche schnelle Carbs, weniger Kosten, mehr Sättigung.</div></div>
-        </div>
-
-      </div>
+    <div id="rezepte-abendessen" class="slot-section">
+      <div id="rezepte-list-abendessen" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
+      <button onclick="rezepteAdd('abendessen')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
     </div>
 
-    <!-- WÄHREND GYM -->
-    <div id="waehrend-gym" class="inner-slot">
-      <div class="intro-bar">Während einer Krafteinheit (60–75 Min) ist die Anforderung gering: Hydration, sonst nichts. Intra-Workout-Supplements sind für dieses Trainingsprofil Marketing – kein messbarer Mehrwert.</div>
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Wasser</div><div class="badges"><span class="badge b-top">Standard – reicht vollständig</span></div></div>
-          <div class="dose">500–750 ml während der Einheit · keine Zusätze nötig</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Krafttraining ist keine Ausdauerbelastung – Elektrolytverluste in 60–75 Min Gym sind gering. Reines Wasser reicht vollständig aus um die Leistung zu erhalten.</div></div>
-            <div><div class="col-label">Was du weglassen kannst</div><div class="col-text">Intra-Workout BCAAs, Glucose-Drinks, EAA-Pulver – redundant für dieses Profil. Whey post-workout deckt die Aminosäuren-Versorgung vollständig ab.</div></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">HYDRAFIT (nur Sommer / lange Einheit)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Situativ</span></div></div>
-          <div class="dose">Nur wenn Einheit >75 Min oder Sommer / unbelüftetes Gym</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Wann sinnvoll</div><div class="col-text">Bei starkem Schwitzen (Sommer, schlechte Belüftung) oder besonders langer Bein-Einheit. Dann Elektrolyte sinnvoll um Krampfrisiko zu minimieren.</div></div>
-            <div><div class="col-label">Standard</div><div class="col-text">60-Min-Einheit in normalem Gym: reines Wasser reicht. HYDRAFIT für Spiel und Lauftraining priorisieren wo der Bedarf real ist.</div></div>
-          </div>
-        </div>
-
-      </div>
+    <div id="rezepte-snack" class="slot-section">
+      <div id="rezepte-list-snack" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
+      <button onclick="rezepteAdd('snack')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
     </div>
-
-    <!-- POST GYM -->
-    <div id="post-gym" class="inner-slot">
-      <div class="intro-bar">Das wichtigste Fenster nach dem Krafttraining: Proteinzufuhr innerhalb von 30–60 Min. Bei 4 Krafteinheiten/Woche ist das der direkte Hebel für Muskeladaptation. Ohne diesen Slot verlässt du Ergebnis auf dem Tisch.</div>
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">100% Whey Protein Shake</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">25–30 g Whey · 30–60 Min nach Einheit · immer mit Kohlenhydraten kombinieren</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Alle essentiellen Aminosäuren in schnell resorbierbarer Form. Stimuliert Muskelproteinsynthese maximal. 4 Krafteinheiten/Woche ohne Protein-Versorgung bringen kaum Adaptation – der Reiz war da, aber der Rohstoff für Umbau fehlt.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Immer mit Kohlenhydraten kombinieren – anabole Reaktion ist ohne Carbs gedämpft. Banane, Haferflocken oder Reiswaffel dazu. Kein Casein nötig wenn tagsüber normal gegessen wird.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Magerquark (200 g = ~25 g Protein) + Banane.</b> <span class="av av-gut">Vollständiger Ersatz</span> – etwas langsamer resorbiert als Whey, real kaum Unterschied. Billiger und sättigender. Oder Hüttenkäse + Brot + Obst.</div></div>
-        </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">PROTEINBAR 35% / CRUNCHY 32% (unterwegs)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Situativ</span></div></div>
-          <div class="dose">Nur wenn kein Shake möglich ist · kein Standard-Ersatz</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Wann sinnvoll</div><div class="col-text">Auswärtsreise zum Spielort, Gym ohne Umkleide, kein Shaker dabei. Praktische Notlösung die die Proteinversorgung sichert.</div></div>
-            <div><div class="col-label">Wann nicht</div><div class="col-text">Wenn Shaker verfügbar: Pulver ist günstiger und liefert mehr Protein pro Euro. Riegel sind Convenience, kein Standard.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Skyr-Becher + Nüsse</b> (fertig verpackt, überall erhältlich). <span class="av av-gut">Gleichwertiger Ersatz</span> – ~20 g Protein, günstiger, echter Lebensmittelcharakter.</div></div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- PRE LAUF -->
-    <div id="pre-lauf" class="inner-slot">
-      <div class="intro-bar">Zone 2–3 und Auslaufen (nicht HIIT – eigener Tab). Auslaufen am Montag = aktive Regeneration nach Spieltag. Zone-2-3 = aerober Grundlagenaufbau, 45–75 Min. Strategie unterscheidet sich deutlich.</div>
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">HYDRAFIT (Auslaufen + Zone 2-3)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">In Trinkflasche vorbereiten · bei Zone 2-3 ab 45 Min</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Auslaufen (Mo)</div><div class="col-text">Nach dem Spieltag noch dehydriert – HYDRAFIT unterstützt Rehydration. Kein Koffein, keine Carbs nötig. Nur Elektrolyte für aktive Erholung.</div></div>
-            <div><div class="col-label">Zone 2-3</div><div class="col-text">Bei Läufen über 45 Min signifikante Elektrolytverluste. HYDRAFIT reicht für bis zu 60 Min. Darüber hinaus ISONAM für kombinierten Carb+Elektrolyt-Effekt.</div></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">ISONAM Energy (Zone 2-3 über 60 Min)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Empfohlen</span></div></div>
-          <div class="dose">Nur bei Läufen >60 Min · kontinuierlich, nicht auf einmal</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Carbs + Elektrolyte isotonisch kombiniert – optimal für moderate Langbelastung. Besser als Gel (zu schneller Peak) und besser als reines Wasser (keine Energie). Hält Glykogen stabil über die gesamte Einheit.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Für Läufe unter 60 Min reicht HYDRAFIT. ISONAM ist das Upgrade wenn du länger unterwegs bist und Kohlenhydrate während des Laufs brauchst.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Selbstgemachter Isodrink:</b> 500 ml Wasser + 30 g Traubenzucker + 1 Prise Salz. <span class="av av-gut">Funktionaler Ersatz</span> – identische Wirkung, deutlich günstiger.</div></div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- POST LAUF -->
-    <div id="post-lauf" class="inner-slot">
-      <div class="intro-bar">Nach Zone-2-3 oder Auslaufen. Auslaufen braucht kaum Nachversorgung – es ist Regeneration, kein Trainingsreiz. Zone-2-3 benötigt Protein + Carbs wenn es die primäre Einheit des Tages war.</div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-top"><div class="card-name">100% Whey + Kohlenhydrate (nach Zone 2-3)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Empfohlen</span></div></div>
-          <div class="dose">20–25 g Whey · binnen 60 Min · wenn Zone-2-3 die Haupteinheit war</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Zone 2-3</div><div class="col-text">Zone-2-3 über 60 Min schöpft Glykogenspeicher an und erzeugt moderaten Muskelstress. Protein + Carbs füllen beides auf. Weniger kritisch als post-Gym oder post-Spiel, aber sinnvoll wenn danach keine große Mahlzeit kommt.</div></div>
-            <div><div class="col-label">Nach Auslaufen</div><div class="col-text">Normales Frühstück oder nächste Mahlzeit reicht völlig. Kein Supplement nötig – Auslaufen ist Regeneration, kein Trainingsreiz der eine Proteinreaktion erfordert.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Magerquark + Haferflocken + Banane.</b> <span class="av av-gut">Vollständiger Ersatz</span> – Protein, Carbs und Mikronährstoffe optimal kombiniert.</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRE HIIT -->
-    <div id="pre-hiit" class="inner-slot">
-      <div class="intro-bar">HIIT = kurze Maximalintervalle. Koffein ist der einzig relevante Wirkstoff pre-workout. Carbs sind bei Einheiten unter 30 Min nicht nötig – die Glykogenspeicher reichen vollständig. Kein voller Magen.</div>
-      <div class="cards">
-
-        <div class="card">
-          <div class="card-top"><div class="card-name">Total Energy Strong Gel (Koffein)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Empfohlen</span></div></div>
-          <div class="dose">1 Gel · 15 Min vor HIIT · max. 2–3× pro Woche gesamt (alle Anwendungen)</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Koffein verbessert neuromuskuläre Aktivierung, senkt wahrgenommene Anstrengung und erhöht Spitzgeschwindigkeit bei Sprints. Das Gel ist hier wegen des Koffeins relevant – nicht wegen der Kohlenhydrate.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text"><b>Koffeintoleranz vermeiden</b> – nicht jeden Tag, nicht kombiniert mit Spieltag-Einsatz. Max. 2–3× pro Woche über alle Anwendungsfelder hinweg.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Espresso oder schwarzer Kaffee</b> (200 mg Koffein ≈ 2 Espressi) · 20–30 Min vorher. <span class="av av-gut">Vollständiger Ersatz</span> – gleicher Effekt, 0 Kosten, besser dosierbar. Gel nur wenn kein Kaffee möglich.</div></div>
-          <div class="warn-box">Max. 2–3× pro Woche über alle Einsätze · Koffeintoleranz baut sich schnell auf</div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- POST HIIT -->
-    <div id="post-hiit" class="inner-slot">
-      <div class="intro-bar">Nach HIIT. Die Einheit ist kurz aber intensiv – Muskelproteinabbau-Rate ist hoch. Proteinversorgung ist das Wichtigste, Carbs je nach restlichem Tagesplan.</div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-top"><div class="card-name">100% Whey Protein Shake</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">20–25 g Whey · binnen 45 Min nach HIIT</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">HIIT erzeugt trotz kurzer Dauer erheblichen Muskelstress – maximale Sprintintensität bedeutet hohe Mikrotrauma-Rate. Whey stoppt den katabolen Zustand und leitet Reparatur ein.</div></div>
-            <div><div class="col-label">Carbs</div><div class="col-text">Wenn HIIT einziger Trainingsblock: Carbs optional. Wenn noch Gym folgt: definitiv Carbs dazu (Banane, Brot) um Glykogen für den zweiten Block zu sichern.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Magerquark + Honig + Früchte.</b> <span class="av av-gut">Vollständiger Ersatz</span> – Protein aus Quark, schnelle Carbs aus Honig, Mikronährstoffe aus Früchten.</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MD SUPP –90 MIN -->
-    <div id="md-supp-90" class="inner-slot">
-      <div class="intro-bar">30–90 Minuten vor Anpfiff. Ziel: Glykogenspeicher auffüllen, Magen nicht belasten. Diese Phase wird durch normale Mahlzeit dominiert – Supplements sind Ergänzung, kein Ersatz. Keine unbekannten Produkte erstmals am Spieltag.</div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-top"><div class="card-name">ENERGYBAR (Notfall / Reise)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Situativ</span></div></div>
-          <div class="dose">60–90 Min vor Anpfiff · klein, kohlenhydratreich, fettarm</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Komplexe Carbs für stabilen Blutzucker über 90 Min. Kein Zuckerpeak, kein Einbruch zur 70. Minute. Für unterwegs oder wenn keine Küche verfügbar ist.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Wenn 2 Stunden vorher normal gegessen wurde (Pasta, Reis), ist der Riegel überflüssig. Nur als Convenience auf Auswärtsreisen oder bei frühem Anpfiff ohne Frühstücksoption.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Weißbrot mit Honig, Banane + Haferflocken, Bananenbrot.</b> <span class="av av-gut">Vollständiger Ersatz</span> – ENERGYBAR ist reines Convenience.</div></div>
-        </div>
-        <div class="card">
-          <div class="card-top"><div class="card-name">HYDRAFIT (Vorab-Hydration)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Empfohlen</span></div></div>
-          <div class="dose">400–500 ml mit HYDRAFIT · 60–90 Min vor dem Spiel</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Pre-Game-Hydration stellt sicher, dass du mit vollen Elektrolyt-Reservoirs anpfeifst. Besonders bei langer Anreise oder Hitze. Fehler ist erst im Spiel zu hydrieren wenn es zu spät ist.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Reines Wasser pre-game verdünnt Elektrolyte – kontraproduktiv. HYDRAFIT sichert optimale Ausgangslage für die erste Halbzeit.</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MD SUPP ANPFIFF -->
-    <div id="md-supp-pre" class="inner-slot">
-      <div class="intro-bar">Unmittelbar vor dem Anpfiff – letztes Aufwärmen vorbei. Maximal ein Gel oder Shot. Kein Riegel mehr. Nur wenn wirklich nötig – nicht jedes Spiel erfordert Supplements.</div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-top"><div class="card-name">Total Energy Strong Gel (Koffein)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-ok">Situativ</span></div></div>
-          <div class="dose">15 Min vor Anpfiff · nur Frühspiel / schlechte Nacht / lange Anreise</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Koffein erhöht Fokus, Reaktionszeit und Sprintbereitschaft für die ersten 20–30 Min. Frühe Fehlentscheidungen entstehen oft durch Unteraktivierung – besonders bei Morgen- oder Frühspielen.</div></div>
-            <div><div class="col-label">Wann nicht</div><div class="col-text">Bei Nachmittags- oder Abendspielen wenn du wach und fokussiert bist: unnötig. Koffein dann belastet auch den Schlaf danach. Nur gezielt, nicht routinemäßig.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Espresso 20 Min vor Anpfiff</b> wenn in Kabine/Vereinsheim möglich. <span class="av av-gut">Vollständiger Ersatz</span></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MD SUPP HALBZEIT -->
-    <div id="md-supp-ht" class="inner-slot">
-      <div class="intro-bar">15 Minuten Pause – schnell, kein schwerer Magen, sofort verfügbar. Gel + Elektrolyte sind das Optimum. Keine feste Nahrung. Ziel: Carbs und Elektrolyte in unter 5 Minuten aufnehmen.</div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-top"><div class="card-name">Total Energy Amino Gel</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Beste Halbzeit-Option</span></div></div>
-          <div class="dose">1 Gel · direkt zu Beginn der Halbzeit · in Trikottasche</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Carbs + BCAAs kombiniert – füllt Glykogen nach und reduziert Muskelabbau in der zweiten Halbzeit. Bei 9–10 km Gesamtlaufleistung und 20 Sprints ist beides relevant.</div></div>
-            <div><div class="col-label">Alternativen im Sortiment</div><div class="col-text">Carbo Gel (2,50 €) ohne BCAAs. Sport Gel (2,00 €) günstigste Variante. Amino Gel ist für 15 Cent Aufpreis die klar bessere Wahl für dieses Profil.</div></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-top"><div class="card-name">HYDRAFIT (Halbzeit-Flasche)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">Neue Flasche vorbereitet · erste Halbzeit-Flasche leertrinken</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">45 Min bei ~150 Puls = erhebliche Natrium- und Kaliumverluste. HYDRAFIT stoppt das Elektrolytdefizit bevor es die Leistung in der 60.–90. Minute beeinträchtigt. Krämpfrisiko sinkt messbar.</div></div>
-            <div><div class="col-label">Praxis</div><div class="col-text">Zwei Flaschen vorbereiten: erste mit HYDRAFIT für erste Halbzeit, zweite frische mitnehmen. So für beide Hälften versorgt ohne Aufwand in der Pause.</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MD SUPP ABPFIFF -->
-    <div id="md-supp-post1" class="inner-slot">
-      <div class="intro-bar">Unmittelbar nach dem Abpfiff – noch in Sportkleidung, vor der Dusche. Das Regenerationsfenster öffnet sich jetzt. Die ersten 20 Minuten sind kritisch.</div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-top"><div class="card-name">4 Fuel Recharge</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">Direkt nach Abpfiff · noch vor der Dusche trinken · erste 20 Min</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Elektrolyte + Carbs + etwas Protein in trinkbarer Form. Stoppt den katabolen Zustand sofort. Körper ist in den ersten 20 Min nach Belastung maximal insulin-sensitiv – Nährstoffaufnahme am effizientesten.</div></div>
-            <div><div class="col-label">Warum kritisch</div><div class="col-text">Montag folgt direkt Pull-Tag. Wer Sonntag schlecht regeneriert, trainiert Montag auf leerem Tank. 4 FUEL öffnet das Fenster – der Whey-Shake schließt es 30–60 Min später.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Schokomilch (Vollmilch + Kakao)</b> – in der Sporternährungsforschung tatsächlich gut dokumentiert: Carbs + Protein + Elektrolyte. <span class="av av-gut">Funktionaler Ersatz</span> – günstig und alltagstauglich.</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MD SUPP +30–60 MIN -->
-    <div id="md-supp-post2" class="inner-slot">
-      <div class="intro-bar">30–60 Minuten nach Abpfiff – geduscht, auf dem Weg nach Hause. Die zweite Welle der Regeneration: vollständige Proteinversorgung und Glykogenauffüllung für den nächsten Tag.</div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-top"><div class="card-name">100% Whey Protein + Carbs</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Must-have</span></div></div>
-          <div class="dose">25–30 g Whey + Kohlenhydrate · 30–60 Min nach 4 FUEL</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Vervollständigt die Regeneration nach 4 FUEL. Whey liefert alle essentiellen Aminosäuren für Muskelreparatur nach 90 Min Intervallbelastung. Carbs füllen Glykogen vollständig auf damit Montag-Gym nicht auf leerem Tank läuft.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Wer nach dem Spiel noch eine vollwertige proteinreiche Mahlzeit isst (Fleisch, Fisch, Eier + Reis/Pasta), kann den Shake weglassen. Shake nur wenn Mahlzeit erst sehr spät kommt.</div></div>
-          </div>
-          <div class="alt-box"><div class="alt-label">Nahrungsalternative</div><div class="alt-text"><b>Pasta / Reis + Hähnchen / Fisch + Gemüse.</b> <span class="av av-gut">Vollständiger Ersatz</span> – wenn normal gegessen wird, ist kein zweiter Shake nötig.</div></div>
-        </div>
-        <div class="card">
-          <div class="card-top"><div class="card-name">Magnesium Liquid (Sonntagabend – erhöhte Priorität)</div><div class="badges"><span class="badge b-ns">NAMEDSPORT</span><span class="badge b-top">Besonders wichtig</span></div></div>
-          <div class="dose">Sonntagabend · nach dem Spiel der wichtigste Magnesium-Tag der Woche</div>
-          <div class="divider"></div>
-          <div class="two-col">
-            <div><div class="col-label">Nutzen</div><div class="col-text">Nach 90 Min Spielbelastung Magnesiumreserven besonders erschöpft. Fördert tiefen Erholungsschlaf, verhindert nächtliche Muskelkrämpfe, verbessert Nervenregeneration bis Montag.</div></div>
-            <div><div class="col-label">Begründung</div><div class="col-text">Der Schlaf von Sonntag auf Montag ist der wichtigste Regenerationsschlaf der Woche. Montag folgt Pull-Tag – je besser die Nacht, desto besser die Einheit.</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-    <div id="matchday-tab" class="slot-section">
-    
-    <div style="margin: 0 0 1rem;">
-      <div class="intro-bar" style="border-left-color: var(--green-mid);">
-        Optimale Matchday-Ernährung für einen Sonntags-Schiedsrichter. Basis: 3–4 Stunden vor Anpfiff letzte große Mahlzeit, danach nur noch leichtes. Kein Experiment am Spieltag – nur Bekanntes essen. Kohlenhydrate dominieren, Fett und Ballaststoffe reduzieren.
-      </div>
-    </div>
-
-    <div class="md-timeline">
-
-      <!-- ABEND DAVOR -->
-      <div class="md-slot">
-        <div class="md-time-col">
-          <div class="md-dot"></div>
-          <div class="md-time-label">Samstag<br>Abend</div>
-          <div class="md-time-tag" style="background:var(--surface2);color:var(--text-2);">–12 Std.</div>
-        </div>
-        <div class="md-content-col">
-          <div class="md-slot-title">Pre-Loading – Sättigungs-Dinner</div>
-          <div class="md-slot-sub">Letzter Glykogen-Tankstopp vor dem Spieltag. Kohlenhydratreich, moderate Protein, wenig Fett. Nicht überfüllen – Schlaf nicht belasten.</div>
-          <div class="meal-cards">
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#ddeaf7">🍝</div>Pasta Pomodoro</div>
-              <div class="meal-desc">200 g Nudeln (gekocht) + einfache Tomatensauce + Parmesan. Klassiker aus gutem Grund – hohe Glykogendichte, leicht verdaulich, keine Überraschungen.</div>
-              <div class="macro-row"><span class="macro m-carb">~80 g Carbs</span><span class="macro m-prot">~15 g Protein</span><span class="macro m-fat">wenig Fett</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#e6f2dd">🍚</div>Hähnchen + Basmatireis</div>
-              <div class="meal-desc">150 g Hähnchenbrust + 200 g Reis (gekocht) + Brokkoli. Protein für die Nacht, Carbs für morgen. Fettarm zubereiten (Ofen/Dampf).</div>
-              <div class="macro-row"><span class="macro m-carb">~70 g Carbs</span><span class="macro m-prot">~40 g Protein</span><span class="macro m-fat">gering</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#faf0d5">🥔</div>Kartoffeln + Quark + Gurke</div>
-              <div class="meal-desc">250 g Pellkartoffeln + 150 g Magerquark + Gurke/Tomate. Einfach, billig, effektiv. Carbs aus Kartoffeln, Protein aus Quark, kaum Fett.</div>
-              <div class="macro-row"><span class="macro m-carb">~50 g Carbs</span><span class="macro m-prot">~25 g Protein</span><span class="macro m-fat">minimal</span></div>
-            </div>
-          </div>
-          <div class="md-avoid">
-            <span class="avoid-tag">Fettige Saucen</span>
-            <span class="avoid-tag">Ballaststoffreiche Rohkost</span>
-            <span class="avoid-tag">Alkohol</span>
-            <span class="avoid-tag">Spätes Essen nach 21 Uhr</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- FRÜHSTÜCK 3-4H VOR -->
-      <div class="md-slot">
-        <div class="md-time-col">
-          <div class="md-dot"></div>
-          <div class="md-time-label">3–4 Std.<br>vor Anpfiff</div>
-          <div class="md-time-tag" style="background:var(--blue-bg);color:var(--blue-text);">Hauptmahlzeit</div>
-        </div>
-        <div class="md-content-col">
-          <div class="md-slot-title">Pre-Game Hauptmahlzeit</div>
-          <div class="md-slot-sub">Die wichtigste Mahlzeit des Spieltags. Kohlenhydrate im Fokus, moderates Protein, wenig Fett und Ballaststoffe damit der Magen beim Anpfiff ruhig ist. Portionsgröße: satt, nicht voll.</div>
-          <div class="meal-cards">
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#e6f2dd">🥣</div>Haferflocken-Bowl (Favorit)</div>
-              <div class="meal-desc">80 g Haferflocken + 250 ml Milch + 1 Banane + 1 EL Erdnussbutter + 1 TL Honig. Perfekte Kombination: langsame + schnelle Carbs, Protein, etwas Fett für Sättigung.</div>
-              <div class="macro-row"><span class="macro m-carb">~85 g Carbs</span><span class="macro m-prot">~18 g Protein</span><span class="macro m-fat">~10 g Fett</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#ddeaf7">🍳</div>Toastbrot + Rührei + OJ</div>
-              <div class="meal-desc">3–4 Scheiben Weißtoast + 2 Rühreier (wenig Fett) + Orangensaft. Schnelle Carbs aus Toast, Protein aus Ei. Klassisches englisches Frühstück ohne Fettbombe.</div>
-              <div class="macro-row"><span class="macro m-carb">~75 g Carbs</span><span class="macro m-prot">~20 g Protein</span><span class="macro m-fat">~10 g Fett</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#eeedf8">🍌</div>Pfannkuchen + Ahornsirup</div>
-              <div class="meal-desc">3–4 Pfannkuchen (Mehl/Ei/Milch, ohne Butter) + Ahornsirup oder Marmelade + Banane. Hohe Carb-Dichte, gut verträglich, gut transportierbar wenn auswärts.</div>
-              <div class="macro-row"><span class="macro m-carb">~90 g Carbs</span><span class="macro m-prot">~15 g Protein</span><span class="macro m-fat">~8 g Fett</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#dff2ee">🍚</div>Reis-Porridge (asiatisch)</div>
-              <div class="meal-desc">150 g Basmatireis + 300 ml Hühnerbrühe + etwas Salz. Sehr leicht verdaulich, ideal wenn Magen vor dem Spiel empfindlich ist. Mit Banane ergänzen.</div>
-              <div class="macro-row"><span class="macro m-carb">~65 g Carbs</span><span class="macro m-prot">~8 g Protein</span><span class="macro m-fat">minimal</span></div>
-            </div>
-          </div>
-          <div class="md-rule"><b>Regel:</b> Kein High-Fat (Speck, Käse, Butter in Massen), kein Vollkorn (Ballaststoffe bremsen Magenentleerung), kein rohes Gemüse (Blähgefahr). Was du normalerweise gut verträgst: essen. Was du nicht kennst: weglassen.</div>
-          <div class="md-avoid">
-            <span class="avoid-tag">Vollkornbrot</span>
-            <span class="avoid-tag">Gebratenes / Fettig</span>
-            <span class="avoid-tag">Rohes Gemüse</span>
-            <span class="avoid-tag">Hülsenfrüchte</span>
-            <span class="avoid-tag">Koffein auf leeren Magen</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- SNACK 60-90 MIN -->
-      <div class="md-slot">
-        <div class="md-time-col">
-          <div class="md-dot"></div>
-          <div class="md-time-label">60–90 Min<br>vor Anpfiff</div>
-          <div class="md-time-tag" style="background:var(--amber-bg);color:var(--amber-text);">Snack-Phase</div>
-        </div>
-        <div class="md-content-col">
-          <div class="md-slot-title">Letzter Energie-Snack</div>
-          <div class="md-slot-sub">Kleiner Top-up – kein vollständiges Essen. Magen muss bei Anpfiff weitgehend leer sein. Nur wenn mehr als 3 Stunden seit der letzten Mahlzeit vergangen sind.</div>
-          <div class="meal-cards">
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#e6f2dd">🍌</div>Banane</div>
-              <div class="meal-desc">Die einfachste, wirkungsvollste Pre-Game-Option. Schnelle + mittlere Carbs, Kalium (anti-Krampf), leicht verdaulich. Überall verfügbar.</div>
-              <div class="macro-row"><span class="macro m-carb">~27 g Carbs</span><span class="macro m-elec">Kalium</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#ddeaf7">🍞</div>Toastbrot + Honig</div>
-              <div class="meal-desc">1–2 Scheiben Weißtoast + Honig. Einfache Carbs, kein Fett, kein Ballaststoff. Ideal wenn Hauptmahlzeit weiter zurückliegt.</div>
-              <div class="macro-row"><span class="macro m-carb">~35 g Carbs</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#faf0d5">🧃</div>Apfelsaft + Wasser (50/50)</div>
-              <div class="meal-desc">200 ml Apfelsaft + 200 ml Wasser = natürlicher Isodrink. Schnelle Carbs + Hydration kombiniert, kein festes Essen nötig wenn Magen bereits voll ist.</div>
-              <div class="macro-row"><span class="macro m-carb">~25 g Carbs</span><span class="macro m-elec">Elektrolyte</span></div>
-            </div>
-          </div>
-          <div class="md-rule"><b>Entscheidung:</b> Wenn Hauptmahlzeit &lt;2 Std. zurück und Magen noch beschäftigt → weglassen. Wenn Hauptmahlzeit &gt;3 Std. zurück → Banane oder Toast mit Honig.</div>
-        </div>
-      </div>
-
-      <!-- UNMITTELBAR VOR -->
-      <div class="md-slot">
-        <div class="md-time-col">
-          <div class="md-dot"></div>
-          <div class="md-time-label">15–20 Min<br>vor Anpfiff</div>
-          <div class="md-time-tag" style="background:var(--red-bg);color:var(--red-text);">Letzter Boost</div>
-        </div>
-        <div class="md-content-col">
-          <div class="md-slot-title">Optionaler letzter Boost</div>
-          <div class="md-slot-sub">Kein Essen mehr – nur noch flüssig oder Gel. Nur wenn wirklich nötig (Frühspiel, schlechte Nacht, fehlende Energie). Kein Standard-Ritual für jeden Spieltag.</div>
-          <div class="meal-cards">
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#ddeaf7">☕</div>Espresso (beste Option)</div>
-              <div class="meal-desc">1–2 Espressi wenn im Vereinsheim verfügbar. Gleiche Koffeinwirkung wie Strong Gel, kostet nichts, leichter zu dosieren. Bewährtes Schiedsrichter-Ritual.</div>
-              <div class="macro-row"><span class="macro m-carb">~0 Carbs</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#eeedf8">⚡</div>Strong Gel (unterwegs)</div>
-              <div class="meal-desc">Wenn kein Kaffee möglich: Strong Gel als Koffein-Quelle. Zusätzlich leichte Carbs. Nur 1–2×/Woche einsetzen um Toleranz zu vermeiden.</div>
-              <div class="macro-row"><span class="macro m-carb">~20 g Carbs</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#dff2ee">💧</div>Hydrafit-Flasche</div>
-              <div class="meal-desc">Trinkflasche mit HYDRAFIT bereits beim Aufwärmen dabei. Letzte Elektrolyt-Aufnahme vor dem Anpfiff. Kein Koffein, keine Energie – reine Hydration.</div>
-              <div class="macro-row"><span class="macro m-elec">Natrium · Kalium</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- HALBZEIT -->
-      <div class="md-slot">
-        <div class="md-time-col">
-          <div class="md-dot"></div>
-          <div class="md-time-label">Halbzeit<br>15 Min</div>
-          <div class="md-time-tag" style="background:var(--amber-bg);color:var(--amber-text);">Pause</div>
-        </div>
-        <div class="md-content-col">
-          <div class="md-slot-title">Halbzeit-Protokoll</div>
-          <div class="md-slot-sub">Schnell, kompakt, kein voller Magen. Kombination aus Gel + Elektrolyte deckt in 5 Minuten alles ab was die zweite Halbzeit braucht. Keine feste Nahrung.</div>
-          <div class="meal-cards">
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#e6f2dd">✓</div>Amino Gel + HYDRAFIT</div>
-              <div class="meal-desc">Amino Gel (Carbs + BCAAs) + neue HYDRAFIT-Flasche = optimales Halbzeit-Protokoll. Beides zusammen in unter 3 Minuten. Flasche fürs Aufwärmen zweite Halbzeit mitnehmen.</div>
-              <div class="macro-row"><span class="macro m-carb">~20 g Carbs</span><span class="macro m-prot">BCAAs</span><span class="macro m-elec">Elektrolyte</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#ddeaf7">🍊</div>Fruchtpause (Alternativ)</div>
-              <div class="meal-desc">Orangenspalten oder Bananenstücke wenn kein Gel dabei: natürlicher Zucker + Kalium. Viele Schiedsrichter bevorzugen echtes Essen in der Pause. Beides funktioniert.</div>
-              <div class="macro-row"><span class="macro m-carb">~20 g Carbs</span><span class="macro m-elec">Kalium</span></div>
-            </div>
-          </div>
-          <div class="md-rule"><b>Trikottasche vorher vorbereiten:</b> Amino Gel rein, zweite HYDRAFIT-Flasche in der Kabine bereitstellen. Kein Aufwand in der Halbzeit selbst.</div>
-        </div>
-      </div>
-
-      <!-- UNMITTELBAR NACH -->
-      <div class="md-slot">
-        <div class="md-time-col">
-          <div class="md-dot"></div>
-          <div class="md-time-label">0–20 Min<br>nach Abpfiff</div>
-          <div class="md-time-tag" style="background:var(--purple-bg);color:var(--purple-text);">Sofort</div>
-        </div>
-        <div class="md-content-col">
-          <div class="md-slot-title">Sofort-Regeneration (vor der Dusche)</div>
-          <div class="md-slot-sub">Kritischstes Fenster. Körper ist maximal aufnahmefähig. Noch in Sportkleidung – vor der Dusche. Flüssig, schnell, ohne Aufwand.</div>
-          <div class="meal-cards">
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#eeedf8">⚡</div>4 Fuel Recharge</div>
-              <div class="meal-desc">Supplement-Option: Elektrolyte + Carbs + Protein kombiniert. Öffnet das Regenerationsfenster professionell. Da Montag Pull-Tag folgt, ist das der wichtigste Moment der Woche.</div>
-              <div class="macro-row"><span class="macro m-carb">Carbs</span><span class="macro m-prot">Protein</span><span class="macro m-elec">Elektrolyte</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#ddeaf7">🍫</div>Schokomilch (Nahrungsalternative)</div>
-              <div class="meal-desc">500 ml Vollmilch + 2 EL Kakao. Klingt simpel – ist wissenschaftlich dokumentiert als Post-Sport-Recovery-Getränk. Carbs + Protein + Kalzium + Flüssigkeit in einem.</div>
-              <div class="macro-row"><span class="macro m-carb">~50 g Carbs</span><span class="macro m-prot">~17 g Protein</span><span class="macro m-fat">~10 g Fett</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#e6f2dd">🍌</div>Banane + Salzstangen</div>
-              <div class="meal-desc">Notfallkombo wenn nichts anderes dabei: Banane (Carbs + Kalium) + Salzstangen (Natrium). Improvisation die funktioniert – besser als nichts, deutlich besser als Warten.</div>
-              <div class="macro-row"><span class="macro m-carb">~40 g Carbs</span><span class="macro m-elec">Na · K</span></div>
-            </div>
-          </div>
-          <div class="md-avoid">
-            <span class="avoid-tag">Alkohol (auch Bier – blockt Proteinsynthese)</span>
-            <span class="avoid-tag">Fastfood direkt nach dem Spiel</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 1-2H NACH -->
-      <div class="md-slot">
-        <div class="md-time-col">
-          <div class="md-dot"></div>
-          <div class="md-time-label">1–2 Std.<br>nach Abpfiff</div>
-          <div class="md-time-tag" style="background:var(--green-bg);color:var(--green-text);">Hauptmahlzeit</div>
-        </div>
-        <div class="md-content-col">
-          <div class="md-slot-title">Post-Game Hauptmahlzeit</div>
-          <div class="md-slot-sub">Vollständige Regenerationsmahlzeit. Protein + Carbs + Gemüse + gesunde Fette. Jetzt darf der Teller voll sein. Kein Diät-Denken – der Körper braucht jetzt Nährstoffe.</div>
-          <div class="meal-cards">
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#e6f2dd">🍗</div>Hähnchen + Süßkartoffeln</div>
-              <div class="meal-desc">200 g Hähnchenbrust (Ofen) + 250 g Süßkartoffeln + Brokkoli + Olivenöl. Protein für Muskelreparatur, komplexe Carbs für Glykogen, Antioxidantien aus Gemüse.</div>
-              <div class="macro-row"><span class="macro m-carb">~65 g Carbs</span><span class="macro m-prot">~50 g Protein</span><span class="macro m-fat">~12 g Fett</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#ddeaf7">🐟</div>Lachs + Reis + Salat</div>
-              <div class="meal-desc">200 g Lachs (Omega-3 direkt aus Nahrung) + 200 g Reis + gemischter Salat. Top-Option: Protein + natürliche Omega-3 + Carbs + Ballaststoffe jetzt wieder erlaubt.</div>
-              <div class="macro-row"><span class="macro m-carb">~55 g Carbs</span><span class="macro m-prot">~45 g Protein</span><span class="macro m-fat">~18 g Fett</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#eeedf8">🥩</div>Rindfleisch + Pasta</div>
-              <div class="meal-desc">150 g mageres Rind + 200 g Pasta + Tomaten/Zucchini. Eisen und Kreatin aus Fleisch, Carbs aus Pasta. Sättigende Option wenn Hunger groß ist nach dem Spiel.</div>
-              <div class="macro-row"><span class="macro m-carb">~70 g Carbs</span><span class="macro m-prot">~45 g Protein</span><span class="macro m-fat">~15 g Fett</span></div>
-            </div>
-            <div class="meal-card">
-              <div class="meal-card-title"><div class="meal-icon" style="background:#dff2ee">🌯</div>Bowl mit Hühnchen + Quinoa</div>
-              <div class="meal-desc">Quinoa + Hühnchen + Avocado + Tomaten + Gurke. Vollständige Aminosäuren aus Quinoa + Hühnchen, gesunde Fette aus Avocado. Schnell zusammengestellt.</div>
-              <div class="macro-row"><span class="macro m-carb">~55 g Carbs</span><span class="macro m-prot">~42 g Protein</span><span class="macro m-fat">~14 g Fett</span></div>
-            </div>
-          </div>
-          <div class="md-rule"><b>Jetzt sind Ballaststoffe wieder erlaubt:</b> Salat, Gemüse, Vollkorn – alles wieder okay. Post-Game darf und soll die Mahlzeit vollwertig sein. Schlafqualität: nicht zu spät und nicht zu fett essen.</div>
-        </div>
-      </div>
-
-      <!-- ABEND -->
-      <div class="md-slot" style="min-height:auto">
-        <div class="md-time-col">
-          <div class="md-dot"></div>
-          <div class="md-time-label">Sonntag<br>Abend</div>
-          <div class="md-time-tag" style="background:var(--gray-bg);color:var(--gray-text);">Abschluss</div>
-        </div>
-        <div class="md-content-col" style="padding-bottom:.5rem">
-          <div class="md-slot-title">Abend-Stack (Supplements)</div>
-          <div class="md-slot-sub">Magnesium Liquid + ggf. Ashwagandha vor dem Schlafen – erhöhte Priorität am Sonntagabend. Der Schlaf von Sonntag auf Montag ist der wichtigste Regenerationsschlaf der Woche da Montag direkt Pull-Tag folgt.</div>
-          <div class="md-rule" style="margin-top:0"><b>Magnesium ist am Sonntagabend besonders wichtig</b> – nach 90 Min Spielbelastung sind die Reserven besonders erschöpft. Tiefer Schlaf jetzt bestimmt wie du Montagmorgen beim Gym ankommst.</div>
-        </div>
-      </div>
-
-    </div><!-- end md-timeline -->
-  </div>
   </div>
 
   <!-- ── 3. REGENERATION ── -->
@@ -4133,21 +3291,6 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     btn.classList.add('active');
   }
 
-  function showInnerSlot(id, btn) {
-    var slot = document.getElementById(id);
-    if (!slot) return;
-    // Find all sibling inner-slots
-    var container = slot.parentElement;
-    container.querySelectorAll('.inner-slot').forEach(function(s){ s.classList.remove('active'); });
-    slot.classList.add('active');
-    // Update sub-tab button states in the nearest nav-group
-    var navGroup = btn.closest('.nav-group');
-    if (navGroup) {
-      navGroup.querySelectorAll('.sub-tab').forEach(function(t){ t.classList.remove('active'); });
-    }
-    btn.classList.add('active');
-  }
-
   // ── KALENDER FILTER ─────────────────────────────────────────
   function filterKal(type, btn) {
     document.querySelectorAll('.kal-filter').forEach(function(b){ b.classList.remove('active'); });
@@ -4284,17 +3427,68 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     lpClose();
   }
 
-  // ── MEAL PLAN ────────────────────────────────────────────────
-  function saveMeal(d,m,v){ var key='sr-meal-'+d+'-'+m; var p={}; p[key]=v; dbSave(p); }
-  function loadMeals() {
-    ['mo','di','mi','do','fr','sa','so'].forEach(function(d){
-      ['fr','mi','pw','ab'].forEach(function(m){
-        var v = dbGet('sr-meal-'+d+'-'+m, '');
-        var el = document.getElementById('meal-'+d+'-'+m);
-        if (v && el) el.value = v;
-      });
-    });
+  // ── REZEPTE ──────────────────────────────────────────────────
+  var REZEPTE_CATS = ['fruehstueck', 'mittagessen', 'abendessen', 'snack'];
+  function rezepteKey(cat) { return 'rezepte-' + cat; }
+  function rezepteGetItems(cat) {
+    var items = dbGet(rezepteKey(cat), null);
+    return Array.isArray(items) ? items : [];
   }
+  function rezepteSaveItems(cat, items) { var p = {}; p[rezepteKey(cat)] = items; dbSave(p); }
+  function renderRezepteList(cat) {
+    var list = document.getElementById('rezepte-list-' + cat);
+    if (!list) return;
+    var items = rezepteGetItems(cat);
+    if (!items.length) {
+      list.innerHTML = '<div style="font-size:12px;color:var(--text-3);font-style:italic;padding:.25rem 0">Noch keine Rezepte – füge unten eins hinzu</div>';
+      return;
+    }
+    var html = '';
+    items.forEach(function(item, i) {
+      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem;display:flex;flex-direction:column;gap:8px">'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<input type="text" value="' + String(item.title || '').replace(/"/g, '&quot;') + '" placeholder="Rezeptname"'
+        + ' style="flex:1;min-width:0;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;outline:none;padding:2px 0"'
+        + ' onchange="rezepteSaveTitle(\'' + cat + '\',' + i + ',this.value)">'
+        + '<button onclick="rezepteRemove(\'' + cat + '\',' + i + ')" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;flex-shrink:0" title="Entfernen">×</button>'
+        + '</div>'
+        + '<textarea placeholder="Zutaten & Zubereitung..." style="width:100%;min-height:70px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:6px 8px;color:var(--text-2);font-size:12px;font-family:\'Inter\',sans-serif;resize:vertical;outline:none;box-sizing:border-box"'
+        + ' onchange="rezepteSaveText(\'' + cat + '\',' + i + ',this.value)">' + String(item.text || '').replace(/</g, '&lt;') + '</textarea>'
+        + '</div>';
+    });
+    list.innerHTML = html;
+  }
+  window.rezepteSaveTitle = function(cat, idx, val) {
+    var items = rezepteGetItems(cat);
+    if (!items[idx]) return;
+    items[idx].title = val;
+    rezepteSaveItems(cat, items);
+  };
+  window.rezepteSaveText = function(cat, idx, val) {
+    var items = rezepteGetItems(cat);
+    if (!items[idx]) return;
+    items[idx].text = val;
+    rezepteSaveItems(cat, items);
+  };
+  window.rezepteRemove = function(cat, idx) {
+    var items = rezepteGetItems(cat);
+    items.splice(idx, 1);
+    rezepteSaveItems(cat, items);
+    renderRezepteList(cat);
+  };
+  window.rezepteAdd = function(cat) {
+    var items = rezepteGetItems(cat);
+    items.push({ title: '', text: '' });
+    rezepteSaveItems(cat, items);
+    renderRezepteList(cat);
+    var list = document.getElementById('rezepte-list-' + cat);
+    var inputs = list ? list.querySelectorAll('input[type=text]') : [];
+    var last = inputs[inputs.length - 1];
+    if (last) last.focus();
+  };
+  window.loadRezepte = function() {
+    REZEPTE_CATS.forEach(function(cat) { renderRezepteList(cat); });
+  };
 
   // ── 2-WEEK TRAINING CALENDAR ─────────────────────────────────
   var CAL_BUILT = false;
@@ -4383,7 +3577,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     // Load from Google Sheets first, then populate UI
     dbLoad(function() {
       srLoadNotes();
-      loadMeals();
+      loadRezepte();
       // Kalender-Termine (inkl. Overrides/eigene Termine) und Mahlzeiten mit Sheets-Daten neu rendern
       if (typeof planerRenderWeek === 'function') planerRenderWeek();
       lpLoad();
