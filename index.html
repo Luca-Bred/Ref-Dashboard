@@ -1785,8 +1785,6 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 .ueb-week-row{display:flex;align-items:center;gap:10px;padding:6px 1rem;font-size:12px;border-bottom:1px solid var(--border);transition:background .15s}
 .ueb-week-row:last-child{border-bottom:none}
 .ueb-week-row.today{border-left:3px solid var(--grass);background:rgba(0,255,135,0.04);padding-left:calc(1rem - 3px)}
-.ueb-ci-circle{flex:1;text-align:center;padding:.5rem .15rem;cursor:pointer;border-radius:var(--r-sm);transition:background .15s;min-width:0}
-.ueb-ci-circle:hover{background:var(--surface2)}
 </style>
 
 <div class="ueb-grid">
@@ -1888,38 +1886,13 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       <div id="ueb-week-list"></div>
     </div>
 
-    <!-- Block 2: Daily Check-in -->
+    <!-- Block 2: To-Do -->
     <div style="flex:1;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--grass)">Daily Check-in</div>
-        <button style="background:none;border:none;font-size:11px;color:var(--text-3);cursor:pointer;padding:0">Verlauf anzeigen</button>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--grass)">To-Do</div>
       </div>
-      <!-- 5 Metrik-Kreise -->
-      <div style="display:flex;justify-content:space-between;margin-bottom:.875rem" id="ueb-checkin-circles"></div>
-      <!-- Readiness + Fokus -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto">
-        <!-- Readiness Score -->
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:.875rem;text-align:center">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.5rem">Readiness</div>
-          <div style="position:relative;width:68px;height:68px;margin:0 auto .5rem">
-            <svg viewBox="0 0 68 68" style="transform:rotate(-90deg);width:68px;height:68px">
-              <circle cx="34" cy="34" r="28" fill="none" stroke="var(--border)" stroke-width="5"/>
-              <circle id="ueb-readiness-ring" cx="34" cy="34" r="28" fill="none" stroke="var(--grass)" stroke-width="5"
-                stroke-dasharray="175.9" stroke-dashoffset="175.9" stroke-linecap="round"
-                style="transition:stroke-dashoffset .6s ease"/>
-            </svg>
-            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-              <span id="ueb-readiness-pct" style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--grass)">–</span>
-            </div>
-          </div>
-          <div id="ueb-readiness-badge" style="display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:2px 9px;border-radius:20px;background:var(--surface3);color:var(--text-3);border:1px solid var(--border)">–</div>
-        </div>
-        <!-- Heutiger Fokus -->
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:.875rem">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:.625rem">🎯 Heutiger Fokus</div>
-          <div id="ueb-fokus-list" style="display:flex;flex-direction:column;gap:6px"></div>
-        </div>
-      </div>
+      <div id="ueb-todo-list" style="display:flex;flex-direction:column;gap:9px"></div>
+      <button onclick="uebAddTodoItem()" style="margin-top:auto;width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:7px;color:var(--text-3);font-size:11px;font-weight:600;cursor:pointer">+ Aufgabe hinzufügen</button>
     </div>
 
   </div>
@@ -6849,20 +6822,6 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
   var UEB_TRAININGSFOKUS_DEFAULT = ['Rückkehr ins Lauftraining', 'Beweglichkeit & Mobility', 'Kraft Rumpf/Stabilität'];
 
-  var UEB_CHECKIN_METRICS = [
-    { key:'schlaf',     label:'Schlaf',     icon:'🌙' },
-    { key:'energie',    label:'Energie',    icon:'⚡' },
-    { key:'beine',      label:'Beine',      icon:'🦵' },
-    { key:'motivation', label:'Motivation', icon:'💪' },
-    { key:'stress',     label:'Stress',     icon:'📊' },
-  ];
-
-  var UEB_FOKUS_DEFAULT = ['Ausreichend trinken','Mobility 15 Min','Fokus: Technik'];
-
-  function uebTodayKey() {
-    var d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-  }
 
   window.initUebersicht = function() {
     // ── Nächstes Spiel
@@ -6894,7 +6853,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     uebLoadTrainingsfokus();
     buildWeekView();
     loadTrainingsWeekStats();
-    loadCheckin();
+    uebLoadTodo();
   };
 
   window.buildWeekView = function() {
@@ -7082,134 +7041,72 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     }
   };
 
-  window.loadCheckin = function() {
-    var key     = 'regen-checkin-' + uebTodayKey();
-    var rawData = dbGet(key);
-    var data    = {};
-    try { data = typeof rawData === 'object' && rawData ? rawData : JSON.parse(rawData || '{}'); } catch(e) {}
+  // ── To-Do-Liste (rechte Spalte, frei editierbar, geräteübergreifend via dbGet/dbSave) ──
+  function uebGetTodoItems() {
+    var items = dbGet('ueb-todo-items', null);
+    return Array.isArray(items) ? items : [];
+  }
 
-    var circles = document.getElementById('ueb-checkin-circles');
-    if (circles) {
-      var html = '';
-      UEB_CHECKIN_METRICS.forEach(function(m) {
-        var val = data[m.key] || 0;
-        var col = val >= 7 ? 'var(--grass)' : val >= 5 ? 'var(--amber)' : val > 0 ? 'var(--text-3)' : 'var(--text-3)';
-        html += '<div class="ueb-ci-circle" id="ueb-ci-wrap-' + m.key + '" onclick="uebToggleSpinner(\'' + m.key + '\')">'
-          + '<div style="font-size:18px;line-height:1;margin-bottom:3px">' + m.icon + '</div>'
-          + '<div id="ueb-ci-val-' + m.key + '" style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:700;color:' + col + ';line-height:1">'
-          + (val > 0 ? val + '<span style="font-size:9px;color:var(--text-3)">/10</span>' : '<span style="font-size:11px;color:var(--text-3)">–</span>')
-          + '</div>'
-          + '<div style="font-size:9px;color:var(--text-3);margin-top:2px">' + m.label + '</div>'
-          + '<div id="ueb-ci-spin-' + m.key + '" style="display:none;margin-top:4px;justify-content:center;gap:3px;align-items:center">'
-          + '<button onclick="event.stopPropagation();uebCheckinAdj(\'' + m.key + '\',-1)" style="width:20px;height:20px;border-radius:50%;border:1px solid var(--border-med);background:var(--surface2);color:var(--text-2);cursor:pointer;font-size:13px;line-height:1;padding:0">−</button>'
-          + '<button onclick="event.stopPropagation();uebCheckinAdj(\'' + m.key + '\',+1)" style="width:20px;height:20px;border-radius:50%;border:1px solid var(--border-med);background:var(--surface2);color:var(--text-2);cursor:pointer;font-size:13px;line-height:1;padding:0">+</button>'
-          + '</div>'
-          + '</div>';
-      });
-      circles.innerHTML = html;
+  function uebSaveTodoItems(items) {
+    dbSave({'ueb-todo-items': items});
+  }
+
+  function renderTodoList(items) {
+    var list = document.getElementById('ueb-todo-list');
+    if (!list) return;
+    if (!items.length) {
+      list.innerHTML = '<div style="font-size:11px;color:var(--text-3);font-style:italic">Keine Aufgaben – füge unten eine hinzu</div>';
+      return;
     }
-    updateReadiness();
-    loadFokus();
-  };
-
-  window.uebToggleSpinner = function(key) {
-    var spin = document.getElementById('ueb-ci-spin-' + key);
-    if (!spin) return;
-    var isOpen = spin.style.display === 'flex';
-    // close all
-    UEB_CHECKIN_METRICS.forEach(function(m) {
-      var s = document.getElementById('ueb-ci-spin-' + m.key);
-      if (s) s.style.display = 'none';
-    });
-    if (!isOpen) spin.style.display = 'flex';
-  };
-
-  window.uebCheckinAdj = function(key, delta) {
-    var todayKey = 'regen-checkin-' + uebTodayKey();
-    var rawData  = dbGet(todayKey);
-    var data     = {};
-    try { data = typeof rawData === 'object' && rawData ? rawData : JSON.parse(rawData || '{}'); } catch(e) {}
-    var cur = parseInt(data[key] || 0, 10);
-    var nv  = Math.max(1, Math.min(10, cur + delta));
-    data[key] = nv;
-    var saveObj = {}; saveObj[todayKey] = JSON.stringify(data);
-    dbSave(saveObj);
-    // Refresh display
-    var col = nv >= 7 ? 'var(--grass)' : nv >= 5 ? 'var(--amber)' : 'var(--text-3)';
-    var valEl = document.getElementById('ueb-ci-val-' + key);
-    if (valEl) valEl.innerHTML = nv + '<span style="font-size:9px;color:var(--text-3)">/10</span>';
-    if (valEl) valEl.style.color = col;
-    updateReadiness();
-  };
-
-  window.saveCheckin = function() {
-    var todayKey = 'regen-checkin-' + uebTodayKey();
-    var data = {};
-    UEB_CHECKIN_METRICS.forEach(function(m) {
-      var valEl = document.getElementById('ueb-ci-val-' + m.key);
-      if (valEl) {
-        var txt = valEl.textContent.replace(/[^0-9]/g,'');
-        if (txt) data[m.key] = parseInt(txt,10);
-      }
-    });
-    var saveObj = {}; saveObj[todayKey] = JSON.stringify(data);
-    dbSave(saveObj);
-  };
-
-  window.updateReadiness = function() {
-    var todayKey = 'regen-checkin-' + uebTodayKey();
-    var rawData  = dbGet(todayKey);
-    var data     = {};
-    try { data = typeof rawData === 'object' && rawData ? rawData : JSON.parse(rawData || '{}'); } catch(e) {}
-    var vals = UEB_CHECKIN_METRICS.map(function(m){ return parseInt(data[m.key]||0,10); });
-    var filled = vals.filter(function(v){ return v > 0; });
-    if (!filled.length) return;
-    var avg  = filled.reduce(function(a,b){ return a+b; },0) / filled.length;
-    var pct  = Math.round(avg * 10);
-    var circ = 2 * Math.PI * 28; // r=28 → 175.9
-    var offset = circ * (1 - pct / 100);
-    var ring  = document.getElementById('ueb-readiness-ring');
-    var pctEl = document.getElementById('ueb-readiness-pct');
-    var badge = document.getElementById('ueb-readiness-badge');
-    if (ring)  ring.style.strokeDashoffset  = offset.toFixed(1);
-    if (ring)  ring.style.stroke = pct >= 70 ? 'var(--grass)' : pct >= 50 ? 'var(--amber)' : 'var(--red)';
-    if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = pct >= 70 ? 'var(--grass)' : pct >= 50 ? 'var(--amber)' : 'var(--red)'; }
-    if (badge) {
-      if (pct >= 70) { badge.textContent = 'GUT';      badge.style.cssText = 'display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:2px 9px;border-radius:20px;background:var(--grass-dim);color:var(--grass);border:1px solid rgba(0,255,135,.3)'; }
-      else if (pct >= 50) { badge.textContent = 'OK'; badge.style.cssText = 'display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:2px 9px;border-radius:20px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,.3)'; }
-      else { badge.textContent = 'SCHLECHT'; badge.style.cssText = 'display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:2px 9px;border-radius:20px;background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,68,.3)'; }
-    }
-  };
-
-  window.loadFokus = function() {
-    var key   = 'regen-fokus-' + uebTodayKey();
-    var saved = dbGet(key);
-    var items;
-    try { items = Array.isArray(saved) ? saved : JSON.parse(saved || 'null'); } catch(e) { items = null; }
-    if (!items) items = UEB_FOKUS_DEFAULT.slice();
-    var fl = document.getElementById('ueb-fokus-list');
-    if (!fl) return;
     var html = '';
-    items.forEach(function(text, i) {
-      html += '<div style="display:flex;align-items:center;gap:6px">'
-        + '<input type="checkbox" style="accent-color:var(--grass);flex-shrink:0">'
-        + '<input type="text" value="' + text.replace(/"/g,'&quot;') + '"'
-        + ' style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text-2);font-size:11px;flex:1;outline:none;padding:1px 0"'
-        + ' onchange="uebSaveFokusItem(' + i + ',this.value)">'
+    items.forEach(function(item, i) {
+      var done = !!item.done;
+      html += '<div style="display:flex;align-items:center;gap:8px">'
+        + '<input type="checkbox" ' + (done ? 'checked' : '') + ' onchange="uebToggleTodoItem(' + i + ')" style="accent-color:var(--grass);flex-shrink:0;width:15px;height:15px;cursor:pointer">'
+        + '<input type="text" value="' + String(item.text || '').replace(/"/g, '&quot;') + '" placeholder="Aufgabe…"'
+        + ' style="background:transparent;border:none;border-bottom:1px solid var(--border);color:' + (done ? 'var(--text-3)' : 'var(--text-2)') + ';font-size:12px;flex:1;min-width:0;outline:none;padding:2px 0;text-decoration:' + (done ? 'line-through' : 'none') + '"'
+        + ' onchange="uebSaveTodoItemText(' + i + ',this.value)">'
+        + '<button onclick="uebRemoveTodoItem(' + i + ')" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;flex-shrink:0" title="Entfernen">×</button>'
         + '</div>';
     });
-    fl.innerHTML = html;
+    list.innerHTML = html;
+  }
+
+  window.uebLoadTodo = function() {
+    renderTodoList(uebGetTodoItems());
   };
 
-  window.uebSaveFokusItem = function(idx, val) {
-    var key   = 'regen-fokus-' + uebTodayKey();
-    var saved = dbGet(key);
-    var items;
-    try { items = Array.isArray(saved) ? saved : JSON.parse(saved || 'null'); } catch(e) { items = null; }
-    if (!items) items = UEB_FOKUS_DEFAULT.slice();
-    items[idx] = val;
-    var saveObj = {}; saveObj[key] = JSON.stringify(items);
-    dbSave(saveObj);
+  window.uebToggleTodoItem = function(idx) {
+    var items = uebGetTodoItems();
+    if (!items[idx]) return;
+    items[idx].done = !items[idx].done;
+    uebSaveTodoItems(items);
+    renderTodoList(items);
+  };
+
+  window.uebSaveTodoItemText = function(idx, val) {
+    var items = uebGetTodoItems();
+    if (!items[idx]) return;
+    items[idx].text = val;
+    uebSaveTodoItems(items);
+  };
+
+  window.uebRemoveTodoItem = function(idx) {
+    var items = uebGetTodoItems();
+    items.splice(idx, 1);
+    uebSaveTodoItems(items);
+    renderTodoList(items);
+  };
+
+  window.uebAddTodoItem = function() {
+    var items = uebGetTodoItems();
+    items.push({text: '', done: false});
+    uebSaveTodoItems(items);
+    renderTodoList(items);
+    var list = document.getElementById('ueb-todo-list');
+    var inputs = list ? list.querySelectorAll('input[type=text]') : [];
+    var last = inputs[inputs.length - 1];
+    if (last) last.focus();
   };
 
   // Wire initUebersicht into DOMContentLoaded
