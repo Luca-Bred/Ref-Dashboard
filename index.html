@@ -2942,6 +2942,10 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       </div>
     </div>
 
+    <div style="display:flex;justify-content:flex-end;margin:.5rem 0 .875rem">
+      <button onclick="rezeptImportOpen()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text);font-size:11px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;white-space:nowrap">⭳ Rezept aus JSON importieren</button>
+    </div>
+
     <div id="rezepte-fruehstueck" class="slot-section active">
       <div id="rezepte-list-fruehstueck" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
       <button onclick="rezepteAdd('fruehstueck')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
@@ -2960,6 +2964,25 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     <div id="rezepte-snack" class="slot-section">
       <div id="rezepte-list-snack" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
       <button onclick="rezepteAdd('snack')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
+    </div>
+
+    <!-- Rezept-Import Modal -->
+    <div id="rezept-import-modal" class="modal-overlay" onclick="if(event.target===this)rezeptImportClose()">
+      <div class="modal-box" style="max-width:520px">
+        <div class="mhdr">
+          <div class="mhdr-eyebrow">Rezept importieren</div>
+          <button class="m-close" onclick="rezeptImportClose()">✕</button>
+        </div>
+        <div class="mbody">
+          <div style="font-size:12px;color:var(--text-2);margin-bottom:.625rem;line-height:1.5">JSON aus deiner Rezeptsammlung hier einfügen. Die Kategorie wird automatisch aus dem Feld <code>category</code> übernommen.</div>
+          <textarea id="rezept-import-input" placeholder='{"name": "...", "category": "dinner", "ingredients": [...], "steps": [...]}' style="width:100%;min-height:180px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:8px 10px;color:var(--text);font-size:12px;font-family:ui-monospace,Consolas,monospace;resize:vertical;outline:none;box-sizing:border-box"></textarea>
+          <div id="rezept-import-error" style="font-size:11px;color:#e74c3c;margin-top:6px;min-height:14px"></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:1rem">
+            <button onclick="rezeptImportClose()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:7px 14px;border-radius:6px;cursor:pointer">Abbrechen</button>
+            <button onclick="rezeptImportSubmit()" style="background:var(--grass);border:1px solid var(--grass);color:#04140c;font-size:12px;font-weight:700;padding:7px 14px;border-radius:6px;cursor:pointer">Importieren</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3444,6 +3467,42 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     return Array.isArray(items) ? items : [];
   }
   function rezepteSaveItems(cat, items) { var p = {}; p[rezepteKey(cat)] = items; dbSave(p); }
+  function rezeptEsc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function rezeptFormatAmount(n) {
+    if (n === null || n === undefined || n === '') return '';
+    var num = Number(n);
+    if (isNaN(num)) return String(n);
+    return (num % 1 === 0) ? String(num) : String(num).replace('.', ',');
+  }
+  function renderRezeptStructuredCard(cat, item, i) {
+    var metaBits = [];
+    if (item.servings) metaBits.push('<span style="background:var(--surface2);border:1px solid var(--border-med);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--text-2)">' + rezeptEsc(item.servings) + ' Portionen</span>');
+    if (item.kcal) metaBits.push('<span style="background:var(--surface2);border:1px solid var(--border-med);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--text-2)">' + rezeptEsc(item.kcal) + ' kcal</span>');
+    if (item.protein) metaBits.push('<span style="background:var(--surface2);border:1px solid var(--border-med);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--text-2)">' + rezeptEsc(item.protein) + ' g Protein</span>');
+    (item.tags || []).forEach(function(t) {
+      metaBits.push('<span style="background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.35);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--grass)">' + rezeptEsc(t) + '</span>');
+    });
+    var ingredientsHtml = (item.ingredients || []).map(function(ing) {
+      var amt = rezeptFormatAmount(ing.amount);
+      var unit = ing.unit ? rezeptEsc(ing.unit) : '';
+      var prefix = amt ? (amt + (unit ? ' ' + unit : '')) : '';
+      return '<li>' + (prefix ? '<b>' + prefix + '</b> ' : '') + rezeptEsc(ing.name) + '</li>';
+    }).join('');
+    var stepsHtml = (item.steps || []).map(function(s) {
+      return '<li style="margin-bottom:6px;white-space:pre-line">' + rezeptEsc(s) + '</li>';
+    }).join('');
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem;display:flex;flex-direction:column;gap:8px">'
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
+      + '<div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'Inter\',sans-serif">' + rezeptEsc(item.title) + '</div>'
+      + '<button onclick="rezepteRemove(\'' + cat + '\',' + i + ')" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;flex-shrink:0" title="Entfernen">×</button>'
+      + '</div>'
+      + (metaBits.length ? '<div style="display:flex;flex-wrap:wrap;gap:6px">' + metaBits.join('') + '</div>' : '')
+      + (ingredientsHtml ? '<div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:4px">Zutaten</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.6">' + ingredientsHtml + '</ul></div>' : '')
+      + (stepsHtml ? '<details><summary style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);cursor:pointer">Zubereitung</summary><ol style="margin:6px 0 0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.5">' + stepsHtml + '</ol></details>' : '')
+      + (item.notes ? '<div style="font-size:11px;color:var(--text-3);font-style:italic;line-height:1.5">' + rezeptEsc(item.notes) + '</div>' : '')
+      + (item.source ? '<div style="font-size:10px;color:var(--text-3);text-align:right">Quelle: ' + rezeptEsc(item.source) + '</div>' : '')
+      + '</div>';
+  }
   function renderRezepteList(cat) {
     var list = document.getElementById('rezepte-list-' + cat);
     if (!list) return;
@@ -3454,6 +3513,10 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     }
     var html = '';
     items.forEach(function(item, i) {
+      if (item.kind === 'structured') {
+        html += renderRezeptStructuredCard(cat, item, i);
+        return;
+      }
       html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem;display:flex;flex-direction:column;gap:8px">'
         + '<div style="display:flex;align-items:center;gap:8px">'
         + '<input type="text" value="' + String(item.title || '').replace(/"/g, '&quot;') + '" placeholder="Rezeptname"'
@@ -3497,6 +3560,68 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   };
   window.loadRezepte = function() {
     REZEPTE_CATS.forEach(function(cat) { renderRezepteList(cat); });
+  };
+  function rezeptCategoryFromSchema(cat) {
+    var map = {
+      breakfast: 'fruehstueck', fruehstueck: 'fruehstueck', 'frühstück': 'fruehstueck',
+      lunch: 'mittagessen', mittagessen: 'mittagessen', mittag: 'mittagessen',
+      dinner: 'abendessen', abendessen: 'abendessen', abend: 'abendessen',
+      snack: 'snack'
+    };
+    var key = String(cat || '').toLowerCase().trim();
+    return map[key] || 'snack';
+  }
+  function rezepteShowCategory(cat) {
+    var id = 'rezepte-' + cat;
+    var container = document.getElementById('planer-ernaehrung');
+    if (!container) return;
+    var btn = null;
+    container.querySelectorAll('.subnav .sub-tab').forEach(function(b) {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + id + "'") >= 0) btn = b;
+    });
+    if (btn) showErnaehrungSlot(id, btn);
+  }
+  window.rezeptImportOpen = function() {
+    var ta = document.getElementById('rezept-import-input');
+    var err = document.getElementById('rezept-import-error');
+    if (ta) ta.value = '';
+    if (err) err.textContent = '';
+    document.getElementById('rezept-import-modal').classList.add('is-open');
+  };
+  window.rezeptImportClose = function() {
+    document.getElementById('rezept-import-modal').classList.remove('is-open');
+  };
+  window.rezeptImportSubmit = function() {
+    var ta = document.getElementById('rezept-import-input');
+    var err = document.getElementById('rezept-import-error');
+    if (err) err.textContent = '';
+    var raw = ta ? ta.value.trim() : '';
+    if (!raw) { if (err) err.textContent = 'Bitte JSON einfügen.'; return; }
+    var data;
+    try { data = JSON.parse(raw); } catch (e) { if (err) err.textContent = 'Ungültiges JSON: ' + e.message; return; }
+    if (!data || !data.name) { if (err) err.textContent = 'Feld "name" fehlt im JSON.'; return; }
+    var cat = rezeptCategoryFromSchema(data.category);
+    var nutrition = data.nutritionPerServing || {};
+    var item = {
+      kind: 'structured',
+      title: data.name,
+      servings: data.servings || null,
+      kcal: nutrition.kcal || null,
+      protein: nutrition.proteinGrams || null,
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      ingredients: Array.isArray(data.ingredients) ? data.ingredients.map(function(ing) {
+        return { name: ing && ing.name || '', amount: (ing && ing.amount != null ? ing.amount : null), unit: (ing && ing.unit) || null };
+      }) : [],
+      steps: Array.isArray(data.steps) ? data.steps : [],
+      notes: data.notes || '',
+      source: data.source || ''
+    };
+    var items = rezepteGetItems(cat);
+    items.push(item);
+    rezepteSaveItems(cat, items);
+    renderRezepteList(cat);
+    rezeptImportClose();
+    rezepteShowCategory(cat);
   };
 
   // ── 2-WEEK TRAINING CALENDAR ─────────────────────────────────
