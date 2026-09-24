@@ -6,7 +6,7 @@
 <title>SR Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/laucide@latest"></script>
 <style>
 :root {
@@ -2936,58 +2936,462 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
   <!-- ── 2. ERNÄHRUNG: REZEPTE ── -->
   <div id="planer-ernaehrung" class="slot-section">
-    <div class="subnav">
-      <div class="nav-group">
-        <span class="nav-group-label">Rezepte</span>
-        <button class="sub-tab active" onclick="showErnaehrungSlot('rezepte-fruehstueck',this)">Frühstück</button>
-        <button class="sub-tab" onclick="showErnaehrungSlot('rezepte-mittagessen',this)">Mittagessen</button>
-        <button class="sub-tab" onclick="showErnaehrungSlot('rezepte-abendessen',this)">Abendessen</button>
-        <button class="sub-tab" onclick="showErnaehrungSlot('rezepte-snack',this)">Snack</button>
+  <template id="rk-template">
+    <style>
+:host{
+    --pine:#1E2B22;
+    --pine-light:#2A3B30;
+    --parchment:#F7F1E4;
+    --parchment-dark:#EBE0C8;
+    --ink:#2C3831;
+    --ink-soft:#6B7A6E;
+    --mustard:#C68A2E;
+    --mustard-soft:#E9C77F;
+    --herb:#6B8F71;
+    --herb-dark:#4F6E55;
+    --brick:#A85A3F;
+    --shadow:rgba(30,43,34,0.18);
+    display:block;
+    background:var(--parchment);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    border-radius:16px;
+    overflow:hidden;
+  }
+  *{box-sizing:border-box;}
+  .app{max-width:1080px;margin:0 auto;padding:20px 20px 40px;}
+
+  /* Header */
+  header{
+    background:var(--pine);
+    color:var(--parchment);
+    padding:28px 24px 40px;
+    margin:0 -20px 0;
+    border-radius:0 0 18px 18px;
+    position:relative;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:clamp(28px,4vw,40px);
+    margin:0 0 4px;
+    letter-spacing:-0.5px;
+  }
+  header p.sub{
+    margin:0;
+    color:var(--mustard-soft);
+    font-size:14px;
+    font-style:italic;
+    font-family:'Fraunces',serif;
+  }
+  .header-controls{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+    flex-wrap:wrap;
+  }
+  .search-box{
+    flex:1;
+    min-width:180px;
+    position:relative;
+  }
+  .search-box input{
+    width:100%;
+    padding:11px 14px 11px 38px;
+    border-radius:10px;
+    border:none;
+    background:var(--pine-light);
+    color:var(--parchment);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+  }
+  .search-box input::placeholder{color:#9FB0A2;}
+  .search-box::before{
+    content:"⌕";
+    position:absolute;
+    left:13px;top:50%;transform:translateY(-50%);
+    color:#9FB0A2;
+    font-size:16px;
+  }
+  .btn-add{
+    background:var(--mustard);
+    color:var(--pine);
+    border:none;
+    padding:11px 20px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    white-space:nowrap;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn-add:hover{background:var(--mustard-soft);transform:translateY(-1px);}
+
+  /* Filter chips */
+  .chips{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:22px 0 26px;
+  }
+  .chip{
+    padding:7px 14px;
+    border-radius:999px;
+    border:1.5px solid var(--parchment-dark);
+    background:transparent;
+    color:var(--ink-soft);
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    transition:all .15s ease;
+    font-family:'Inter',sans-serif;
+  }
+  .chip:hover{border-color:var(--herb);color:var(--herb-dark);}
+  .chip.active{
+    background:var(--herb);
+    border-color:var(--herb);
+    color:white;
+  }
+
+  /* Grid */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:20px;
+  }
+
+  .card{
+    background:white;
+    border-radius:4px 4px 10px 10px;
+    box-shadow:0 3px 10px var(--shadow);
+    cursor:pointer;
+    position:relative;
+    padding-top:34px;
+    transition:transform .15s ease, box-shadow .15s ease;
+    overflow:hidden;
+  }
+  .card:hover{transform:translateY(-3px) rotate(-0.3deg);box-shadow:0 8px 18px var(--shadow);}
+  .card .tab{
+    position:absolute;
+    top:0;left:16px;
+    background:var(--herb);
+    color:white;
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    padding:5px 12px 6px;
+    border-radius:0 0 6px 6px;
+    font-family:'Inter',sans-serif;
+  }
+  .card .tab.dinner{background:var(--pine);}
+  .card .tab.breakfast{background:var(--mustard);color:var(--pine);}
+  .card .tab.lunch{background:var(--herb);}
+  .card-body{padding:14px 16px 18px;}
+  .card h3{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    font-weight:600;
+    margin:0 0 8px;
+    line-height:1.25;
+  }
+  .card .meta-line{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .card .pills{display:flex;flex-wrap:wrap;gap:6px;}
+  .card .pill{
+    font-size:10.5px;
+    padding:3px 9px;
+    border-radius:999px;
+    background:var(--parchment);
+    color:var(--ink-soft);
+    border:1px solid var(--parchment-dark);
+  }
+  .card::after{
+    content:"";
+    position:absolute;
+    bottom:0;left:0;right:0;
+    height:5px;
+    background:repeating-linear-gradient(90deg,var(--parchment-dark) 0 6px, transparent 6px 12px);
+  }
+
+  /* Empty state */
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+  }
+  .empty h2{
+    font-family:'Fraunces',serif;
+    color:var(--ink);
+    font-size:24px;
+    margin-bottom:8px;
+  }
+  .empty button{
+    margin-top:16px;
+  }
+
+  /* Modal overlay */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(30,43,34,0.55);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    z-index:100;
+  }
+  .modal{
+    background:var(--parchment);
+    border-radius:16px;
+    max-width:560px;
+    width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+    padding:0;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  }
+  .modal-head{
+    background:var(--pine);
+    color:var(--parchment);
+    padding:20px 24px;
+    border-radius:16px 16px 0 0;
+    position:sticky;top:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .modal-head h2{
+    font-family:'Fraunces',serif;
+    font-size:24px;
+    margin:0;
+    font-weight:600;
+  }
+  .close-x{
+    background:none;border:none;color:var(--parchment);
+    font-size:22px;cursor:pointer;line-height:1;
+    opacity:.8;
+  }
+  .close-x:hover{opacity:1;}
+  .modal-content{padding:22px 24px 28px;}
+
+  /* Detail view */
+  .detail-meta{
+    display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;
+  }
+  .servings-control{
+    display:flex;align-items:center;gap:14px;
+    background:white;
+    border-radius:10px;
+    padding:12px 16px;
+    margin-bottom:20px;
+    border:1px solid var(--parchment-dark);
+  }
+  .servings-control .label{font-size:13px;color:var(--ink-soft);font-weight:500;}
+  .stepper{display:flex;align-items:center;gap:10px;margin-left:auto;}
+  .stepper button{
+    width:30px;height:30px;border-radius:50%;
+    border:1.5px solid var(--herb);
+    background:white;color:var(--herb-dark);
+    font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .stepper button:hover{background:var(--herb);color:white;}
+  .stepper .count{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:500;font-size:16px;
+    min-width:20px;text-align:center;
+  }
+  h3.section-title{
+    font-family:'Fraunces',serif;
+    font-size:16px;
+    color:var(--herb-dark);
+    margin:22px 0 10px;
+    font-weight:600;
+  }
+  .ing-list{list-style:none;padding:0;margin:0;}
+  .ing-list li{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px dashed var(--parchment-dark);
+    font-size:14.5px;
+  }
+  .ing-list .amt{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--herb-dark);
+    font-weight:500;
+    white-space:nowrap;
+    margin-left:12px;
+  }
+  .steps-list{padding-left:22px;margin:0;}
+  .steps-list li{margin-bottom:10px;line-height:1.5;font-size:14.5px;white-space:pre-line;}
+  .notes-box{
+    background:var(--mustard-soft);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13.5px;
+    margin-top:18px;
+    color:var(--pine);
+  }
+  .detail-actions{
+    display:flex;gap:10px;margin-top:24px;
+  }
+  .btn-secondary{
+    flex:1;
+    padding:10px;
+    border-radius:10px;
+    border:1.5px solid var(--pine);
+    background:transparent;
+    color:var(--pine);
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .btn-secondary:hover{background:var(--pine);color:white;}
+  .btn-danger{
+    padding:10px 16px;
+    border-radius:10px;
+    border:1.5px solid var(--brick);
+    background:transparent;
+    color:var(--brick);
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .btn-danger:hover{background:var(--brick);color:white;}
+
+  /* Form */
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin:14px 0 6px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  input[type=text], input[type=number], textarea, select{
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1.5px solid var(--parchment-dark);
+    background:white;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    color:var(--ink);
+  }
+  textarea{resize:vertical;min-height:60px;}
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+  .tag-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .tag-opt{
+    padding:6px 12px;border-radius:999px;
+    border:1.5px solid var(--parchment-dark);
+    font-size:12.5px;cursor:pointer;color:var(--ink-soft);
+  }
+  .tag-opt.active{background:var(--herb);border-color:var(--herb);color:white;}
+  .dyn-row{
+    display:flex;gap:8px;margin-bottom:8px;align-items:center;
+  }
+  .dyn-row input{flex:1;}
+  .dyn-row input.amt-input{max-width:80px;flex:none;}
+  .dyn-row input.unit-input{max-width:70px;flex:none;}
+  .rm-btn{
+    background:none;border:none;color:var(--brick);
+    font-size:18px;cursor:pointer;padding:0 4px;
+  }
+  .add-line{
+    background:none;border:1.5px dashed var(--herb);
+    color:var(--herb-dark);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:13px;
+    cursor:pointer;
+    width:100%;
+    margin-top:2px;
+  }
+  .save-bar{
+    display:flex;gap:10px;margin-top:22px;
+  }
+  .btn-save{
+    flex:1;background:var(--herb);color:white;border:none;
+    padding:12px;border-radius:10px;font-weight:600;cursor:pointer;
+    font-family:'Inter',sans-serif;font-size:14.5px;
+  }
+  .btn-save:hover{background:var(--herb-dark);}
+  .btn-cancel{
+    padding:12px 18px;background:transparent;border:1.5px solid var(--parchment-dark);
+    border-radius:10px;cursor:pointer;color:var(--ink-soft);font-weight:500;
+  }
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--pine);color:var(--parchment);
+    padding:10px 18px;border-radius:10px;font-size:13.5px;
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
+    z-index:200;
+    opacity:0;transition:opacity .25s ease;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;}
+  .loading{text-align:center;padding:60px;color:var(--ink-soft);}
+
+  /* Teilen */
+  .share-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .share-tab{
+    padding:7px 13px;border-radius:8px;border:1.5px solid var(--parchment-dark);
+    background:transparent;color:var(--ink-soft);font-size:12.5px;font-weight:600;
+    cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  .share-tab.active{background:var(--pine);border-color:var(--pine);color:var(--parchment);}
+  .share-hint{font-size:12.5px;color:var(--ink-soft);margin:0 0 10px;line-height:1.45;}
+  .share-box{
+    width:100%;min-height:210px;max-height:40vh;
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.45;
+    padding:12px;border-radius:10px;border:1.5px solid var(--parchment-dark);
+    background:white;color:var(--ink);resize:vertical;white-space:pre;
+  }
+  .share-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .share-actions button{
+    flex:1;min-width:130px;padding:11px;border-radius:10px;font-weight:600;
+    cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;
+  }
+  .btn-copy{background:var(--herb);color:white;border:none;}
+  .btn-copy:hover{background:var(--herb-dark);}
+  .btn-dl{background:transparent;border:1.5px solid var(--pine);color:var(--pine);}
+  .btn-dl:hover{background:var(--pine);color:white;}
+  .share-all{
+    margin-top:14px;padding-top:14px;border-top:1px dashed var(--parchment-dark);
+    font-size:12.5px;color:var(--ink-soft);
+  }
+  .share-all button{
+    background:none;border:none;color:var(--herb-dark);font-weight:600;
+    cursor:pointer;text-decoration:underline;font-size:12.5px;padding:0;
+    font-family:'Inter',sans-serif;
+  }
+    </style>
+<div class="app">
+  <header>
+    <h1>Rezeptkiste</h1>
+    <p class="sub">Bowls, Batch-Cooking, zwei Portionen — deine Sammlung</p>
+    <div class="header-controls">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Rezept suchen...">
       </div>
+      <button class="btn-add" id="openAddBtn">+ Neues Rezept</button>
     </div>
+  </header>
 
-    <div style="display:flex;justify-content:flex-end;margin:.5rem 0 .875rem">
-      <button onclick="rezeptImportOpen()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text);font-size:11px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;white-space:nowrap">⭳ Rezept aus JSON importieren</button>
-    </div>
+  <div class="chips" id="chipsRow"></div>
+  <div id="mainArea"><div class="loading">Rezeptkiste wird geöffnet...</div></div>
+</div>
 
-    <div id="rezepte-fruehstueck" class="slot-section active">
-      <div id="rezepte-list-fruehstueck" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
-      <button onclick="rezepteAdd('fruehstueck')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
-    </div>
-
-    <div id="rezepte-mittagessen" class="slot-section">
-      <div id="rezepte-list-mittagessen" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
-      <button onclick="rezepteAdd('mittagessen')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
-    </div>
-
-    <div id="rezepte-abendessen" class="slot-section">
-      <div id="rezepte-list-abendessen" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
-      <button onclick="rezepteAdd('abendessen')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
-    </div>
-
-    <div id="rezepte-snack" class="slot-section">
-      <div id="rezepte-list-snack" style="display:flex;flex-direction:column;gap:10px;margin-bottom:.875rem"></div>
-      <button onclick="rezepteAdd('snack')" style="width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:9px;color:var(--text-3);font-size:12px;font-weight:600;cursor:pointer">+ Rezept hinzufügen</button>
-    </div>
-
-    <!-- Rezept-Import Modal -->
-    <div id="rezept-import-modal" class="modal-overlay" onclick="if(event.target===this)rezeptImportClose()">
-      <div class="modal-box" style="max-width:520px">
-        <div class="mhdr">
-          <div class="mhdr-eyebrow">Rezept importieren</div>
-          <button class="m-close" onclick="rezeptImportClose()">✕</button>
-        </div>
-        <div class="mbody">
-          <div style="font-size:12px;color:var(--text-2);margin-bottom:.625rem;line-height:1.5">JSON aus deiner Rezeptsammlung hier einfügen. Die Kategorie wird automatisch aus dem Feld <code>category</code> übernommen.</div>
-          <textarea id="rezept-import-input" placeholder='{"name": "...", "category": "dinner", "ingredients": [...], "steps": [...]}' style="width:100%;min-height:180px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:8px 10px;color:var(--text);font-size:12px;font-family:ui-monospace,Consolas,monospace;resize:vertical;outline:none;box-sizing:border-box"></textarea>
-          <div id="rezept-import-error" style="font-size:11px;color:#e74c3c;margin-top:6px;min-height:14px"></div>
-          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:1rem">
-            <button onclick="rezeptImportClose()" style="background:var(--surface2);border:1px solid var(--border-med);color:var(--text-2);font-size:12px;font-weight:600;padding:7px 14px;border-radius:6px;cursor:pointer">Abbrechen</button>
-            <button onclick="rezeptImportSubmit()" style="background:var(--grass);border:1px solid var(--grass);color:#04140c;font-size:12px;font-weight:700;padding:7px 14px;border-radius:6px;cursor:pointer">Importieren</button>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="toast" id="toast"></div>
+  </template>
+  <div id="rk-mount"></div>
   </div>
 
   <!-- ── 3. REGENERATION ── -->
@@ -3463,171 +3867,2406 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     lpClose();
   }
 
-  // ── REZEPTE ──────────────────────────────────────────────────
-  var REZEPTE_CATS = ['fruehstueck', 'mittagessen', 'abendessen', 'snack'];
-  function rezepteKey(cat) { return 'rezepte-' + cat; }
-  function rezepteGetItems(cat) {
-    var items = dbGet(rezepteKey(cat), null);
-    return Array.isArray(items) ? items : [];
+(function(){
+  var mount = document.getElementById('rk-mount');
+  var tpl = document.getElementById('rk-template');
+  if (!mount || !tpl) return;
+  var root = mount.attachShadow({mode:'open'});
+  root.appendChild(tpl.content.cloneNode(true));
+  tpl.remove();
+
+const TAG_OPTIONS = ["Bowl","Vegetarisch","Air Fryer","Schnell","Batch-Cooking","Proteinreich"];
+const CATEGORIES = [
+  {id:"breakfast", label:"Frühstück"},
+  {id:"lunch", label:"Mittag"},
+  {id:"dinner", label:"Abend"}
+];
+
+let recipes = [];
+let activeFilters = new Set();
+let searchTerm = "";
+let editingId = null;
+let currentServings = {}; // recipeId -> current servings shown in detail view
+
+function uid(){ return 'r' + Date.now() + Math.random().toString(36).slice(2,7); }
+
+const SEED_RECIPES = [
+  {
+    id: 'seed-haehnchen-reis-bowl',
+    _v: 3,
+    name: 'Hähnchen-Reis-Bowl mit Süßkartoffel (Heißluftfritteuse)',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 918,
+    protein: 59,
+    tags: ['Bowl','Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Hähnchenbrustfilet', amount:400, unit:'g'},
+      {name:'Süßkartoffel (oder normale Kartoffel), gewürfelt – alternativ TK-Süßkartoffelpommes', amount:400, unit:'g'},
+      {name:'Basmatireis (roh)', amount:150, unit:'g'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Avocado', amount:1, unit:''},
+      {name:'Sojasauce', amount:3, unit:'EL'},
+      {name:'Sesamöl', amount:1, unit:'EL'},
+      {name:'Honig oder Ahornsirup', amount:1, unit:'TL'},
+      {name:'Limette, Saft davon', amount:1, unit:''},
+      {name:'Sesam', amount:1, unit:'EL'},
+      {name:'Frühlingszwiebeln', amount:2, unit:''},
+      {name:'Paprikapulver (nur bei frischer Kartoffel/Süßkartoffel, nicht bei TK-Pommes)', amount:1, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer, schwarz', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Süßkartoffel-/Kartoffelwürfel mit Olivenöl und Paprikapulver vermischen und salzen. Bei TK-Pommes: direkt aus der Packung, kein Öl/Gewürz nötig.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Würfel auf einem Blech ca. 25-30 Minuten backen, zwischendurch wenden. TK-Pommes: Packungsangabe beachten.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 180°C vorheizen. Kartoffel/Süßkartoffel-Würfel im Korb bei 180°C ca. 15-18 Minuten frittieren, nach der Hälfte der Zeit schütteln. TK-Pommes: 180-200°C, 12-15 Minuten (Packungsangabe beachten).',
+      'Parallel dazu Basmatireis nach Packungsanweisung in Salzwasser kochen (meist ca. 10-12 Minuten), danach abgießen und beiseitestellen.',
+      'Während der letzten 8-10 Minuten der Frittier-Zeit: Hähnchenbrustfilet mit Salz und Pfeffer würzen, in einer Pfanne mit etwas Öl bei mittlerer Hitze 6-8 Minuten pro Seite braten, bis es durchgegart ist. Danach kurz ruhen lassen und in Scheiben schneiden.',
+      'Sojasauce, Sesamöl, Honig/Ahornsirup und Limettensaft in einer kleinen Schüssel zum Dressing verrühren.',
+      'Reis als Basis in zwei Schalen verteilen, Kartoffel/Süßkartoffel/Pommes, Hähnchenscheiben und in Scheiben geschnittene Avocado darauf anrichten. Mit Dressing beträufeln, Sesam und gehackte Frühlingszwiebeln bestreuen.'
+    ],
+    notes: 'Für 2 Portionen direkt doppelt kochen – eine für Samstag Mittag, eine zum Aufwärmen am Sonntagabend nach dem Spiel. Hähnchen nach dem Braten in Scheiben schneiden, abkühlen lassen und am Folgetag kurz in der Pfanne erhitzen statt Mikrowelle, schmeckt frischer. Reis und Kartoffel/Süßkartoffel vertragen Aufwärmen in der Mikrowelle problemlos. Avocado erst kurz vor dem Servieren zugeben, damit sie nicht braun wird. Bei TK-Süßkartoffelpommes Salz/Paprikapulver weglassen, da meist schon gewürzt/paniert.'
+  },
+  {
+    id: 'seed-ofengemuese-halloumi-bowl',
+    _v: 4,
+    name: 'Ofengemüse-Bowl mit Halloumi & Kichererbsen',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 1218,
+    protein: 51,
+    tags: ['Bowl','Vegetarisch','Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Kartoffeln', amount:400, unit:'g'},
+      {name:'Paprika', amount:2, unit:''},
+      {name:'Zucchini', amount:1, unit:''},
+      {name:'Halloumi', amount:150, unit:'g'},
+      {name:'Kichererbsen (abgetropft)', amount:400, unit:'g'},
+      {name:'Quinoa oder Bulgur, trocken', amount:150, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Griechischer Joghurt', amount:150, unit:'g'},
+      {name:'Zitrone, Saft davon', amount:1, unit:''},
+      {name:'Olivenöl (fürs Dressing)', amount:1, unit:'EL'},
+      {name:'Salz', amount:1, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Quinoa/Bulgur nach Packungsanweisung in Salzwasser kochen (meist ~15 Min ziehen lassen).',
+      'Kartoffeln in ca. 2cm große Würfel schneiden (ungeschält ist ok bei Bio-Kartoffeln). Paprika und Zucchini in mundgerechte Stücke schneiden. Kichererbsen abtropfen und trocken tupfen.',
+      'Kartoffeln, Paprika, Zucchini und Kichererbsen in einer großen Schüssel mit Olivenöl, Salz und Pfeffer vermengen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Kartoffelwürfel auf einem Blech ca. 15 Minuten vorgaren (sie brauchen am längsten).\n\nAIRFRYER-VARIANTE: Kartoffelwürfel allein in die Heißluftfritteuse geben, 180°C, 10 Minuten vorgaren (sie brauchen am längsten).',
+      'OFEN-VARIANTE: Paprika, Zucchini und Kichererbsen dazugeben, weitere 15-18 Minuten backen, einmal wenden.\n\nAIRFRYER-VARIANTE: Paprika, Zucchini und Kichererbsen zu den Kartoffeln geben, weitere 12 Minuten bei 180°C, einmal zwischendurch schütteln.',
+      'Halloumi in ca. 1,5cm dicke Scheiben oder Würfel schneiden.',
+      'OFEN-VARIANTE: Halloumi-Stücke auf das Gemüse legen, weitere 8-10 Minuten backen, bis goldbraun.\n\nAIRFRYER-VARIANTE: Halloumi-Stücke auf das Gemüse legen/verteilen, weitere 6-7 Minuten bei 180°C goldbraun braten.',
+      'Für das Dressing Griechischen Joghurt, Zitronensaft und Olivenöl verrühren, mit Salz/Pfeffer abschmecken.',
+      'Quinoa/Bulgur in zwei Schüsseln verteilen, Ofengemüse, Kichererbsen und Halloumi darauf anrichten, Dressing darüber geben.'
+    ],
+    notes: 'Ca. 1218 kcal pro Portion, ~51g Protein (nachgerechnet). Zweite Portion kalt oder kurz aufgewärmt am nächsten Tag gut geeignet (Halloumi wird beim Aufwärmen etwas fester, schmeckt aber weiterhin gut). Dressing separat aufbewahren, wenn für den nächsten Tag geplant.'
+  },
+  {
+    id: 'seed-falafel-hummus-skyr-bowl',
+    _v: 3,
+    name: 'Falafel-Bowl mit Hummus & Skyr-Dressing',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 1076,
+    protein: 40,
+    tags: ['Bowl','Vegetarisch','Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Falafel (TK oder fertig)', amount:12, unit:''},
+      {name:'Couscous, trocken', amount:150, unit:'g'},
+      {name:'Kirschtomaten', amount:200, unit:'g'},
+      {name:'Salatgurke', amount:1, unit:''},
+      {name:'Rote Zwiebel', amount:0.5, unit:''},
+      {name:'Hummus', amount:200, unit:'g'},
+      {name:'Skyr', amount:150, unit:'g'},
+      {name:'Zitrone, Saft davon', amount:0.5, unit:''},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'},
+      {name:'Petersilie, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Falafel auf einem Blech ca. 18-20 Minuten backen, nach der Hälfte wenden (Packungsangabe beachten).\n\nAIRFRYER-VARIANTE: Falafel in die Heißluftfritteuse geben, 200°C, 10-12 Minuten, nach der Hälfte wenden (Packungsangabe beachten, je nach Marke leicht abweichend).',
+      'Couscous nach Packungsanweisung mit kochendem Wasser übergießen und ca. 5 Minuten quellen lassen, dann mit einer Gabel auflockern.',
+      'Kirschtomaten halbieren, Salatgurke würfeln, rote Zwiebel fein hacken. Alles in einer Schüssel mit Olivenöl, Salz und Pfeffer vermengen.',
+      'Skyr, Zitronensaft und Petersilie verrühren, mit Salz abschmecken (alternativ: klassisches Tzatziki-Gewürz wie Knoblauch/Dill ergänzen).',
+      'Couscous in zwei Schüsseln verteilen, Salat, Hummus und Falafel darauf anrichten, Skyr-Dressing darüber geben.'
+    ],
+    notes: 'Ca. 1076 kcal pro Portion, ~40g Protein (nachgerechnet) (Falafel + Hummus + Skyr zusammen). Falafel-Menge ggf. an Packungsangabe anpassen, meist ~6 Stück/Portion. Zweite Portion: Couscous/Salat/Falafel getrennt vom Skyr-Dressing lagern, dann bleibt alles knackig.'
+  },
+  {
+    id: 'seed-lachs-edamame-bowl',
+    _v: 3,
+    name: 'Lachs-Bowl mit Edamame & Sesam-Soja-Dressing',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 804,
+    protein: 50,
+    tags: ['Bowl','Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Lachsfilet', amount:300, unit:'g'},
+      {name:'Reis, trocken', amount:150, unit:'g'},
+      {name:'Edamame (TK, ohne Schale)', amount:200, unit:'g'},
+      {name:'Karotten', amount:2, unit:''},
+      {name:'Salatgurke', amount:1, unit:''},
+      {name:'Frühlingszwiebeln', amount:2, unit:''},
+      {name:'Sojasauce', amount:1, unit:'EL'},
+      {name:'Sojasauce (fürs Dressing)', amount:1, unit:'EL'},
+      {name:'Sesamöl', amount:1, unit:'TL'},
+      {name:'Sesam, geröstet', amount:1, unit:'EL'},
+      {name:'Reisessig', amount:1, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Reis nach Packungsanweisung kochen (meist 15-18 Min).',
+      'Lachsfilet mit Sojasauce bestreichen, mit Pfeffer würzen, 10 Minuten ziehen lassen.',
+      'Karotten raspeln oder in feine Streifen schneiden, Salatgurke in Streifen oder Würfel schneiden, Frühlingszwiebeln in Ringe schneiden.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Edamame auf einem Blech verteilen, ca. 5 Minuten vorgaren. Lachsfilets (Hautseite nach unten) dazulegen, weitere 12-15 Minuten garen, bis der Lachs innen noch leicht glasig bis durchgegart ist (je nach Dicke).\n\nAIRFRYER-VARIANTE: Edamame in die Heißluftfritteuse geben, 180°C, 5 Minuten vorgaren. Lachsfilets (Hautseite nach unten) mit in die Heißluftfritteuse legen, bei 180°C weitere 10-12 Minuten garen, bis der Lachs innen noch leicht glasig bis durchgegart ist (je nach Dicke).',
+      'Für das Dressing Sojasauce, Sesamöl, Sesam und Reisessig verrühren.',
+      'Reis in zwei Schüsseln verteilen, Edamame, Karotte, Gurke und Frühlingszwiebel anrichten, Lachs darauf legen, mit Dressing beträufeln.'
+    ],
+    notes: 'Ca. 804 kcal pro Portion, ~50g Protein (nachgerechnet) – sehr gute Proteindichte im Verhältnis zu den Kalorien. Lachs am besten mit Haut nach unten in die Fritteuse, dann löst er sich leichter. Zweite Portion: Lachs kalt sehr gut zu Reisbowl, alternativ kurz und schonend aufwärmen, damit er nicht trocken wird.'
+  },
+  {
+    id: 'seed-linsen-ofenkartoffeln-feta-spinat-bowl',
+    _v: 3,
+    name: 'Linsen-Bowl mit Ofenkartoffeln, Feta & Spinat',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 824,
+    protein: 43,
+    tags: ['Bowl','Vegetarisch','Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Rote Linsen, trocken', amount:200, unit:'g'},
+      {name:'Kartoffeln', amount:400, unit:'g'},
+      {name:'Blattspinat, frisch', amount:150, unit:'g'},
+      {name:'Feta', amount:100, unit:'g'},
+      {name:'Kürbiskerne', amount:30, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Kreuzkümmel, gemahlen', amount:1, unit:'TL'},
+      {name:'Gemüsebrühe', amount:500, unit:'ml'},
+      {name:'Salz', amount:1, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Kartoffeln in ca. 2cm große Würfel schneiden, mit Olivenöl und der Hälfte von Salz und Pfeffer vermengen. OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen, Kartoffeln auf einem Blech ca. 25-30 Minuten backen, zwischendurch wenden.\n\nAIRFRYER-VARIANTE: In die Heißluftfritteuse geben, 180°C, 18-20 Minuten, zwischendurch schütteln.',
+      'Zwiebel und Knoblauch fein würfeln bzw. hacken. In einem Topf kurz andünsten (etwas Öl oder Wasser), Kreuzkümmel kurz mitrösten.',
+      'Rote Linsen und Gemüsebrühe dazugeben, aufkochen und ca. 12-15 Minuten köcheln lassen, bis die Linsen weich sind. Mit restlichem Salz und Pfeffer abschmecken.',
+      'Spinat kurz vor Ende der Kochzeit unter die heißen Linsen rühren, bis er zusammenfällt.',
+      'Feta in Würfel oder Bröckel zerteilen.',
+      'Linsen-Spinat-Mischung in zwei Schüsseln verteilen, Ofenkartoffeln darauf anrichten, mit Feta und Kürbiskernen bestreuen.'
+    ],
+    notes: 'Ca. 824 kcal pro Portion, ~43g Protein (nachgerechnet). Komplett vegetarisch und gut lagerfähig. Linsen und Kartoffeln kühlen gut, Spinat und Feta idealerweise erst beim Aufwärmen/Anrichten der zweiten Portion dazugeben.'
+  },
+  {
+    id: 'seed-kartoffel-gemuese-auflauf-huettenkaese',
+    _v: 2,
+    name: 'Kartoffel-Gemüse-Auflauf mit Hüttenkäse',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 584,
+    protein: 39,
+    tags: ['Vegetarisch','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Kartoffeln', amount:500, unit:'g'},
+      {name:'Zucchini', amount:1, unit:''},
+      {name:'Paprika', amount:1, unit:''},
+      {name:'Hüttenkäse', amount:250, unit:'g'},
+      {name:'Skyr oder griechischer Joghurt', amount:100, unit:'g'},
+      {name:'Ei', amount:1, unit:''},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Geriebener Käse (Gouda/Emmentaler)', amount:60, unit:'g'},
+      {name:'Muskatnuss, gerieben', amount:1, unit:'TL'},
+      {name:'Salz', amount:1, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'},
+      {name:'Olivenöl', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Kartoffeln schälen oder ungeschält lassen (Bio), in dünne Scheiben (ca. 3-4mm) schneiden.',
+      'Zucchini und Paprika in dünne Scheiben bzw. Streifen schneiden.',
+      'Hüttenkäse, Skyr oder Joghurt, Ei und Knoblauch (gepresst) in einer Schüssel oder mit dem Stabmixer glatt pürieren. Mit Muskatnuss, Salz und Pfeffer abschmecken.',
+      'Auflaufform mit Olivenöl einfetten. Kartoffelscheiben, Zucchini und Paprika abwechselnd schichten, dabei jede Schicht leicht salzen.',
+      'Hüttenkäse-Sauce gleichmäßig über das Gemüse gießen, sodass alles bedeckt ist. Mit geriebenem Käse bestreuen.',
+      'Bei 190°C (Ober-/Unterhitze) ca. 40-45 Minuten backen, bis die Kartoffeln weich sind und die Oberfläche goldbraun ist. Falls die Oberseite zu schnell bräunt, mit Alufolie abdecken.'
+    ],
+    notes: 'Ca. 584 kcal pro Portion, ~39g Protein (nachgerechnet) durch Hüttenkäse + Skyr + Käse. Beide Portionen lassen sich gut im Ofen aufbewahren und am nächsten Tag aufwärmen (180°C, ca. 15 Min zugedeckt).'
+  },
+  {
+    id: 'seed-tofu-gemuese-curry',
+    _v: 3,
+    name: 'Tofu-Gemüse-Curry mit knusprigem Tofu',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 998,
+    protein: 38,
+    tags: ['Vegetarisch','Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Tofu, fest', amount:300, unit:'g'},
+      {name:'Stärke (Mais- oder Kartoffelstärke)', amount:1, unit:'EL'},
+      {name:'Sojasauce', amount:1, unit:'EL'},
+      {name:'Reis, trocken', amount:150, unit:'g'},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Rote Paprika', amount:1, unit:''},
+      {name:'Brokkoli', amount:200, unit:'g'},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Ingwer, frisch, geraspelt', amount:1, unit:'EL'},
+      {name:'Currypaste (rot oder gelb)', amount:2, unit:'EL'},
+      {name:'Kokosmilch', amount:400, unit:'ml'},
+      {name:'Sojasauce (für die Sauce)', amount:1, unit:'EL'},
+      {name:'Limette, Saft davon', amount:0.5, unit:''}
+    ],
+    steps: [
+      'Tofu zwischen Küchenpapier pressen, um überschüssiges Wasser zu entfernen (mind. 10 Minuten, idealerweise mit Gewicht beschwert).',
+      'Tofu in Würfel schneiden, mit Sojasauce und Stärke vermengen, sodass alle Seiten leicht bedeckt sind.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Tofuwürfel auf einem Blech verteilen, ca. 25-30 Minuten backen, nach der Hälfte wenden, bis knusprig-goldbraun.\n\nAIRFRYER-VARIANTE: Tofuwürfel in die Heißluftfritteuse geben, 200°C, 12-15 Minuten, nach der Hälfte schütteln, bis knusprig-goldbraun.',
+      'Reis nach Packungsanweisung kochen (meist 15-18 Min).',
+      'Zwiebel in Streifen, Paprika in Streifen, Brokkoli in Röschen schneiden. Knoblauch und Ingwer fein hacken.',
+      'Zwiebel, Knoblauch und Ingwer in einem Topf kurz andünsten (etwas Öl oder Wasser), Currypaste dazugeben und kurz mitrösten.',
+      'Kokosmilch dazugießen, aufkochen, Paprika und Brokkoli zugeben, ca. 8-10 Minuten köcheln lassen, bis das Gemüse bissfest ist. Mit Sojasauce und Limettensaft abschmecken.',
+      'Reis in zwei Schüsseln verteilen, Curry darüber geben, knusprigen Tofu obenauf anrichten.'
+    ],
+    notes: 'Ca. 998 kcal pro Portion, ~38g Protein (nachgerechnet). Tofu-Menge kann bei Bedarf erhöht werden für mehr Protein. Zweite Portion: Curry hält sich gut, Tofu am besten separat aufbewahren und beim Aufwärmen kurz in der Heißluftfritteuse nachkrossen statt in der Sauce mitköcheln.'
+  },
+  {
+    id: 'seed-falafel-burger-fladenbrot',
+    _v: 3,
+    name: 'Falafel-Burger im Fladenbrot',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 793,
+    protein: 30,
+    tags: ['Vegetarisch','Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Kichererbsen, getrocknet (über Nacht eingeweicht) oder aus der Dose, abgetropft', amount:400, unit:'g'},
+      {name:'Zwiebel', amount:0.5, unit:''},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Petersilie, frisch', amount:3, unit:'EL'},
+      {name:'Kreuzkümmel, gemahlen', amount:1, unit:'TL'},
+      {name:'Koriander, gemahlen', amount:1, unit:'TL'},
+      {name:'Kichererbsenmehl oder normales Mehl', amount:2, unit:'EL'},
+      {name:'Salz', amount:1, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'},
+      {name:'Olivenöl (zum Bestreichen)', amount:1, unit:'EL'},
+      {name:'Fladenbrot', amount:2, unit:''},
+      {name:'Griechischer Joghurt', amount:150, unit:'g'},
+      {name:'Zitrone, Saft davon', amount:0.5, unit:''},
+      {name:'Tomate', amount:1, unit:''},
+      {name:'Salatblätter', amount:50, unit:'g'}
+    ],
+    steps: [
+      'Kichererbsen, Zwiebel, Knoblauch, Petersilie, Kreuzkümmel, Koriander, Salz und Pfeffer im Blitzhacker oder Food Processor grob zerkleinern (nicht pürieren, sollte etwas Struktur behalten).',
+      'Kichererbsenmehl untermengen, bis die Masse formbar ist. 15 Minuten im Kühlschrank ruhen lassen.',
+      'Aus der Masse 4 flache Patties (ca. 8-9cm Durchmesser) formen, mit Olivenöl bestreichen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Patties auf einem mit Backpapier ausgelegten Blech ca. 20-25 Minuten backen, nach der Hälfte wenden, bis goldbraun und fest.\n\nAIRFRYER-VARIANTE: Patties in die Heißluftfritteuse geben, 190°C, 14-16 Minuten, nach der Hälfte vorsichtig wenden, bis goldbraun und fest.',
+      'Griechischen Joghurt und Zitronensaft verrühren, mit Salz abschmecken.',
+      'Fladenbrot kurz aufwärmen, Tomate in Scheiben schneiden. Fladenbrot mit Salatblättern, Tomate, Falafel-Patty und Joghurt-Sauce belegen und zusammenklappen.'
+    ],
+    notes: 'Ca. 793 kcal pro Portion, ~30g Protein (nachgerechnet). Wichtig: Kichererbsen aus der Dose funktionieren, aber getrocknete/eingeweichte (nicht gekocht!) ergeben die authentischere, festere Konsistenz. Patties lassen sich roh 1-2 Tage im Kühlschrank lagern oder gebacken aufwärmen.'
+  },
+  {
+    id: 'seed-ziegenkaese-honig-nusssalat',
+    _v: 3,
+    name: 'Knuspriger Ziegenkäse mit Honig auf Nusssalat',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 626,
+    protein: 24,
+    tags: ['Vegetarisch','Air Fryer'],
+    ingredients: [
+      {name:'Ziegenkäserolle (fest)', amount:150, unit:'g'},
+      {name:'Mehl', amount:20, unit:'g'},
+      {name:'Ei', amount:1, unit:''},
+      {name:'Semmelbrösel', amount:50, unit:'g'},
+      {name:'Gemischter Blattsalat', amount:100, unit:'g'},
+      {name:'Walnusskerne', amount:30, unit:'g'},
+      {name:'Honig', amount:1, unit:'EL'},
+      {name:'Balsamico-Essig', amount:1, unit:'EL'},
+      {name:'Olivenöl', amount:2, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Ziegenkäserolle in 4 gleich dicke Scheiben (ca. 1,5cm) schneiden.',
+      'Mehl auf einen Teller geben, Ei verquirlen, Semmelbrösel auf einen weiteren Teller geben. Käsescheiben nacheinander in Mehl, dann Ei, dann Semmelbrösel wälzen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Käsescheiben mit etwas Olivenöl bestreichen, auf einem Blech ca. 12-15 Minuten backen, nach der Hälfte wenden, bis goldbraun und knusprig.\n\nAIRFRYER-VARIANTE: Panierte Käsescheiben mit etwas Olivenöl bestreichen, in die Heißluftfritteuse geben, 190°C, 8-10 Minuten, nach der Hälfte vorsichtig wenden, bis goldbraun und knusprig.',
+      'Restliches Olivenöl, Balsamico-Essig, Salz und Pfeffer zu einem Dressing verrühren.',
+      'Blattsalat mit dem Dressing anmachen, auf zwei Tellern verteilen. Käsescheiben daraufsetzen, mit Walnusskernen bestreuen, Honig darüber träufeln.'
+    ],
+    notes: 'Ca. 626 kcal pro Portion, ~24g Protein (nachgerechnet). Eher als Wochenend- oder Beilagen-Variante gedacht, nicht als Hauptprotein-Quelle. Ziegenkäse vorher 15 Min ins Gefrierfach legen, lässt sich dann leichter in Scheiben schneiden.'
+  },
+  {
+    id: 'seed-garnelen-spiesse-chili-limette',
+    _v: 3,
+    name: 'Garnelen-Spieße mit Chili-Limette',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 240,
+    protein: 40,
+    tags: ['Air Fryer','Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Garnelen, roh, geschält', amount:400, unit:'g'},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Limette, Saft und Schale', amount:1, unit:''},
+      {name:'Chiliflocken', amount:1, unit:'TL'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Petersilie oder Koriander, frisch, gehackt', amount:2, unit:'EL'},
+      {name:'Holzspieße', amount:8, unit:''}
+    ],
+    steps: [
+      'Holzspieße in Wasser einweichen (verhindert Verbrennen in der Fritteuse).',
+      'Knoblauch fein hacken, mit Saft und abgeriebener Schale der Limette, Chiliflocken, Olivenöl und Salz verrühren.',
+      'Garnelen in der Marinade wenden, mindestens 10 Minuten ziehen lassen (länger ist besser, falls Zeit da ist).',
+      'Garnelen auf die Spieße stecken (je ca. 4-5 Stück pro Spieß).',
+      'OFEN-VARIANTE: Auf 220°C (Ober-/Unterhitze oder Grillfunktion) vorheizen. Spieße auf einem Blech ca. 8-10 Minuten backen, nach der Hälfte wenden, bis die Garnelen rosa und durchgegart sind.\n\nAIRFRYER-VARIANTE: Spieße in die Heißluftfritteuse legen, 200°C, 8-10 Minuten, nach der Hälfte wenden, bis die Garnelen rosa und durchgegart sind.',
+      'Mit Petersilie oder Koriander bestreuen und sofort servieren.'
+    ],
+    notes: 'Ca. 240 kcal pro Portion, ~40g Protein (nachgerechnet) bei sehr wenig Kalorien – ideal als proteinreiche Beilage oder leichtes Abendessen, z.B. kombiniert mit einem einfachen Salat oder etwas Reis, falls mehr Kalorien gebraucht werden. Holzspieße vorher 10 Min in Wasser einweichen, damit sie in der Fritteuse nicht verbrennen.'
+  },
+  {
+    id: 'seed-suesskartoffel-pommes-skyr-dip',
+    _v: 3,
+    name: 'Süßkartoffel-Pommes mit Skyr-Dip',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 349,
+    protein: 12,
+    tags: ['Vegetarisch','Air Fryer','Schnell'],
+    ingredients: [
+      {name:'Süßkartoffeln', amount:500, unit:'g'},
+      {name:'Stärke (Mais- oder Kartoffelstärke)', amount:1, unit:'EL'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Salz', amount:1, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'},
+      {name:'Skyr', amount:150, unit:'g'},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Zitrone, Saft davon', amount:0.5, unit:''},
+      {name:'Schnittlauch, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Süßkartoffeln schälen, in ca. 1cm dicke Sticks schneiden.',
+      'Sticks mit Stärke bestreuen und gut vermengen, sodass eine dünne Schicht alle Sticks bedeckt.',
+      'Olivenöl, Paprikapulver, Salz und Pfeffer dazugeben, gut vermengen.',
+      'OFEN-VARIANTE: Auf 220°C (Ober-/Unterhitze) vorheizen. Sticks auf einem Blech verteilen (nicht zu eng), ca. 25-30 Minuten backen, nach der Hälfte wenden, bis knusprig.\n\nAIRFRYER-VARIANTE: Sticks in die Heißluftfritteuse geben (nicht zu eng, ggf. in 2 Durchgängen), 200°C, 18-20 Minuten, nach der Hälfte schütteln, bis knusprig.',
+      'Skyr, Knoblauch (gepresst), Zitronensaft und Schnittlauch verrühren, mit Salz abschmecken.'
+    ],
+    notes: 'Ca. 349 kcal pro Portion, ~12g Protein (nachgerechnet) (hauptsächlich durch den Skyr-Dip). Passt gut als Beilage zum Sonntag mit höherem Kalorienbudget, z.B. zu Garnelen-Spießen oder als Snack. Die Stärke sorgt für extra Crunch – nicht weglassen.'
+  },
+  {
+    id: 'seed-halloumi-fries-honig-chili-dip',
+    _v: 3,
+    name: 'Halloumi-Fries mit Honig-Chili-Dip',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 732,
+    protein: 39,
+    tags: ['Vegetarisch','Air Fryer','Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Halloumi', amount:250, unit:'g'},
+      {name:'Mehl', amount:30, unit:'g'},
+      {name:'Ei', amount:1, unit:''},
+      {name:'Semmelbrösel oder Panko', amount:60, unit:'g'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'},
+      {name:'Griechischer Joghurt', amount:150, unit:'g'},
+      {name:'Honig', amount:1, unit:'TL'},
+      {name:'Chiliflocken', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Halloumi in ca. 1cm dicke Sticks schneiden (wie Pommes).',
+      'Mehl auf einen Teller geben, Ei verquirlen, Semmelbrösel oder Panko mit Paprikapulver und Pfeffer auf einem weiteren Teller mischen. Halloumi-Sticks nacheinander in Mehl, Ei, dann Panade wälzen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Sticks auf einem mit Backpapier ausgelegten Blech verteilen, ca. 15-18 Minuten backen, nach der Hälfte wenden, bis goldbraun und knusprig.\n\nAIRFRYER-VARIANTE: Panierte Sticks in die Heißluftfritteuse geben, 200°C, 8-10 Minuten, nach der Hälfte wenden, bis goldbraun und knusprig.',
+      'Griechischen Joghurt, Honig und Chiliflocken als Dip verrühren.'
+    ],
+    notes: 'Ca. 732 kcal pro Portion, ~39g Protein (nachgerechnet). Höher als ursprünglich angenommen – Halloumi durch die Panade und den Salzgehalt eher als gelegentlicher Snack/Beilage gedacht, nicht als tägliches Hauptgericht – passt gut in einen Tag mit mehr Kalorienspielraum.'
+  },
+  {
+    id: 'seed-mini-pizza-fladenbrot',
+    _v: 3,
+    name: 'Mini-Pizza auf Fladenbrot',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 447,
+    protein: 19,
+    tags: ['Vegetarisch','Air Fryer','Schnell'],
+    ingredients: [
+      {name:'Fladenbrot oder Pita', amount:2, unit:''},
+      {name:'Passierte Tomaten', amount:120, unit:'g'},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Oregano, getrocknet', amount:1, unit:'TL'},
+      {name:'Mozzarella, gerieben oder in Scheiben', amount:100, unit:'g'},
+      {name:'Paprika', amount:0.5, unit:''},
+      {name:'Kirschtomaten', amount:100, unit:'g'},
+      {name:'Rote Zwiebel', amount:0.5, unit:''},
+      {name:'Rucola', amount:30, unit:'g'},
+      {name:'Salz', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Passierte Tomaten mit gepresstem Knoblauch, Oregano und Salz verrühren.',
+      'Fladenbrot mit der Tomatensauce bestreichen. Paprika in dünne Streifen, Kirschtomaten halbieren, rote Zwiebel in feine Ringe schneiden.',
+      'Fladenbrot mit Mozzarella, Paprika, Kirschtomaten und Zwiebel belegen.',
+      'OFEN-VARIANTE: Auf 220°C (Ober-/Unterhitze oder Grillfunktion) vorheizen. Fladenbrote auf einem Blech ca. 6-8 Minuten backen, bis der Käse geschmolzen und leicht gebräunt ist.\n\nAIRFRYER-VARIANTE: In die Heißluftfritteuse geben, 190°C, 5-6 Minuten, bis der Käse geschmolzen und leicht gebräunt ist.',
+      'Mit Rucola nach dem Backen bestreuen.'
+    ],
+    notes: 'Ca. 447 kcal pro Portion, ~19g Protein (nachgerechnet). Sehr schnell gemacht (unter 15 Min), gut für spontane Abende. Belag frei variierbar je nach Kantine-Resten oder was da ist.'
+  },
+  {
+    id: 'seed-nudelsalat-mayo-joghurt',
+    _v: 2,
+    name: 'Einfacher und kalorienarmer Nudelsalat mit Mayo-Joghurt-Dressing',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 340,
+    protein: 12,
+    tags: ['Vegetarisch','Schnell','Batch-Cooking'],
+    ingredients: [
+      {name:'Nudeln (z.B. Fusilli, Girandole)', amount:100, unit:'g'},
+      {name:'Rote Paprika', amount:50, unit:'g'},
+      {name:'Gewürzgurken', amount:50, unit:'g'},
+      {name:'Gurkenwasser von den Gewürzgurken', amount:50, unit:'ml'},
+      {name:'Hartgekochte Eier', amount:1, unit:''},
+      {name:'Joghurt pur (3,8 % Fett)', amount:60, unit:'g'},
+      {name:'Mayonnaise', amount:20, unit:'g'},
+      {name:'Dijon-Senf', amount:0.5, unit:'TL'},
+      {name:'Salz und Pfeffer, nach Geschmack', amount:null, unit:''},
+      {name:'Zucker', amount:0.5, unit:'Prise'}
+    ],
+    steps: [
+      'Die Nudeln nach Anleitung bissfest kochen, dann abschütten und etwas auskühlen lassen.',
+      'In der Zwischenzeit die Paprika und Gewürzgurken klein schneiden. Die hartgekochten Eier nach Geschmack vierteln oder in Scheiben oder gröbere Würfel schneiden (nicht zu klein, damit sie nicht komplett zerkrümeln).',
+      'Aus Joghurt, Mayonnaise, Dijon-Senf und Gurkenwasser ein Dressing rühren (es ist sehr flüssig) und mit Salz, Pfeffer und einer Prise Zucker würzen.',
+      'Die Nudeln und das Gemüse mit dem Dressing verrühren und die Eierstücke vorsichtig unterheben. Den Nudelsalat abgedeckt im Kühlschrank für mindestens 30 Minuten durchziehen lassen. In dieser Zeit verbindet sich das Dressing mit den Nudeln und gibt dem Salat eine geschmeidige Konsistenz.'
+    ],
+    notes: 'Hält sich abgedeckt im Kühlschrank ca. 2-3 Tage.'
+  },
+  {
+    id: 'seed-haehnchen-burger-teriyaki-ananas',
+    _v: 3,
+    name: 'Hähnchen-Burger mit Teriyaki-Ananas',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 536,
+    protein: 50,
+    tags: ['Air Fryer','Proteinreich'],
+    ingredients: [
+      {name:'Hähnchenbrustfilets', amount:2, unit:''},
+      {name:'Teriyaki-Sauce', amount:75, unit:'ml'},
+      {name:'Rote Zwiebel', amount:0.5, unit:''},
+      {name:'Chilischote', amount:0.5, unit:''},
+      {name:'Scheiben Emmentaler', amount:2, unit:''},
+      {name:'Scheiben Ananas (frisch oder aus der Dose, abgetropft)', amount:2, unit:''},
+      {name:'Vollkornbrötchen', amount:2, unit:''},
+      {name:'Rucola oder Salatblätter', amount:30, unit:'g'}
+    ],
+    steps: [
+      'Hähnchenbrustfilets in einem Gefrierbeutel oder einer Schale mit Teriyaki-Sauce vermengen, mindestens 20 Minuten (bis zu 12 Stunden) im Kühlschrank marinieren.',
+      'Rote Zwiebel in dünne Ringe, Chilischote in feine Ringe schneiden.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze oder Grillfunktion) vorheizen. Hähnchen aus der Marinade nehmen, auf einem Blech ca. 18-20 Minuten backen, nach der Hälfte wenden.\n\nAIRFRYER-VARIANTE: Hähnchen aus der Marinade nehmen, in die Heißluftfritteuse geben, 200°C, 12-14 Minuten insgesamt, nach der Hälfte wenden.',
+      'In den letzten 4-5 Minuten der Backzeit die Ananasscheiben mit dazugeben, bis leicht gebräunt.',
+      'In den letzten 2 Minuten der Backzeit je 1 Scheibe Emmentaler auf jedes Filet legen, bis der Käse geschmolzen ist.',
+      'Vollkornbrötchen aufschneiden, kurz toasten (Pfanne, Toaster oder 2 Min mit in der Fritteuse). Mit Rucola, Hähnchen, Zwiebel, Chili und Ananas belegen.'
+    ],
+    notes: 'Ca. 536 kcal pro Portion, ~50g Protein (nachgerechnet) – sehr gutes Verhältnis. Marinierzeit einplanen (mind. 20 Min, besser 2-3 Std wenn Zeit da ist). Zweite Portion: Hähnchen separat aufbewahren, Brötchen erst kurz vorm Essen toasten.'
+  },
+  {
+    id: 'seed-kaesespaetzle-roestzwiebeln',
+    _v: 2,
+    name: 'Klassische Kässpätzle mit Röstzwiebeln',
+    category: 'dinner',
+    baseServings: 4,
+    kcal: 697,
+    protein: 35,
+    tags: ['Vegetarisch'],
+    ingredients: [
+      {name:'Mehl', amount:300, unit:'g'},
+      {name:'Eier', amount:3, unit:''},
+      {name:'Wasser', amount:120, unit:'ml'},
+      {name:'Salz (für den Teig)', amount:1, unit:'TL'},
+      {name:'Bergkäse, gerieben', amount:200, unit:'g'},
+      {name:'Emmentaler, gerieben', amount:100, unit:'g'},
+      {name:'Zwiebeln', amount:2, unit:''},
+      {name:'Butter', amount:2, unit:'EL'},
+      {name:'Salz (fürs Kochwasser)', amount:2, unit:'TL'},
+      {name:'Schnittlauch, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Mehl, Eier, Wasser und Salz in einer Schüssel zu einem zähen, glatten Teig verrühren (mit Kochlöffel oder Handmixer), bis er Blasen wirft. Ca. 10 Minuten ruhen lassen.',
+      'Zwiebeln in feine Ringe schneiden. Butter in einer Pfanne erhitzen, Zwiebeln bei mittlerer Hitze langsam goldbraun und knusprig rösten (ca. 15-20 Minuten, gelegentlich wenden).',
+      'Einen großen Topf mit Wasser und Salz zum Kochen bringen. Teig portionsweise durch einen Spätzlehobel oder von einem Brett direkt ins kochende Wasser schaben. Spätzle sind fertig, sobald sie an der Oberfläche schwimmen (ca. 2-3 Min), dann mit einer Schaumkelle herausnehmen.',
+      'Pfannen-Variante (empfohlen): Spätzle direkt in die Pfanne mit den Zwiebeln geben, Bergkäse und Emmentaler unterheben, bei niedriger Hitze schmelzen lassen, dabei vorsichtig wenden, bis alles gleichmäßig verteilt und cremig ist (ca. 3-5 Min). Ofen-Variante (für Kruste): Spätzle mit den Zwiebeln in eine feuerfeste Auflaufform geben, Käse darüber streuen. Bei 200°C (Ober-/Unterhitze oder Grillfunktion) ca. 10 Minuten überbacken, bis der Käse geschmolzen und leicht gebräunt ist.',
+      'Kässpätzle mit Schnittlauch bestreut servieren.'
+    ],
+    notes: 'Ca. 697 kcal pro Portion, ~35g Protein (nachgerechnet, bei 4 Portionen). Klassiker, eher Wochenend-/High-Kalorien-Tag geeignet. Pfannen-Variante ist authentischer und schneller – Käse schmilzt gleichmäßig durch die Resthitze, Spätzle bleiben bissfester. Ofen-Variante lohnt sich, wenn du eine knusprige Kruste obenauf willst. Für den Teig gut schlagen, bis er Blasen wirft – macht die Spätzle schön locker. Ein Spätzlehobel oder eine Spätzlepresse erleichtert die Arbeit, geht aber auch mit Brett und Schaber (klassische Methode).'
+  },
+  {
+    id: 'seed-kaesespaetzle-ofenkaese',
+    _v: 2,
+    name: 'Kässpätzle mit Ofenkäse',
+    category: 'dinner',
+    baseServings: 4,
+    kcal: 681,
+    protein: 32,
+    tags: ['Vegetarisch'],
+    ingredients: [
+      {name:'Mehl', amount:300, unit:'g'},
+      {name:'Eier', amount:3, unit:''},
+      {name:'Wasser', amount:120, unit:'ml'},
+      {name:'Salz (für den Teig)', amount:1, unit:'TL'},
+      {name:'Bergkäse, gerieben', amount:100, unit:'g'},
+      {name:'Zwiebeln', amount:2, unit:''},
+      {name:'Butter', amount:2, unit:'EL'},
+      {name:'Salz (fürs Kochwasser)', amount:2, unit:'TL'},
+      {name:'Ganzer Ofenkäse (Camembert oder Brie, ca. 200-250g)', amount:1, unit:''},
+      {name:'Preiselbeeren (optional, zum Servieren)', amount:1, unit:'EL'},
+      {name:'Schnittlauch, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Mehl, Eier, Wasser und Salz in einer Schüssel zu einem zähen, glatten Teig verrühren, bis er Blasen wirft. Ca. 10 Minuten ruhen lassen.',
+      'Zwiebeln in feine Ringe schneiden. Butter in einer Pfanne erhitzen, Zwiebeln bei mittlerer Hitze goldbraun rösten (ca. 15 Minuten).',
+      'Einen großen Topf mit Wasser und Salz zum Kochen bringen. Teig portionsweise ins kochende Wasser geben, Spätzle sind fertig, sobald sie an der Oberfläche schwimmen (ca. 2-3 Min), dann herausnehmen.',
+      'Spätzle mit Bergkäse und den gerösteten Zwiebeln vermengen, in eine feuerfeste Auflaufform geben und glatt streichen.',
+      'Den ganzen Ofenkäse (oder in Scheiben geschnitten) mittig auf die Spätzle legen.',
+      'Bei 200°C (Ober-/Unterhitze) ca. 12-15 Minuten backen, bis der Ofenkäse gebräunt und cremig-flüssig ist.',
+      'Sofort servieren, mit Schnittlauch bestreut, optional mit Preiselbeeren dazu.'
+    ],
+    notes: 'Ca. 681 kcal pro Portion, ~32g Protein (nachgerechnet, bei 4 Portionen) – klar als Wochenend-/High-Kalorien-Tag-Gericht einordnen, nicht als Alltagsoption. Der Ofenkäse ersetzt NICHT den geriebenen Bergkäse: die Spätzle werden zuerst mit dem Bergkäse durchmischt (herzhafte Basis), der ganze Ofenkäse kommt danach obendrauf und sorgt beim Backen für die cremig-zerlaufende Haube.'
+  },
+  {
+    id: 'seed-haehnchen-ananas-curry-reis',
+    _v: 2,
+    name: 'Hähnchen-Ananas-Curry mit Reis (leichte Version)',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 696,
+    protein: 44,
+    tags: ['Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Hähnchenbrustfilet', amount:300, unit:'g'},
+      {name:'Reis, trocken', amount:150, unit:'g'},
+      {name:'Ananas, frisch oder aus der Dose (abgetropft, Saft aufbewahren)', amount:200, unit:'g'},
+      {name:'Frühlingszwiebeln', amount:3, unit:''},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Honig', amount:1, unit:'TL'},
+      {name:'Currypulver', amount:1.5, unit:'EL'},
+      {name:'Kokosmilch (light)', amount:200, unit:'ml'},
+      {name:'Griechischer Joghurt oder Skyr', amount:100, unit:'g'},
+      {name:'Gemüsebrühe (Instant)', amount:1, unit:'TL'},
+      {name:'Chili, gemahlen', amount:0.5, unit:'TL'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Reis nach Packungsanweisung in Salzwasser garen.',
+      'Hähnchenbrustfilet in mundgerechte Würfel schneiden. Frühlingszwiebeln in Ringe, Knoblauch fein hacken.',
+      'Olivenöl in einer Pfanne erhitzen, Hähnchen darin anbraten, bis es leicht Farbe bekommt. Honig dazugeben, kurz karamellisieren lassen.',
+      'Frühlingszwiebeln und Knoblauch dazugeben, kurz mit anschwitzen.',
+      'Ananas dazugeben, kurz mit anschwitzen. Currypulver dazu, kurz mit anrösten, bis es duftet.',
+      'Mit Kokosmilch ablöschen, Gemüsebrühe einrühren. Mit Salz, Pfeffer und Chili abschmecken, ca. 10-12 Minuten auf niedriger Stufe köcheln lassen, bis das Hähnchen durch ist.',
+      'Pfanne vom Herd nehmen, Joghurt unterrühren (nicht mehr aufkochen, sonst gerinnt er). Bei Bedarf mit etwas Ananassaft abschmecken.',
+      'Curry auf dem Reis servieren.'
+    ],
+    notes: 'Ca. 696 kcal pro Portion, ~44g Protein (nachgerechnet) – deutlich proteinreicher und leichter als das Original mit Sahne/Schmelzkäse, bei ähnlichem Geschmack durch Curry, Honig und Ananas. Der Joghurt wird erst nach dem Köcheln vom Herd genommen untergehoben, damit er nicht gerinnt. Zweite Portion hält sich 2-3 Tage im Kühlschrank und schmeckt aufgewärmt mindestens genauso gut.'
+  },
+  {
+    id: 'seed-mac-and-cheese-airfryer',
+    _v: 3,
+    name: 'Mac and Cheese aus dem Airfryer',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 960,
+    protein: 45,
+    tags: ['Vegetarisch','Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Makkaroni oder Fusilli, trocken', amount:200, unit:'g'},
+      {name:'Butter', amount:20, unit:'g'},
+      {name:'Mehl', amount:20, unit:'g'},
+      {name:'Milch', amount:300, unit:'ml'},
+      {name:'Cheddar, gerieben', amount:150, unit:'g'},
+      {name:'Hüttenkäse', amount:100, unit:'g'},
+      {name:'Muskatnuss, gerieben', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'},
+      {name:'Semmelbrösel oder Panko', amount:30, unit:'g'}
+    ],
+    steps: [
+      'Makkaroni oder Fusilli nach Packungsanweisung bissfest kochen, abgießen.',
+      'Butter in einem Topf schmelzen, Mehl einrühren, ca. 1 Minute anschwitzen (Mehlschwitze).',
+      'Milch nach und nach unter Rühren dazugießen, bis eine glatte, sahnige Sauce entsteht. Kurz aufkochen lassen, bis sie eindickt.',
+      'Vom Herd nehmen, Cheddar und Hüttenkäse einrühren, bis geschmolzen. Mit Muskatnuss, Salz und Pfeffer abschmecken.',
+      'Nudeln unter die Sauce heben, in eine kleine Auflaufform oder Airfryer-taugliche Form geben, mit Semmelbröseln bestreuen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze oder Grillfunktion) vorheizen. Auflaufform ca. 12-15 Minuten backen, bis die Oberfläche knusprig-golden ist.\n\nAIRFRYER-VARIANTE: In die Heißluftfritteuse geben, 180°C, 8-10 Minuten, bis die Oberfläche knusprig-golden ist.'
+    ],
+    notes: 'Ca. 960 kcal pro Portion, ~45g Protein (nachgerechnet) durch Hüttenkäse in der Sauce. Der Hüttenkäse wird zusammen mit dem Cheddar püriert oder untergemischt, macht die Sauce cremiger und proteinreicher, ohne dass man ihn schmeckt. Alternativ komplett in der Pfanne fertig ohne Airfryer-Schritt, dann bleibt es einfach cremig ohne Kruste.'
+  },
+  {
+    id: 'seed-flammkuchenrollen-airfryer',
+    _v: 3,
+    name: 'Flammkuchenrollen aus dem Airfryer',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 673,
+    protein: 25,
+    tags: ['Air Fryer','Schnell'],
+    ingredients: [
+      {name:'Flammkuchenteig (fertig, aus dem Kühlregal)', amount:1, unit:''},
+      {name:'Crème fraîche', amount:100, unit:'g'},
+      {name:'Schinkenwürfel oder Speckwürfel', amount:80, unit:'g'},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Geriebener Käse (Gouda/Emmentaler)', amount:50, unit:'g'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'},
+      {name:'Schnittlauch, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Zwiebel sehr fein würfeln.',
+      'Flammkuchenteig auf der Arbeitsfläche ausrollen, mit Crème fraîche bestreichen, dabei am Rand ca. 1cm frei lassen.',
+      'Schinken- oder Speckwürfel, Zwiebel und Käse gleichmäßig auf dem Teig verteilen, mit Salz und Pfeffer würzen.',
+      'Teig von der langen Seite her fest aufrollen, dann in ca. 3-4cm breite Scheiben schneiden.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Rollen mit der Schnittfläche nach oben auf einem Blech verteilen, ca. 15-18 Minuten backen, bis goldbraun und knusprig.\n\nAIRFRYER-VARIANTE: Rollen mit der Schnittfläche nach oben in die Heißluftfritteuse legen (nicht zu eng, ggf. in 2 Durchgängen), 190°C, 10-12 Minuten, bis goldbraun und knusprig.',
+      'Mit Schnittlauch bestreut servieren.'
+    ],
+    notes: 'Ca. 673 kcal pro Portion, ~25g Protein (nachgerechnet). Eher als Snack/Vorspeise oder Wochenend-Option gedacht. Zahnstocher zum Fixieren der Rollen sind hilfreich, damit sie beim Backen nicht aufgehen.'
+  },
+  {
+    id: 'seed-wraps-burritos-airfryer',
+    _v: 3,
+    name: 'Knusprige Wraps/Burritos aus dem Airfryer',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 950,
+    protein: 61,
+    tags: ['Air Fryer','Schnell','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Tortilla-Wraps (groß)', amount:4, unit:''},
+      {name:'Hähnchenbrustfilet, gebraten oder Reste', amount:250, unit:'g'},
+      {name:'Schwarze Bohnen, abgetropft', amount:200, unit:'g'},
+      {name:'Reis, gekocht (Rest vom Vortag geht gut)', amount:120, unit:'g'},
+      {name:'Geriebener Käse (Gouda/Cheddar)', amount:100, unit:'g'},
+      {name:'Paprika', amount:1, unit:''},
+      {name:'Rote Zwiebel', amount:0.5, unit:''},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Kreuzkümmel, gemahlen', amount:1, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Olivenöl (zum Bestreichen)', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Hähnchen in Streifen oder Würfel schneiden (falls noch roh, vorher in einer Pfanne durchbraten). Paprika und rote Zwiebel in feine Streifen bzw. Ringe schneiden.',
+      'Hähnchen, Bohnen, Reis, Paprika und Zwiebel in einer Schüssel mit Paprikapulver, Kreuzkümmel und Salz vermengen.',
+      'Tortilla-Wraps auf der Arbeitsfläche auslegen, Füllung und Käse mittig verteilen, dabei an den Rändern etwas Platz lassen.',
+      'Seiten einklappen, dann fest von unten nach oben aufrollen (klassische Burrito-Technik). Mit Olivenöl bestreichen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Wraps mit der Naht nach unten auf einem Blech ca. 15-18 Minuten backen, nach der Hälfte wenden, bis knusprig-golden.\n\nAIRFRYER-VARIANTE: Wraps mit der Naht nach unten in die Heißluftfritteuse legen, 190°C, 8-10 Minuten, nach der Hälfte vorsichtig wenden, bis knusprig-golden.'
+    ],
+    notes: 'Ca. 950 kcal pro Portion (2 Wraps), ~61g Protein (nachgerechnet) – sehr gutes Verhältnis. Ideal für Reste-Verwertung (übrig gebliebenes Hähnchen, Reis). Fest einrollen und mit der Naht nach unten in die Fritteuse legen, damit sie sich nicht öffnen.'
+  },
+  {
+    id: 'seed-french-toast-beeren-skyr',
+    _v: 2,
+    name: 'French Toast mit Beeren und Skyr',
+    category: 'breakfast',
+    baseServings: 2,
+    kcal: 569,
+    protein: 24,
+    tags: ['Vegetarisch','Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Scheiben Vollkorntoast (leicht altbacken ideal)', amount:4, unit:''},
+      {name:'Eier', amount:3, unit:''},
+      {name:'Milch', amount:100, unit:'ml'},
+      {name:'Zimt, gemahlen', amount:1, unit:'TL'},
+      {name:'Vanilleextrakt', amount:0.5, unit:'TL'},
+      {name:'Butter (zum Braten)', amount:1, unit:'EL'},
+      {name:'Beeren, frisch oder TK (z.B. Heidelbeeren, Erdbeeren)', amount:200, unit:'g'},
+      {name:'Griechischer Joghurt oder Skyr', amount:100, unit:'g'},
+      {name:'Honig oder Ahornsirup', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Eier, Milch, Zimt und Vanilleextrakt in einer flachen Schale gut verquirlen.',
+      'Toastscheiben nacheinander kurz beidseitig in der Mischung wälzen, sodass sie durchtränkt, aber nicht durchgeweicht sind (ca. 15-20 Sekunden pro Seite).',
+      'Butter in einer Pfanne bei mittlerer Hitze schmelzen, getränkte Toastscheiben darin von jeder Seite ca. 2-3 Minuten goldbraun braten.',
+      'Mit Beeren, einem Klecks Joghurt oder Skyr und Honig oder Ahornsirup servieren.'
+    ],
+    notes: 'Ca. 569 kcal pro Portion, ~24g Protein (nachgerechnet) durch Eier, Milch und Skyr-Topping – deutlich proteinreicher als klassischer French Toast mit Puderzucker/Sirup pur. Leicht altbackener Toast saugt die Ei-Milch-Mischung besser auf, ohne zu zerfallen.'
+  },
+  {
+    id: 'seed-tomate-mozzarella-pinsa-airfryer',
+    _v: 3,
+    name: 'Tomate-Mozzarella Pinsa aus dem Airfryer',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 780,
+    protein: 34,
+    tags: ['Vegetarisch','Air Fryer','Schnell'],
+    ingredients: [
+      {name:'Pinsa-Teigböden (fertig, aus dem Kühlregal oder TK, klein/rund)', amount:2, unit:''},
+      {name:'Passierte Tomaten', amount:150, unit:'g'},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Oregano, getrocknet', amount:1, unit:'TL'},
+      {name:'Mozzarella (idealerweise Fior di Latte)', amount:200, unit:'g'},
+      {name:'Kirschtomaten', amount:150, unit:'g'},
+      {name:'Basilikumblätter, frisch', amount:10, unit:''},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Passierte Tomaten mit gepresstem Knoblauch, Oregano und der Hälfte des Salzes verrühren.',
+      'Pinsa-Teigböden dünn mit der Tomatensauce bestreichen, dabei am Rand ca. 1cm frei lassen.',
+      'Mozzarella in Stücke zupfen, gut abtropfen lassen (am besten kurz auf Küchenpapier legen). Kirschtomaten halbieren.',
+      'Pinsa mit Mozzarella und Kirschtomaten belegen, mit Olivenöl beträufeln und restlichem Salz würzen.',
+      'OFEN-VARIANTE (empfohlen für authentischeres Ergebnis, da Pinsa traditionell sehr hohe Hitze braucht): Auf 250°C bzw. höchste Stufe vorheizen, am besten mit vorgeheiztem Backstein oder Blech. Pinsa ca. 6-8 Minuten backen, bis der Rand goldbraun und der Käse geschmolzen ist.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 200-220°C (höchste sinnvolle Stufe) vorheizen, 3-4 Minuten leer laufen lassen. Pinsa vorsichtig in den Korb legen (bei kleinem Korb einzeln nacheinander backen), 200-220°C, 8-10 Minuten, bis der Rand goldbraun und der Käse geschmolzen ist. Nicht wenden.',
+      'Mit frischem Basilikum garnieren und sofort servieren.'
+    ],
+    notes: 'Ca. 780 kcal pro Portion, ~34g Protein (nachgerechnet) durch den Mozzarella. Airfryer erreicht meist nur 200-220°C statt der klassischen 250°C+ im Ofen, daher wird der Rand nicht ganz so wild aufgeblasen wie beim echten Pinsa-Bäcker, bleibt aber knusprig-locker. Mozzarella unbedingt gut abtropfen lassen, sonst wird der Boden in der Fritteuse schnell matschig. Falls der Korb zu klein ist, Pinsa vor dem Belegen etwas kleiner/ovaler formen oder in 2 Durchgängen backen.'
+  },
+  {
+    id: 'seed-quesadillas-airfryer',
+    _v: 3,
+    name: 'Quesadillas aus dem Airfryer',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 837,
+    protein: 54,
+    tags: ['Air Fryer','Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Tortilla-Wraps', amount:4, unit:''},
+      {name:'Hähnchenbrustfilet, gebraten oder Reste', amount:200, unit:'g'},
+      {name:'Schwarze Bohnen, abgetropft', amount:150, unit:'g'},
+      {name:'Geriebener Käse (Cheddar/Gouda)', amount:120, unit:'g'},
+      {name:'Paprika', amount:0.5, unit:''},
+      {name:'Frühlingszwiebeln', amount:2, unit:''},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Kreuzkümmel, gemahlen', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Olivenöl (zum Bestreichen)', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Hähnchen in kleine Stücke schneiden. Paprika und Frühlingszwiebeln fein schneiden.',
+      'Hähnchen, Bohnen, Paprika und Frühlingszwiebeln mit Paprikapulver, Kreuzkümmel und Salz in einer Schüssel vermengen.',
+      'Eine Tortilla auf die Arbeitsfläche legen, mit Käse bestreuen, Füllung darauf verteilen, wieder mit Käse bestreuen, mit einer zweiten Tortilla bedecken. Genauso mit der zweiten Quesadilla verfahren.',
+      'Beide Seiten mit Olivenöl bestreichen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Quesadilla auf einem Blech ca. 15-18 Minuten backen, nach der Hälfte wenden, bis goldbraun und knusprig.\n\nAIRFRYER-VARIANTE: Quesadilla in die Heißluftfritteuse legen, 190°C, 8-10 Minuten, nach der Hälfte vorsichtig wenden, bis goldbraun und knusprig.',
+      'Kurz abkühlen lassen, dann in Dreiecke schneiden.'
+    ],
+    notes: 'Ca. 837 kcal pro Portion, ~54g Protein (nachgerechnet). Sehr schnell gemacht, gut für Reste-Verwertung (Hähnchen vom Vortag). Quesadillas nicht überfüllen, sonst läuft der Käse beim Backen zu sehr aus.'
+  },
+  {
+    id: 'seed-empanadas-airfryer',
+    _v: 3,
+    name: 'Empanadas aus dem Airfryer',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 879,
+    protein: 52,
+    tags: ['Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Empanada-Teigscheiben (fertig, TK, aufgetaut)', amount:8, unit:''},
+      {name:'Hähnchenbrustfilet, gebraten oder Reste, klein gewürfelt', amount:200, unit:'g'},
+      {name:'Schwarze Bohnen, abgetropft', amount:100, unit:'g'},
+      {name:'Zwiebel', amount:0.5, unit:''},
+      {name:'Rote Paprika', amount:0.5, unit:''},
+      {name:'Geriebener Käse (Mozzarella oder Gouda)', amount:80, unit:'g'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Kreuzkümmel, gemahlen', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Ei (zum Bestreichen)', amount:1, unit:''}
+    ],
+    steps: [
+      'Zwiebel und rote Paprika fein würfeln.',
+      'Hähnchen, Bohnen, Zwiebel, Paprika und Käse mit Paprikapulver, Kreuzkümmel und Salz in einer Schüssel vermengen.',
+      'Jeweils 1-2 EL Füllung mittig auf eine Teigscheibe geben.',
+      'Teig zur Halbmondform zuklappen, Ränder mit einer Gabel fest andrücken oder klassisch verzwirbeln.',
+      'Ei verquirlen, Empanadas dünn damit bestreichen.',
+      'OFEN-VARIANTE (klassisch für Empanadas): Auf 200°C (Ober-/Unterhitze) vorheizen. Empanadas auf einem Blech verteilen, ca. 20-22 Minuten backen, bis goldbraun und knusprig.\n\nAIRFRYER-VARIANTE: Empanadas in die Heißluftfritteuse legen (nicht zu eng, ggf. in 2 Durchgängen), 190°C, 10-12 Minuten, bis goldbraun und knusprig.'
+    ],
+    notes: 'Ca. 879 kcal pro Portion (4 Stück), ~52g Protein (nachgerechnet). Deutlich weniger Fett als klassisch frittierte Empanadas. Teigränder gut zudrücken oder mit einer Gabel festdrücken, damit beim Backen nichts auslaufen kann.'
+  },
+  {
+    id: 'seed-baguette-pizza-airfryer',
+    _v: 3,
+    name: 'Baguette-Pizza aus dem Airfryer',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 643,
+    protein: 33,
+    tags: ['Air Fryer','Schnell'],
+    ingredients: [
+      {name:'Baguette', amount:1, unit:''},
+      {name:'Passierte Tomaten', amount:120, unit:'g'},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Oregano, getrocknet', amount:1, unit:'TL'},
+      {name:'Mozzarella, gerieben oder in Scheiben', amount:150, unit:'g'},
+      {name:'Paprika', amount:0.5, unit:''},
+      {name:'Schinken oder Salami (optional)', amount:80, unit:'g'},
+      {name:'Kirschtomaten', amount:100, unit:'g'},
+      {name:'Salz', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Baguette längs halbieren.',
+      'Passierte Tomaten mit gepresstem Knoblauch, Oregano und Salz verrühren.',
+      'Baguette-Hälften mit der Tomatensauce bestreichen. Paprika in dünne Streifen, Kirschtomaten halbieren.',
+      'Mit Mozzarella, Paprika, Schinken oder Salami und Kirschtomaten belegen.',
+      'OFEN-VARIANTE: Auf 220°C (Ober-/Unterhitze oder Grillfunktion) vorheizen. Baguette-Hälften auf einem Blech ca. 8-10 Minuten backen, bis der Käse geschmolzen und leicht gebräunt ist.\n\nAIRFRYER-VARIANTE: In die Heißluftfritteuse legen, 190°C, 5-6 Minuten, bis der Käse geschmolzen und leicht gebräunt ist.'
+    ],
+    notes: 'Ca. 643 kcal pro Portion, ~33g Protein (nachgerechnet) (mehr mit Schinken/Salami). Sehr schnell (unter 15 Min gesamt), gut für spontane Abende oder Reste-Verwertung von übrig gebliebenem Baguette.'
+  },
+  {
+    id: 'seed-croque-monsieur-madame-airfryer',
+    _v: 3,
+    name: 'Croque-Monsieur/Madame aus dem Airfryer',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 498,
+    protein: 31,
+    tags: ['Air Fryer','Schnell'],
+    ingredients: [
+      {name:'Scheiben Toastbrot', amount:4, unit:''},
+      {name:'Butter', amount:1, unit:'EL'},
+      {name:'Mehl', amount:1, unit:'EL'},
+      {name:'Milch', amount:150, unit:'ml'},
+      {name:'Muskatnuss, gerieben', amount:0.3, unit:'TL'},
+      {name:'Salz', amount:0.3, unit:'TL'},
+      {name:'Scheiben gekochter Schinken', amount:4, unit:''},
+      {name:'Emmentaler, gerieben', amount:100, unit:'g'},
+      {name:'Eier (nur für Madame-Variante)', amount:2, unit:''}
+    ],
+    steps: [
+      'Butter in einem kleinen Topf schmelzen, Mehl einrühren, ca. 1 Minute anschwitzen.',
+      'Milch nach und nach unter Rühren dazugießen, aufkochen lassen, bis eine dickliche Béchamel entsteht. Mit Muskatnuss und Salz abschmecken.',
+      '2 Scheiben Toastbrot mit etwas Béchamel bestreichen, je 2 Scheiben Schinken und etwas Emmentaler darauf verteilen, mit den restlichen Toastscheiben belegen.',
+      'Restliche Béchamel auf die Oberseite der Sandwiches streichen, mit restlichem Käse bestreuen.',
+      'OFEN-VARIANTE (klassisch für Croque): Auf 200°C (Ober-/Unterhitze oder Grillfunktion) vorheizen. Sandwiches auf einem Blech ca. 10-12 Minuten backen, bis der Käse geschmolzen und golden ist.\n\nAIRFRYER-VARIANTE: Sandwiches in die Heißluftfritteuse legen, 180°C, 8-10 Minuten, bis der Käse geschmolzen und golden ist.',
+      'Für die Madame-Variante: während die Sandwiches backen, Eier in einer Pfanne als Spiegelei braten, nach dem Backen auf die Sandwiches legen.'
+    ],
+    notes: 'Ca. 498 kcal pro Portion (Monsieur), ~31g Protein (nachgerechnet). Madame-Variante mit Spiegelei oben drauf (nach dem Airfryer separat in der Pfanne braten, da Eier im Airfryer schwer zu kontrollieren sind) kommt auf ca. 583 kcal, ~38g Protein.'
+  },
+  {
+    id: 'seed-klassisches-lahmacun',
+    _v: 3,
+    name: 'Klassisches Lahmacun',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 701,
+    protein: 41,
+    tags: ['Air Fryer','Proteinreich'],
+    ingredients: [
+      {name:'Mehl (Type 550)', amount:250, unit:'g'},
+      {name:'Wasser, lauwarm', amount:150, unit:'ml'},
+      {name:'Trockenhefe', amount:3, unit:'g'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Salz (für den Teig)', amount:0.5, unit:'TL'},
+      {name:'Rinderhackfleisch, mager', amount:250, unit:'g'},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Rote Paprika', amount:1, unit:''},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Tomatenmark', amount:2, unit:'EL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Kreuzkümmel, gemahlen', amount:1, unit:'TL'},
+      {name:'Chiliflocken', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Petersilie, frisch, gehackt', amount:2, unit:'EL'},
+      {name:'Zitrone', amount:0.5, unit:''}
+    ],
+    steps: [
+      'Mehl, Wasser, Trockenhefe, Olivenöl und Salz zu einem glatten Teig verkneten. Zugedeckt ca. 30 Minuten gehen lassen.',
+      'Zwiebel, Paprika und Knoblauch fein hacken bzw. reiben.',
+      'Hackfleisch mit Zwiebel, Paprika, Knoblauch, Tomatenmark, Paprikapulver, Kreuzkümmel, Chiliflocken und Salz gut vermengen (mit den Händen kneten, bis eine streichfähige Masse entsteht).',
+      'Teig in 2 Portionen teilen, sehr dünn ausrollen (ca. 3mm), auf Backpapier legen.',
+      'Hackfleischmasse sehr dünn und gleichmäßig bis zum Rand auf dem Teig verstreichen.',
+      'OFEN-VARIANTE (empfohlen, da Lahmacun traditionell sehr hohe Hitze braucht): Auf 250°C bzw. höchste Stufe (Ober-/Unterhitze, am besten mit vorgeheiztem Backblech oder Backstein) vorheizen. Lahmacun ca. 5-7 Minuten backen, bis der Teig knusprig und das Fleisch durch ist.\n\nAIRFRYER-VARIANTE: Lahmacun mitsamt Backpapier in die Heißluftfritteuse legen, 200°C, 8-10 Minuten, bis der Teig knusprig und das Fleisch durch ist.',
+      'Mit Petersilie bestreuen, mit Zitronensaft beträufeln.'
+    ],
+    notes: 'Ca. 701 kcal pro Portion, ~41g Protein (nachgerechnet) durch das magere Hackfleisch. Belag sehr dünn auftragen, sonst wird der Teig nicht durch. Klassisch mit Salat, Zwiebeln und Zitronensaft eingerollt gegessen.'
+  },
+  {
+    id: 'seed-focaccia-schinken-mozzarella',
+    _v: 3,
+    name: 'Focaccia mit Schinken und Mozzarella',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 925,
+    protein: 38,
+    tags: ['Air Fryer'],
+    ingredients: [
+      {name:'Mehl (Type 550)', amount:300, unit:'g'},
+      {name:'Trockenhefe', amount:7, unit:'g'},
+      {name:'Wasser, lauwarm', amount:200, unit:'ml'},
+      {name:'Olivenöl', amount:3, unit:'EL'},
+      {name:'Salz', amount:1, unit:'TL'},
+      {name:'Mozzarella, in Stücken', amount:150, unit:'g'},
+      {name:'Parmaschinken oder gekochter Schinken', amount:80, unit:'g'},
+      {name:'Rucola', amount:30, unit:'g'},
+      {name:'Grobes Meersalz', amount:1, unit:'TL'}
+    ],
+    steps: [
+      'Mehl, Trockenhefe, Wasser, 2 EL vom Olivenöl und Salz zu einem glatten, elastischen Teig verkneten (von Hand ca. 8-10 Min oder mit der Maschine 5 Min).',
+      'Teig zugedeckt an einem warmen Ort ca. 45-60 Minuten gehen lassen, bis er sich verdoppelt hat.',
+      'Teig auf die Größe des Airfryer-Korbs formen (flach, oval oder rund), auf Backpapier legen. Mit den Fingern typische Focaccia-Dellen eindrücken.',
+      'Mozzarella gleichmäßig auf dem Teig verteilen. Mit restlichem Olivenöl beträufeln und Meersalz bestreuen. Bei gekochtem Schinken: die Hälfte davon jetzt schon mit auflegen.',
+      'Zugedeckt nochmal 15-20 Minuten ruhen lassen.',
+      'OFEN-VARIANTE (empfohlen, v.a. bei größeren Focaccia-Formen): Auf 220°C (Ober-/Unterhitze) vorheizen. Focaccia mitsamt Backpapier ca. 20-25 Minuten backen, bis golden und durchgebacken.\n\nAIRFRYER-VARIANTE: Fritteuse auf 180°C vorheizen. Focaccia mitsamt Backpapier in den Korb legen, 180°C, 15-18 Minuten backen, bis golden und durchgebacken.',
+      'Bei Parmaschinken (roh): jetzt erst über die noch warme Focaccia drapieren. Mit Rucola bestreuen und sofort servieren.'
+    ],
+    notes: 'Ca. 925 kcal pro Portion, ~38g Protein (nachgerechnet) durch Mozzarella und Schinken – deutlich proteinreicher als die klassische Focaccia. Bei Parmaschinken (roh) diesen erst NACH dem Backen auflegen, damit er nicht trocken/hart wird. Bei gekochtem Schinken kann er wahlweise vor oder nach dem Backen drauf.'
+  },
+  {
+    id: 'seed-focaccia-thunfisch-rote-zwiebeln',
+    _v: 3,
+    name: 'Focaccia mit Thunfisch und roten Zwiebeln',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 793,
+    protein: 41,
+    tags: ['Air Fryer','Proteinreich'],
+    ingredients: [
+      {name:'Mehl (Type 550)', amount:300, unit:'g'},
+      {name:'Trockenhefe', amount:7, unit:'g'},
+      {name:'Wasser, lauwarm', amount:200, unit:'ml'},
+      {name:'Olivenöl', amount:3, unit:'EL'},
+      {name:'Salz', amount:1, unit:'TL'},
+      {name:'Thunfisch in Wasser, abgetropft', amount:200, unit:'g'},
+      {name:'Rote Zwiebel', amount:0.5, unit:''},
+      {name:'Kirschtomaten', amount:150, unit:'g'},
+      {name:'Zitrone, Saft davon', amount:0.5, unit:''},
+      {name:'Grobes Meersalz', amount:1, unit:'TL'},
+      {name:'Petersilie, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Mehl, Trockenhefe, Wasser, 2 EL vom Olivenöl und Salz zu einem glatten, elastischen Teig verkneten (von Hand ca. 8-10 Min oder mit der Maschine 5 Min).',
+      'Teig zugedeckt an einem warmen Ort ca. 45-60 Minuten gehen lassen, bis er sich verdoppelt hat.',
+      'Teig auf die Größe des Airfryer-Korbs formen (flach, oval oder rund), auf Backpapier legen. Mit den Fingern typische Focaccia-Dellen eindrücken.',
+      'Kirschtomaten halbieren, auf dem Teig verteilen. Mit restlichem Olivenöl beträufeln und Meersalz bestreuen.',
+      'Zugedeckt nochmal 15-20 Minuten ruhen lassen.',
+      'OFEN-VARIANTE (empfohlen, v.a. bei größeren Focaccia-Formen): Auf 220°C (Ober-/Unterhitze) vorheizen. Focaccia mitsamt Backpapier ca. 20-25 Minuten backen, bis golden und durchgebacken.\n\nAIRFRYER-VARIANTE: Fritteuse auf 180°C vorheizen. Focaccia mitsamt Backpapier in den Korb legen, 180°C, 15-18 Minuten backen, bis golden und durchgebacken.',
+      'Rote Zwiebel in feine Ringe schneiden. Thunfisch mit Zwiebel, Zitronensaft und Petersilie vermengen.',
+      'Thunfisch-Mischung auf die noch warme Focaccia geben und sofort servieren.'
+    ],
+    notes: 'Ca. 793 kcal pro Portion, ~41g Protein (nachgerechnet) durch den Thunfisch – die proteinreichste der Focaccia-Varianten. Thunfisch erst NACH dem Backen auf die noch warme Focaccia geben, sonst wird er trocken und krümelig. Zitronensaft direkt vorm Servieren dazu, damit er frisch bleibt.'
+  },
+  {
+    id: 'seed-klassisches-pide-hackfleisch',
+    _v: 2,
+    name: 'Klassisches Pide mit Hackfleisch',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 1028,
+    protein: 60,
+    tags: ['Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Mehl (Type 550)', amount:300, unit:'g'},
+      {name:'Wasser, lauwarm', amount:180, unit:'ml'},
+      {name:'Trockenhefe', amount:5, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Salz (für den Teig)', amount:1, unit:'TL'},
+      {name:'Rinderhackfleisch, mager', amount:250, unit:'g'},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Rote Paprika', amount:1, unit:''},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Tomatenmark', amount:1.5, unit:'EL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Chiliflocken', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Käse, gerieben (Mozzarella oder Kashkaval)', amount:120, unit:'g'},
+      {name:'Ei (zum Bestreichen)', amount:1, unit:''},
+      {name:'Petersilie, frisch, gehackt', amount:2, unit:'EL'}
+    ],
+    steps: [
+      'Mehl, Wasser, Hefe, Olivenöl und Salz zu einem glatten Teig verkneten. Zugedeckt ca. 45 Minuten gehen lassen, bis er sich verdoppelt hat.',
+      'Zwiebel, Paprika und Knoblauch fein hacken.',
+      'Hackfleisch mit Zwiebel, Paprika, Knoblauch, Tomatenmark, Paprikapulver, Chiliflocken und Salz gut vermengen.',
+      'Teig in 2 Portionen teilen, zu länglich-ovalen Fladen (ca. 25x12cm) ausrollen, auf Backpapier legen.',
+      'Hackfleischmasse mittig auf dem Teig verteilen, dabei ca. 2cm Rand frei lassen. Ränder nach innen einrollen/falten und an den Enden zusammendrücken, sodass ein bootsförmiges Pide entsteht.',
+      'Ei verquirlen, sichtbaren Teigrand dünn damit bestreichen. Käse auf der Füllung verteilen.',
+      'OFEN-VARIANTE (empfohlen für authentisches Ergebnis): Auf 220-230°C (Ober-/Unterhitze, am besten mit vorgeheiztem Backblech oder Backstein) vorheizen. Pide ca. 12-15 Minuten backen, bis der Rand goldbraun und das Hackfleisch durch ist.\n\nAIRFRYER-VARIANTE: Pide mitsamt Backpapier in die Heißluftfritteuse legen (je nach Korbgröße einzeln nacheinander backen), 190°C, 12-14 Minuten, bis der Rand goldbraun und das Hackfleisch durch ist.',
+      'Mit Petersilie bestreut servieren.'
+    ],
+    notes: 'Ca. 1028 kcal pro Portion, ~60g Protein (nachgerechnet) durch mageres Hackfleisch und Käse. Ofen-Variante kommt näher an die authentische Pide-Kruste, da die meisten Airfryer nicht über 200-220°C hinauskommen. Rand fest andrücken, damit die Füllung beim Backen nicht ausläuft.'
+  },
+  {
+    id: 'seed-scharfes-sucuk-pide',
+    _v: 3,
+    name: 'Scharfes Sucuk-Pide',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 1206,
+    protein: 52,
+    tags: ['Air Fryer','Proteinreich'],
+    ingredients: [
+      {name:'Mehl (Type 550)', amount:300, unit:'g'},
+      {name:'Wasser, lauwarm', amount:180, unit:'ml'},
+      {name:'Trockenhefe', amount:5, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Salz (für den Teig)', amount:1, unit:'TL'},
+      {name:'Passierte Tomaten', amount:150, unit:'g'},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Chiliflocken', amount:1.5, unit:'TL'},
+      {name:'Harissa oder Chilipaste', amount:1, unit:'EL'},
+      {name:'Sucuk (türkische Knoblauchwurst), in Scheiben', amount:180, unit:'g'},
+      {name:'Frische Chilischote, in feinen Ringen', amount:1, unit:''},
+      {name:'Käse, gerieben (Kashkaval oder Mozzarella)', amount:120, unit:'g'},
+      {name:'Ei (nur zum Bestreichen des Randes)', amount:1, unit:''},
+      {name:'Frühlingszwiebeln', amount:2, unit:''},
+      {name:'Petersilie, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Mehl, Wasser, Trockenhefe, Olivenöl und Salz zu einem glatten Teig verkneten. Zugedeckt ca. 45 Minuten gehen lassen, bis er sich verdoppelt hat.',
+      'Passierte Tomaten mit gepresstem Knoblauch, Chiliflocken und Harissa oder Chilipaste verrühren.',
+      'Teig in 2 Portionen teilen, zu länglich-ovalen Fladen (ca. 25x12cm) ausrollen, auf Backpapier legen.',
+      'Teig dünn mit der Tomatensauce bestreichen, dabei ca. 2cm Rand frei lassen. Ränder nach innen einrollen/falten und an den Enden zusammendrücken, sodass ein bootsförmiges Pide entsteht.',
+      'Ei verquirlen, sichtbaren Teigrand dünn damit bestreichen. Sucuk, Chilischote und Käse auf der Füllung verteilen.',
+      'OFEN-VARIANTE (empfohlen für authentisches Ergebnis): Auf 220-230°C (Ober-/Unterhitze, am besten mit vorgeheiztem Backblech oder Backstein) vorheizen. Pide ca. 12-15 Minuten backen, bis der Rand goldbraun und der Käse geschmolzen ist.\n\nAIRFRYER-VARIANTE: Pide mitsamt Backpapier in die Heißluftfritteuse legen, 190°C, 12-14 Minuten, bis der Rand goldbraun und der Käse geschmolzen ist.',
+      'Mit Frühlingszwiebeln und Petersilie bestreut servieren.'
+    ],
+    notes: 'Ca. 1206 kcal pro Portion, ~52g Protein (nachgerechnet). Deutlich schärfer als die Standard-Sucuk-Variante durch Harissa/Chilipaste in der Sauce und frische Chili im Belag – Schärfe nach Geschmack über die Chilipaste dosierbar. Ohne Ei etwas leichter und schneller in der Zubereitung.'
+  },
+  {
+    id: 'seed-pide-feige-honig-ziegenkaese',
+    _v: 3,
+    name: 'Pide mit Feige, Honig und Ziegenkäse',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 1033,
+    protein: 33,
+    tags: ['Vegetarisch','Air Fryer'],
+    ingredients: [
+      {name:'Mehl (Type 550)', amount:300, unit:'g'},
+      {name:'Wasser, lauwarm', amount:180, unit:'ml'},
+      {name:'Trockenhefe', amount:5, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Salz (für den Teig)', amount:1, unit:'TL'},
+      {name:'Ziegenkäse, weich', amount:120, unit:'g'},
+      {name:'Feigen, frisch', amount:4, unit:''},
+      {name:'Honig', amount:2, unit:'EL'},
+      {name:'Walnusskerne', amount:30, unit:'g'},
+      {name:'Ei (zum Bestreichen des Randes)', amount:1, unit:''},
+      {name:'Rucola', amount:30, unit:'g'}
+    ],
+    steps: [
+      'Mehl, Wasser, Trockenhefe, Olivenöl und Salz zu einem glatten Teig verkneten. Zugedeckt ca. 45 Minuten gehen lassen, bis er sich verdoppelt hat.',
+      'Feigen in Scheiben schneiden. Walnusskerne grob hacken.',
+      'Teig in 2 Portionen teilen, zu länglich-ovalen Fladen (ca. 25x12cm) ausrollen, auf Backpapier legen.',
+      'Ziegenkäse mittig auf dem Teig verteilen, dabei ca. 2cm Rand frei lassen. Ränder nach innen einrollen/falten und an den Enden zusammendrücken, sodass ein bootsförmiges Pide entsteht.',
+      'Ei verquirlen, sichtbaren Teigrand dünn damit bestreichen.',
+      'OFEN-VARIANTE (empfohlen für authentisches Ergebnis): Auf 220-230°C (Ober-/Unterhitze, am besten mit vorgeheiztem Backblech oder Backstein) vorheizen. Pide ca. 10-12 Minuten backen, bis der Rand goldbraun und durchgebacken ist.\n\nAIRFRYER-VARIANTE: Pide mitsamt Backpapier in die Heißluftfritteuse legen, 190°C, 10-12 Minuten, bis der Rand goldbraun und durchgebacken ist.',
+      'Noch warmes Pide mit Feigenscheiben belegen, mit Honig beträufeln, mit Walnusskernen und Rucola bestreuen.'
+    ],
+    notes: 'Ca. 1033 kcal pro Portion, ~33g Protein (nachgerechnet). Süß-herzhafte Variante, gut als Wochenend-Highlight oder leichtes Abendessen zum Salat. Feigen und Honig erst nach dem Backen auflegen, damit die Feigen nicht matschig werden und der Honig nicht verbrennt.'
+  },
+  {
+    id: 'seed-schupfnudel-auflauf-lauch-hack',
+    _v: 2,
+    name: 'Schupfnudel-Auflauf mit Lauch und Hack',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 655,
+    protein: 30,
+    tags: ['Batch-Cooking'],
+    ingredients: [
+      {name:'Lauch', amount:100, unit:'g'},
+      {name:'Schupfnudeln (Kühlregal, 500g-Packung)', amount:0.67, unit:'Pck'},
+      {name:'Hackfleisch, gemischt', amount:167, unit:'g'},
+      {name:'Majoran, getrocknet', amount:0.17, unit:'TL'},
+      {name:'Gemüsebrühepulver', amount:0.33, unit:'TL'},
+      {name:'Wasser', amount:500, unit:'ml'},
+      {name:'Schmelzkäse light', amount:66.7, unit:'g'},
+      {name:'Emmentaler, gerieben', amount:25, unit:'g'},
+      {name:'Öl zum Braten', amount:1.33, unit:'EL'},
+      {name:'Cayennepfeffer', amount:0.33, unit:'Prise'},
+      {name:'Salz, wenig', amount:null, unit:''}
+    ],
+    steps: [
+      'Lauch waschen und in nicht zu dünne Ringe schneiden.',
+      'Schupfnudeln im Öl anbraten – am besten portionsweise jeweils etwa 5 Minuten, damit alle schön braun werden können. Herausnehmen und beiseitestellen.',
+      'Restliches Öl in die gleiche Pfanne geben (falls nötig – manchmal reicht auch das, was übrig ist) und das Hackfleisch darin krümelig anbraten. Den Lauch kurz mit in die Pfanne geben und alles mit Majoran, nur ganz wenig Salz (wichtig, da der Schmelzkäse sehr salzig ist) und Cayennepfeffer würzen.',
+      'Mit Wasser ablöschen. Das Gemüsebrühepulver zugeben und ca. 5 Minuten köcheln. Den Schmelzkäse light löffelweise einrühren und darin schmelzen lassen.',
+      'Die Schupfnudeln mit der Lauch-Hack-Sauce in eine Auflaufform geben. Den Emmentaler darüber streuen.',
+      'Für etwa 20 Minuten in den vorgeheizten Backofen bei 200°C Ober-/Unterhitze (Umluft: 175°C) schieben und überbacken.'
+    ],
+    notes: 'Lässt sich nicht zu sehr täuschen – sieht wenig aus, ist aber absolut sättigend. Statt normalem Schmelzkäse mit Schmelzkäse light zubereitet, das spart etwas an Kalorien, ohne dass es bei der cremigen Sauce groß auffällt (Geschmack kommt ohnehin vor allem von Majoran, Cayenne und Hack). Ca. 655 kcal pro Portion, ~30g Protein (nachgerechnet).'
+  },
+  {
+    id: 'seed-lachs-blumenkohlreis-lowcarb',
+    _v: 1,
+    name: 'Lachs auf Blumenkohlreis mit Sesam-Soja-Dressing',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 486,
+    protein: 40,
+    tags: ['Bowl','Air Fryer','Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Lachsfilet', amount:250, unit:'g'},
+      {name:'Blumenkohlreis (fertig oder aus 1 Blumenkohlkopf grob geraspelt)', amount:400, unit:'g'},
+      {name:'Edamame, ohne Schale (TK)', amount:150, unit:'g'},
+      {name:'Karotte', amount:100, unit:'g'},
+      {name:'Salatgurke', amount:150, unit:'g'},
+      {name:'Frühlingszwiebeln', amount:2, unit:''},
+      {name:'Sojasauce', amount:2, unit:'EL'},
+      {name:'Sesamöl', amount:1, unit:'TL'},
+      {name:'Sesam, geröstet', amount:1, unit:'EL'},
+      {name:'Reisessig', amount:1, unit:'TL'},
+      {name:'Salz', amount:0.3, unit:'TL'},
+      {name:'Pfeffer', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Lachsfilet auf einem Blech ca. 12-15 Minuten garen, bis innen noch leicht glasig bis durchgegart.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 200°C vorheizen. Lachs in den Korb geben, ca. 10-12 Minuten garen, bis innen noch leicht glasig bis durchgegart.',
+      'Blumenkohlreis in einer beschichteten Pfanne ohne zusätzliches Fett bei eher hoher Hitze ca. 4-5 Minuten anbraten, bis er weich, aber nicht matschig ist. Nicht zu früh salzen und ggf. in zwei Durchgängen braten, sonst zieht er Wasser und wird breiig. Erst am Ende mit Salz abschmecken.',
+      'Edamame nach Packungsanweisung kurz kochen oder dünsten (meist 3-4 Min), abgießen.',
+      'Karotte raspeln oder in feine Streifen schneiden, Salatgurke in Würfel schneiden, Frühlingszwiebeln in Ringe schneiden.',
+      'Sojasauce, Sesamöl, Sesam, Reisessig und Pfeffer zu einem Dressing verrühren.',
+      'Blumenkohlreis in zwei Schüsseln verteilen, Edamame, Karotte, Gurke und Frühlingszwiebel anrichten, Lachs darauf legen, mit Dressing beträufeln.'
+    ],
+    notes: 'Ca. 486 kcal pro Portion, ~40g Protein, ~26g Kohlenhydrate (davon ~11g Ballaststoffe, also ~16g Netto-KH), ~26g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Lowcarb-Variante der Lachs-Edamame-Bowl (804 kcal) – gleiches Geschmacksprofil, Reis durch Blumenkohlreis ersetzt. Für strikteres Lowcarb: Karotte weglassen spart ca. 5g KH/Portion. Edamame durch mehr Blumenkohlreis zu ersetzen senkt das Protein deutlich (Edamame liefert ~8g/Portion). Wegen der niedrigen Kohlenhydrate eher für Tage mit geringer Trainingslast geeignet, nicht Sa/So rund um den Spieltag.'
+  },
+  {
+    id: 'seed-haehnchen-cordon-bleu-ohne-panade',
+    _v: 1,
+    name: 'Hähnchen-Cordon-Bleu ohne Panade',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 365,
+    protein: 48,
+    tags: ['Air Fryer','Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Hähnchenbrustfilets (je ca. 150g)', amount:2, unit:''},
+      {name:'Gekochter Schinken', amount:60, unit:'g'},
+      {name:'Käse, in Scheiben (Gouda oder Emmentaler)', amount:60, unit:'g'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Hähnchenbrustfilets waagerecht einschneiden (Tasche formen, nicht ganz durchschneiden), mit Salz und Pfeffer würzen.',
+      'Je 2 Scheiben Schinken und Käse in die Tasche jedes Filets legen. Käse dabei etwas kleiner als die Tasche zuschneiden und nicht bis an den Rand füllen, sonst läuft er beim Backen aus. Öffnung mit Zahnstochern fixieren.',
+      'Filets mit Olivenöl bestreichen. Optional: gefüllte Filets vor dem Backen 15 Minuten kalt stellen, dann hält die Füllung besser.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Filets auf einem Blech ca. 20-22 Minuten backen, bis das Hähnchen durchgegart ist (Kerntemperatur 74°C). Nicht wenden.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 190°C vorheizen. Filets mit der Öffnung nach oben in den Korb legen, ca. 16-18 Minuten backen. Wenden nur, wenn nötig – sonst läuft der geschmolzene Käse aus.',
+      'Zahnstocher entfernen und sofort servieren.'
+    ],
+    notes: 'Ca. 345-390 kcal pro Portion je nach Schinken und Käse, ~48g Protein, praktisch 0g Kohlenhydrate, ~17-20g Fett (nachgerechnet; magerer Kochschinken + Gouda ergibt das untere Ende, fetterer Schinken + Emmentaler das obere). Bestes Protein-Kalorien-Verhältnis der Sammlung nach den Garnelen-Spießen. Ohne Beilage aber unvollständig: Kartoffeln oder Reis dazu an Trainingstagen, grüner Salat an ruhigen Tagen – so lässt sich dasselbe Gericht an die Tagesbelastung anpassen. Zum Vorkochen weniger geeignet, aufgewärmt wird das Hähnchen trocken und der Käse fest.'
+  },
+  {
+    id: 'seed-gefuellte-paprika-hack-blumenkohlreis',
+    _v: 1,
+    name: 'Gefüllte Paprika mit Hackfleisch und Blumenkohlreis',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 545,
+    protein: 47,
+    tags: ['Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Große Paprika (je ca. 200g)', amount:2, unit:''},
+      {name:'Rinderhackfleisch, mager', amount:300, unit:'g'},
+      {name:'Blumenkohlreis (fertig oder geraspelt)', amount:200, unit:'g'},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Passierte Tomaten', amount:200, unit:'g'},
+      {name:'Käse, gerieben (Gouda oder Cheddar)', amount:80, unit:'g'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Oregano, getrocknet', amount:1, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Paprika der Länge nach halbieren, Kerngehäuse entfernen.',
+      'Zwiebel und Knoblauch fein würfeln bzw. hacken. In einer Pfanne mit Olivenöl anschwitzen.',
+      'Rinderhackfleisch dazugeben, krümelig anbraten, bis es durchgegart ist.',
+      'Blumenkohlreis und die Hälfte der passierten Tomaten dazugeben, mit Paprikapulver, Oregano, Salz und Pfeffer würzen, kurz mitbraten. Der Blumenkohlreis zieht Wasser – bei hoher Hitze kurz einkochen lassen, sonst wird die Füllung wässrig.',
+      'Paprikahälften mit der Hackfleischmischung füllen (die Füllung reicht für gut gehäufte Hälften), in eine Auflaufform setzen. Restliche passierte Tomaten um die Paprika herum in die Form geben.',
+      'OFEN-VARIANTE: Bei 200°C (Ober-/Unterhitze) ca. 30-35 Minuten backen. Den geriebenen Käse erst in den letzten 12-15 Minuten daraufstreuen, sonst wird er dunkel, bevor die Paprika weich ist.\n\nAIRFRYER-VARIANTE: Paprikahälften bei 180°C ca. 15-18 Minuten garen (je nach Korbgröße in zwei Durchgängen), Käse in den letzten 5-6 Minuten daraufstreuen.'
+    ],
+    notes: 'Ca. 528-595 kcal pro Portion je nach Fettgehalt des Hacks (5% Fett: 528 kcal / 48g Protein, 10% Fett: 597 kcal / 47g Protein), ~28g Kohlenhydrate (davon ~8g Ballaststoffe, also ~20g Netto-KH), ~25-32g Fett – nachgerechnet, deckt sich gut mit der Rezeptangabe. Die Paprika bringt die meisten Kohlenhydrate mit; für strikteres Lowcarb kleinere Paprika (150g statt 200g) verwenden, spart ca. 3-4g KH/Portion. Anders als das Cordon Bleu gut zum Vorkochen geeignet – gefüllte Paprika wärmen sauber wieder auf.'
+  },
+  {
+    id: 'seed-haehnchen-schnitzel-parmesan-mandel',
+    _v: 1,
+    name: 'Hähnchen-Schnitzel im Parmesan-Mandel-Mantel',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 460,
+    protein: 49,
+    tags: ['Air Fryer','Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Hähnchenbrustfilet, in 4 flache Schnitzel geschnitten/plattiert', amount:300, unit:'g'},
+      {name:'Ei', amount:1, unit:''},
+      {name:'Parmesan, fein gerieben', amount:40, unit:'g'},
+      {name:'Gemahlene Mandeln', amount:40, unit:'g'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'},
+      {name:'Olivenöl (zum Bestreichen)', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Ei in einer flachen Schale verquirlen. Parmesan, gemahlene Mandeln, Paprikapulver, Salz und Pfeffer auf einem Teller vermengen.',
+      'Schnitzel auf ca. 1cm plattieren und mit Küchenpapier gründlich trocken tupfen – ohne Mehlschicht haftet das Ei sonst schlecht und die Panade löst sich beim Wenden.',
+      'Schnitzel nacheinander erst im Ei, dann in der Parmesan-Mandel-Mischung wenden, dabei kräftig andrücken.',
+      'Schnitzel mit Olivenöl bestreichen.',
+      'OFEN-VARIANTE: Auf 190°C (Ober-/Unterhitze) vorheizen. Schnitzel auf einem Blech ca. 12-15 Minuten backen, nach der Hälfte wenden, bis goldbraun und durchgegart.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 180°C vorheizen. Schnitzel in den Korb legen, ca. 10-12 Minuten backen, nach der Hälfte wenden.\n\nWichtig: Parmesan und Mandeln bräunen deutlich schneller als Semmelbrösel und werden bitter, wenn sie zu dunkel werden. Lieber etwas niedriger und kürzer garen und ab Minute 8 im Blick behalten – plattierte Schnitzel sind ohnehin schnell durch.'
+    ],
+    notes: 'Ca. 448-470 kcal pro Portion, ~49g Protein, ~2g Netto-Kohlenhydrate, ~27g Fett (nachgerechnet). Die Spanne kommt allein vom Referenzwert für Hähnchenbrust: mit deutschen BLS-Werten 448 kcal, mit USDA-Werten 469 kcal – die Rezeptangabe nutzt USDA, beides ist vertretbar. Sehr hohe Proteindichte, praktisch kohlenhydratfrei dank Parmesan-Mandel-Panade statt Semmelbrösel. Zum Vorkochen mäßig geeignet, die Panade weicht auf – falls doch, am nächsten Tag kurz bei 180°C in der Heißluftfritteuse nachkrossen statt Mikrowelle.'
+  },
+  {
+    id: 'seed-garnelen-zucchini-nudeln-knoblauch-chili',
+    _v: 1,
+    name: 'Garnelen-Zucchini-Nudeln mit Knoblauch-Chili-Öl',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 410,
+    protein: 38,
+    tags: ['Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Garnelen, roh, geschält', amount:300, unit:'g'},
+      {name:'Zucchini (für Zoodles)', amount:600, unit:'g'},
+      {name:'Knoblauchzehen', amount:4, unit:''},
+      {name:'Chiliflocken', amount:1, unit:'TL'},
+      {name:'Olivenöl', amount:3, unit:'EL'},
+      {name:'Petersilie, frisch, gehackt', amount:2, unit:'EL'},
+      {name:'Parmesan, gerieben (optional)', amount:30, unit:'g'},
+      {name:'Zitrone, Saft davon', amount:0.5, unit:''},
+      {name:'Salz', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Zucchini mit einem Spiralschneider oder Sparschäler zu Zoodles verarbeiten. Zoodles leicht salzen, in ein Sieb geben und 15-20 Minuten Wasser ziehen lassen, dann gut ausdrücken. Ohne diesen Schritt geben 600g Zucchini so viel Wasser ab, dass die Pfanne dämpft statt brät und das Knoblauchöl verwässert.',
+      'Knoblauch fein hacken. Garnelen trocken tupfen und mit Salz würzen.',
+      'Olivenöl in einer großen Pfanne erhitzen, Knoblauch und Chiliflocken bei mittlerer Hitze 1 Minute anschwitzen, bis es duftet (nicht bräunen lassen).',
+      'Garnelen dazugeben, 3-4 Minuten braten, bis sie rosa und durchgegart sind. Herausnehmen und beiseitestellen – so garen sie nicht nach und bleiben saftig.',
+      'Zoodles in dieselbe Pfanne geben, bei starker Hitze nur 2-3 Minuten kurz anbraten, bis sie warm, aber noch bissfest sind. Bei kleiner Pfanne in zwei Durchgängen arbeiten.',
+      'Garnelen zurück in die Pfanne geben, mit Zitronensaft und Petersilie vermengen. Mit Parmesan bestreut servieren.'
+    ],
+    notes: 'Ca. 385-435 kcal pro Portion, ~38g Protein, ~7-10g Netto-Kohlenhydrate, ~22-27g Fett (nachgerechnet). Die Spanne hängt fast vollständig daran, wie voll der Esslöffel Öl ist: 3 EL knapp gemessen (30g) ergeben 385 kcal, großzügig gemessen (41g) 433 kcal. Wer genau tracken will, wiegt das Öl ab – bei diesem Rezept ist es der größte einzelne Kalorienposten. Der Parmesan steuert ca. 60 kcal und 5g Protein pro Portion bei; ohne ihn sind es ca. 325-375 kcal und 34g Protein. Nur frisch essen: Zoodles werden aufgewärmt komplett weich und wässrig.'
+  },
+  {
+    id: 'seed-haehnchen-bacon-spiesse-avocado-dip',
+    _v: 1,
+    name: 'Hähnchen-Bacon-Spieße mit Avocado-Dip',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 540,
+    protein: 46,
+    tags: ['Air Fryer','Proteinreich'],
+    ingredients: [
+      {name:'Hähnchenbrustfilet, in Würfel geschnitten', amount:300, unit:'g'},
+      {name:'Bacon (Frühstücksspeck)', amount:100, unit:'g'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'},
+      {name:'Avocado, Fruchtfleisch', amount:150, unit:'g'},
+      {name:'Griechischer Joghurt', amount:50, unit:'g'},
+      {name:'Limette, Saft davon', amount:0.5, unit:''},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Koriander oder Petersilie, frisch, gehackt', amount:1, unit:'EL'},
+      {name:'Salz', amount:0.3, unit:'TL'},
+      {name:'Holzspieße', amount:8, unit:''}
+    ],
+    steps: [
+      'Holzspieße in Wasser einweichen (verhindert Verbrennen).',
+      'Bacon in ca. 3cm lange Stücke schneiden. Hähnchenwürfel mit Paprikapulver und Pfeffer würzen – kein zusätzliches Salz, der Bacon salzt bereits kräftig.',
+      'Jeden Hähnchenwürfel eng mit einem Baconstück umwickeln und auf die Spieße stecken. Bacon dabei straff ziehen: locker anliegender Speck bleibt weich, statt kross zu werden. Mit Olivenöl bestreichen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Spieße auf einen Rost über einem Blech legen ca. 20-22 Minuten backen, nach der Hälfte wenden. Der Rost ist wichtig, damit das ausgelassene Baconfett abtropft.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 190°C vorheizen. Spieße in den Korb legen, ca. 14-16 Minuten backen, nach der Hälfte wenden, bis Hähnchen und Bacon durchgegart und leicht kross sind.',
+      'Avocado, Griechischen Joghurt, Limettensaft, gepressten Knoblauch, Koriander oder Petersilie und Salz zu einem cremigen Dip pürieren oder verrühren. Dip erst kurz vor dem Servieren machen oder Frischhaltefolie direkt auf die Oberfläche legen, sonst wird er braun.'
+    ],
+    notes: 'Ca. 495-585 kcal pro Portion, ~46g Protein, ~0-3g Netto-Kohlenhydrate, ~35-40g Fett (nachgerechnet). Die große Spanne hat einen echten Grund: die Rechnung geht vom rohen Bacon aus, aber beim Garen auf dem Rost bzw. im Airfryer-Korb tropfen 10-20g Fett ab, die nicht auf dem Teller landen – das sind 45-90 kcal pro Portion. Realistisch liegt das Gericht eher bei 500-540 kcal. Mit 60g statt 100g Bacon kommt man auf ca. 450-490 kcal (die Ersparnis ist mit ca. 80-90 kcal/Portion größer als oft angenommen). Das fettreichste Gericht der Lowcarb-Gruppe – Protein pro Kalorie ist hier schlechter als beim Cordon Bleu oder Parmesan-Schnitzel.'
+  },
+  {
+    id: 'seed-thunfisch-steak-sesamkruste-wasabi-mayo',
+    _v: 1,
+    name: 'Thunfisch-Steak mit Sesamkruste und Wasabi-Mayo',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 480,
+    protein: 41,
+    tags: ['Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Thunfisch-Steaks (sushi-tauglich, frisch)', amount:300, unit:'g'},
+      {name:'Sesam, weiß und schwarz gemischt', amount:30, unit:'g'},
+      {name:'Sojasauce', amount:1, unit:'EL'},
+      {name:'Neutrales Öl mit hohem Rauchpunkt (Raps-/Sonnenblumenöl) zum Anbraten', amount:1, unit:'EL'},
+      {name:'Sesamöl (zum Beträufeln nach dem Braten, optional)', amount:1, unit:'TL'},
+      {name:'Mayonnaise', amount:3, unit:'EL'},
+      {name:'Wasabi-Paste', amount:1, unit:'TL'},
+      {name:'Limette, Saft davon', amount:0.5, unit:''},
+      {name:'Salz', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Thunfisch-Steaks mit Sojasauce bestreichen, mit Salz würzen.',
+      'Sesam auf einem Teller verteilen, Thunfisch-Steaks darin von allen Seiten fest andrücken, bis rundum eine Sesamkruste haftet.',
+      'Neutrales Öl in einer Pfanne bei starker Hitze erhitzen. Kein Sesamöl zum Anbraten verwenden – es raucht schon bei ca. 175°C und wird bitter; besser erst nach dem Braten darüberträufeln.',
+      'Steaks nur auf den beiden großen Flächen je 45-60 Sekunden scharf anbraten, die schmalen Kanten anschließend nur je 10-15 Sekunden nachrollen. Wer jede Seite eine volle Minute brät, hat den Kern durchgegart statt roh-rosa. Das funktioniert nur mit dicken Steaks (ab ca. 3cm) – dünne Steaks garen unvermeidlich durch.',
+      'Mayonnaise, Wasabi-Paste und Limettensaft verrühren.',
+      'Thunfisch kurz ruhen lassen, gegen die Faser in Scheiben schneiden und mit der Wasabi-Mayo servieren.'
+    ],
+    notes: 'Ca. 480 kcal pro Portion, ~41g Protein, ~1g Netto-Kohlenhydrate, ~32g Fett (nachgerechnet – deckt sich fast exakt mit der Rezeptangabe, die genaueste Vorlage bisher). Mayo auf 2 EL reduzieren spart ca. 51 kcal/Portion. Rohkern-Zubereitung: nur ausdrücklich als Sashimi-/Sushi-Qualität ausgewiesene Ware verwenden und am Kauftag zubereiten – nichts für den zweiten Tag, anders als der Rest der Sammlung. Bei 150g Thunfisch pro Portion ist das wegen des Quecksilbergehalts eher ein Gericht für gelegentlich als für die wöchentliche Rotation.'
+  },
+  {
+    id: 'seed-garnelen-avocado-salat-limette-koriander',
+    _v: 1,
+    name: 'Garnelen-Avocado-Salat mit Limette und Koriander',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 495,
+    protein: 34,
+    tags: ['Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Garnelen, gegart (gekocht oder gebraten)', amount:300, unit:'g'},
+      {name:'Avocado, Fruchtfleisch', amount:300, unit:'g'},
+      {name:'Kirschtomaten', amount:150, unit:'g'},
+      {name:'Rote Zwiebel', amount:50, unit:'g'},
+      {name:'Koriander, frisch, gehackt', amount:2, unit:'EL'},
+      {name:'Limette, Saft davon', amount:1, unit:''},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Chiliflocken (optional)', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Rote Zwiebel fein würfeln und in den Limettensaft geben, 5-10 Minuten ziehen lassen – das nimmt der rohen Zwiebel die Schärfe.',
+      'Falls die Garnelen noch roh sind: in einer Pfanne mit etwas Öl 3-4 Minuten braten oder in der Heißluftfritteuse bei 200°C 6-8 Minuten garen, dann abkühlen lassen.',
+      'Kirschtomaten halbieren, Avocado in Würfel schneiden.',
+      'Garnelen, Kirschtomaten und die Zwiebel-Limetten-Mischung in einer Schüssel vermengen. Olivenöl, Koriander, Chiliflocken, Salz und Pfeffer dazugeben.',
+      'Avocado zum Schluss vorsichtig unterheben, damit sie nicht zerdrückt wird. Sofort servieren.'
+    ],
+    notes: 'Ca. 495 kcal pro Portion, ~34g Protein, ~8g Netto-Kohlenhydrate, ~11g Ballaststoffe, ~33g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Die Avocado macht fast die Hälfte der Kalorien aus: mit 200g statt 300g sind es ca. 415 kcal/Portion, immer noch reichlich. Das einzige Gericht der Sammlung ganz ohne Kochen – gut für späte Abende oder heiße Tage. Nicht vorkochbar und nicht als Lunchbox geeignet: gewürfelte Avocado wird über Nacht braun und weich. Für zwei Tage besser die Basis aus Garnelen, Tomaten und Zwiebel vorbereiten und die Avocado jeweils frisch würfeln.'
+  },
+  {
+    id: 'seed-ofen-feta-cherrytomaten-oliven',
+    _v: 1,
+    name: 'Ofen-Feta mit Cherrytomaten und Oliven',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 429,
+    protein: 16,
+    tags: ['Vegetarisch','Air Fryer','Schnell','Batch-Cooking'],
+    ingredients: [
+      {name:'Feta (ganzer Block)', amount:200, unit:'g'},
+      {name:'Kirschtomaten', amount:250, unit:'g'},
+      {name:'Schwarze Oliven', amount:40, unit:'g'},
+      {name:'Olivenöl', amount:2, unit:'EL'},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Oregano, getrocknet', amount:1, unit:'TL'},
+      {name:'Chiliflocken (optional)', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Feta mittig in eine kleine Auflaufform legen. Kirschtomaten und Oliven drum herum verteilen.',
+      'Gepressten Knoblauch darüber verteilen, mit Olivenöl beträufeln, mit Oregano, Chiliflocken und Pfeffer würzen. Kein Salz – Feta und Oliven bringen genug mit.',
+      'OFEN-VARIANTE: Bei 200°C (Ober-/Unterhitze) ca. 20-25 Minuten backen, bis der Feta weich und leicht gebräunt ist und die Tomaten aufgeplatzt sind.\n\nAIRFRYER-VARIANTE: In einer kleinen ofenfesten Form bei 180°C ca. 12-15 Minuten garen.',
+      'Feta mit einer Gabel leicht zerdrücken, mit den Tomaten und dem austretenden Öl vermengen, warm servieren.'
+    ],
+    notes: 'Ca. 429 kcal pro Portion, ~16g Protein, ~6-8g Netto-Kohlenhydrate, ~36g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Die Proteindichte ist mit 36g je 1000 kcal die niedrigste der Sammlung – zum Vergleich: Cordon Bleu 132, Garnelen-Spieße 167. Ein Ei als Ergänzung ändert daran wenig (dann 514 kcal / 23g Protein); erst 100-150g Hähnchenbrust bringen es auf ein übliches Niveau (534 kcal / 39g bzw. 588 kcal / 50g). Die dritte sinnvolle Variante: die Tomaten-Feta-Masse ist im Grunde eine fertige Pastasauce – mit 50g Nudeln pro Portion wird daraus ein Carb-Loading-Gericht für Samstag (604 kcal). Als eigenständiges Abendessen ohne Ergänzung eher eine Beilage. Wärmt sich gut wieder auf.'
+  },
+  {
+    id: 'seed-zucchini-puffer-frischkaese-dip',
+    _v: 1,
+    name: 'Zucchini-Puffer mit Frischkäse-Dip',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 501,
+    protein: 22,
+    tags: ['Vegetarisch','Schnell','Batch-Cooking'],
+    ingredients: [
+      {name:'Zucchini, geraspelt', amount:500, unit:'g'},
+      {name:'Eier', amount:2, unit:''},
+      {name:'Mandelmehl (gemahlene Mandeln)', amount:40, unit:'g'},
+      {name:'Parmesan, gerieben', amount:30, unit:'g'},
+      {name:'Frühlingszwiebeln', amount:2, unit:''},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'},
+      {name:'Muskatnuss, gerieben', amount:0.3, unit:'TL'},
+      {name:'Olivenöl (zum Braten)', amount:1.5, unit:'EL'},
+      {name:'Frischkäse', amount:80, unit:'g'},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Zitrone, Saft davon', amount:1, unit:''},
+      {name:'Dill oder Schnittlauch, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Zucchini raspeln, mit dem Salz vermengen und 10-15 Minuten stehen lassen. Dann in ein Küchentuch geben und kräftig ausdrücken. Das Vorsalzen zieht deutlich mehr Wasser als das bloße Ausdrücken – aus 500g Zucchini bleiben so etwa 300g übrig.',
+      'Zucchini mit Eiern, Mandelmehl, Parmesan, fein geschnittenen Frühlingszwiebeln, Pfeffer und Muskatnuss zu einem Teig vermengen. Teig 10 Minuten ruhen lassen, damit das Mandelmehl quellen kann – es bindet schwächer als Kartoffel- oder Weizenmehl, und die Ruhezeit hilft spürbar.',
+      'Olivenöl in einer Pfanne bei mittlerer Hitze erhitzen. Portionsweise flache Puffer von ca. 6cm Durchmesser in die Pfanne setzen und fest andrücken – kleiner als klassische Kartoffelpuffer, weil die Mandelmehl-Bindung fragiler ist. Von jeder Seite 3-4 Minuten braten und erst wenden, wenn die Unterseite wirklich fest und goldbraun ist.',
+      'Frischkäse, gepressten Knoblauch, Zitronensaft und Dill oder Schnittlauch zu einem Dip verrühren.'
+    ],
+    notes: 'Ca. 501 kcal pro Portion, ~22g Protein, ~11g Netto-Kohlenhydrate, ~40g Fett (nachgerechnet, deckt sich sehr genau mit der Rezeptangabe). Zwei Einschränkungen: Erstens reichen 1,5 EL Öl in der Praxis selten für die ganze Menge – wer zwischen den Durchgängen nachgießt und auf 3 EL kommt, liegt bei ca. 565 kcal/Portion. Zweitens ist die Proteindichte mit 44g je 1000 kcal die zweitniedrigste der Sammlung; ein drittes Ei bringt 543 kcal/26g, 30g mehr Parmesan 561 kcal/27g – beides ändert die Kategorie nicht. Besser als Beilage zu einem proteinreichen Hauptgericht einplanen, etwa zu den Garnelen-Spießen. Bewusst ohne Airfryer-Variante: der Teig ist zu weich und hält im Korb die Form nicht.'
+  },
+  {
+    id: 'seed-lachs-zitronen-pasta-skyr-sauce',
+    _v: 1,
+    name: 'Lachs-Zitronen-Pasta mit Skyr-Sauce',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 877,
+    protein: 54,
+    tags: ['Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Spaghetti oder Penne, trocken', amount:200, unit:'g'},
+      {name:'Lachsfilet', amount:300, unit:'g'},
+      {name:'Skyr', amount:150, unit:'g'},
+      {name:'Schmelzkäse', amount:60, unit:'g'},
+      {name:'Zitrone, Schale und Saft', amount:1, unit:''},
+      {name:'Olivenöl (für die Sauce)', amount:1, unit:'EL'},
+      {name:'Olivenöl (zum Braten des Lachses)', amount:1, unit:'TL'},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Petersilie, frisch, gehackt', amount:2, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Pasta nach Packungsanweisung in Salzwasser kochen, dabei eine Tasse Nudelwasser aufbewahren.',
+      'Lachsfilet mit Salz und Pfeffer würzen, in einer Pfanne mit 1 TL Öl von jeder Seite 3-4 Minuten braten, bis durchgegart. In Stücke zerteilen und beiseitestellen.',
+      'Olivenöl in derselben Pfanne erhitzen, gepressten Knoblauch kurz anschwitzen.',
+      'Schmelzkäse dazugeben, bei niedriger Hitze schmelzen lassen, mit etwas Nudelwasser verdünnen, bis eine cremige Sauce entsteht.',
+      'Pfanne vom Herd nehmen und kurz abkühlen lassen. Den Skyr zuerst in einer Schüssel mit 2-3 EL der warmen Sauce glattrühren und diese Mischung dann in die Pfanne geben – so eingerührt gerinnt er nicht, was bei direkt zugegebenem kaltem Skyr leicht passiert. Mit abgeriebener Schale und Saft der Zitrone abschmecken.',
+      'Pasta unterheben, Lachsstücke vorsichtig untermengen. Mit Petersilie bestreut servieren.'
+    ],
+    notes: 'Ca. 877 kcal pro Portion, ~54g Protein, ~77g Kohlenhydrate, ~38g Fett (nachgerechnet, deckt sich exakt mit der Rezeptangabe). Hinweis: Im Original war das Öl zum Anbraten des Lachses nicht in der Zutatenliste aufgeführt ("etwas Öl") – hier mit 1 TL ergänzt und eingerechnet. Pasta auf 140g reduzieren spart ca. 105 kcal/Portion (nicht 130). Mit 77g Kohlenhydraten und 54g Protein pro Portion das passendste Gericht der Sammlung für Samstag als Carb-Loading-Abendessen vor dem Sonntagsspiel – und in ca. 20 Minuten fertig. Frisch am besten: Skyr-Saucen trennen sich beim Aufwärmen leicht, für den zweiten Tag bei niedriger Hitze und mit einem Schuss Wasser erwärmen.'
+  },
+  {
+    id: 'seed-haehnchen-zwiebel-pasta-kaesesauce',
+    _v: 1,
+    name: 'Hähnchen-Zwiebel-Pasta mit Käsesauce',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 760,
+    protein: 58,
+    tags: ['Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Spaghetti oder Penne, trocken', amount:200, unit:'g'},
+      {name:'Hähnchenbrustfilet', amount:300, unit:'g'},
+      {name:'Zwiebeln', amount:2, unit:''},
+      {name:'Schmelzkäse', amount:80, unit:'g'},
+      {name:'Skyr', amount:100, unit:'g'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'}
+    ],
+    steps: [
+      'Pasta nach Packungsanweisung in Salzwasser kochen, dabei eine Tasse Nudelwasser aufbewahren.',
+      'Zwiebeln in feine Ringe schneiden. Hähnchenbrustfilet in mundgerechte Stücke schneiden, mit Paprikapulver, Salz und Pfeffer würzen.',
+      'Olivenöl in einer Pfanne erhitzen, Zwiebeln bei mittlerer Hitze ca. 12-15 Minuten goldbraun anrösten (gelegentlich wenden). Langsam rösten statt nur andünsten – das ist die Geschmacksgrundlage des ganzen Gerichts. Zwiebeln anschließend aus der Pfanne nehmen und beiseitestellen.',
+      'Hähnchen in derselben Pfanne 6-8 Minuten anbraten, bis durchgegart. Getrennt vom Zwiebelanteil gebraten, weil das Hähnchen Wasser zieht: zusammen in der Pfanne weichen die gerösteten Zwiebeln wieder auf und verlieren die Röstaromen. Zwiebeln danach zurückgeben.',
+      'Schmelzkäse dazugeben, bei niedriger Hitze schmelzen lassen, mit etwas Nudelwasser verdünnen, bis eine cremige Sauce entsteht.',
+      'Pfanne vom Herd nehmen und kurz abkühlen lassen. Skyr zuerst in einer Schüssel mit 2-3 EL der warmen Sauce glattrühren, dann in die Pfanne geben – direkt zugegebener kalter Skyr gerinnt leicht.',
+      'Pasta unterheben und servieren.'
+    ],
+    notes: 'Ca. 741-780 kcal pro Portion je nach Referenzwerten, ~58g Protein, ~83g Kohlenhydrate, ~19g Fett (nachgerechnet; die Spanne kommt vom Referenzwert für Hähnchenbrust, BLS gegen USDA). Pasta auf 140g reduzieren spart ca. 105 kcal/Portion. Das ausgewogenste Carb-Loading-Gericht der Sammlung: im direkten Vergleich mit der Lachs-Zitronen-Pasta liefert es mehr Protein (58 statt 54g) und mehr Kohlenhydrate (83 statt 77g) bei halbem Fettanteil (19 statt 38g) und 120 kcal weniger. Damit die erste Wahl für Samstag vor dem Spiel. Beide Gerichte nutzen dieselbe Schmelzkäse-Skyr-Technik, schmecken durch Röstzwiebel und Paprika aber deutlich anders als die Zitronen-Variante.'
+  },
+  {
+    id: 'seed-pasta-carbonara-style-ei-zwiebeln',
+    _v: 1,
+    name: 'Pasta Carbonara-Style mit Ei und Zwiebeln',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 675,
+    protein: 30,
+    tags: ['Vegetarisch'],
+    ingredients: [
+      {name:'Spaghetti, trocken', amount:200, unit:'g'},
+      {name:'Eier', amount:4, unit:''},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Schmelzkäse', amount:60, unit:'g'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer, frisch gemahlen', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Pasta nach Packungsanweisung in Salzwasser kochen, dabei eine Tasse Nudelwasser aufbewahren.',
+      'Zwiebel in feine Ringe schneiden. In einer Pfanne mit Olivenöl bei mittlerer Hitze ca. 12-15 Minuten goldbraun anrösten.',
+      'Eier mit geriebenem oder klein geschnittenem Schmelzkäse, Salz und Pfeffer in einer Schüssel verquirlen.',
+      'Ei-Käse-Masse temperieren: unter ständigem Rühren zwei bis drei Esslöffel heißes Nudelwasser einrühren. Das Rezept nutzt vier ganze Eier statt nur Eigelb – Eiweiß stockt früher, deshalb ist dieser Schritt hier wichtiger als bei klassischer Carbonara.',
+      'Pfanne mit den Zwiebeln vom Herd nehmen und eine halbe Minute abkühlen lassen, dann die heiße Pasta dazugeben und kurz durchschwenken.',
+      'Ei-Käse-Masse über die Pasta gießen und zügig unterrühren. Die Restwärme bindet das Ei zu einer cremigen Sauce. Bei Bedarf noch etwas Nudelwasser dazugeben, bis die Konsistenz stimmt.'
+    ],
+    notes: 'Ca. 675 kcal pro Portion, ~30g Protein, ~77g Kohlenhydrate, ~26g Fett (nachgerechnet, deckt sich exakt mit der Rezeptangabe). Mit 45g Protein je 1000 kcal das proteinärmste der drei Pasta-Gerichte. Der Vorschlag, Hähnchen zu ergänzen, funktioniert rechnerisch (150g Hähnchenbrust ergeben 754 kcal / 48g Protein), macht daraus aber praktisch die Hähnchen-Zwiebel-Pasta – die ist dafür schon da. Sinnvoller ist, das Gericht so zu lassen und an Tagen einzuplanen, an denen das Protein anderweitig gedeckt ist: mit 250g Skyr zum Frühstück und einem proteinreichen Kantinen-Mittag sind 30g am Abend unproblematisch, Protein zählt über den Tag. Frisch essen, aufgewärmt wird die Eiersauce körnig.'
+  },
+  {
+    id: 'seed-lachs-pasta-zitrone-ei-sauce',
+    _v: 1,
+    name: 'Lachs-Pasta mit Zitrone und Ei-Sauce',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 865,
+    protein: 55,
+    tags: ['Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Spaghetti, trocken', amount:200, unit:'g'},
+      {name:'Lachsfilet', amount:250, unit:'g'},
+      {name:'Eier', amount:3, unit:''},
+      {name:'Parmesan oder Schmelzkäse, gerieben', amount:40, unit:'g'},
+      {name:'Zitrone, Schale und Saft', amount:1, unit:''},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Petersilie, frisch, gehackt', amount:2, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer, frisch gemahlen', amount:0.5, unit:'TL'}
+    ],
+    steps: [
+      'Pasta nach Packungsanweisung in Salzwasser kochen, dabei eine Tasse Nudelwasser aufbewahren.',
+      'Lachsfilet mit Salz und Pfeffer würzen, in einer Pfanne mit Olivenöl von jeder Seite 3-4 Minuten braten, bis durchgegart. In Stücke zerteilen.',
+      'Eier mit Parmesan, abgeriebener Zitronenschale, Salz und Pfeffer in einer Schüssel verquirlen. Noch keinen Zitronensaft zugeben – Säure lässt die Eimasse leichter gerinnen.',
+      'Ei-Käse-Masse temperieren: unter ständigem Rühren zwei bis drei Esslöffel heißes Nudelwasser einrühren.',
+      'Pfanne mit dem Lachs vom Herd nehmen und eine halbe Minute abkühlen lassen, dann die heiße Pasta dazugeben und kurz durchschwenken.',
+      'Ei-Käse-Masse über die Pasta gießen und zügig unterrühren, bis eine cremige Sauce entsteht. Bei Bedarf noch etwas Nudelwasser dazugeben.',
+      'Erst jetzt den Zitronensaft nach und nach zugeben und abschmecken, mit Petersilie bestreut servieren.'
+    ],
+    notes: 'Ca. 865 kcal pro Portion, ~55g Protein, ~72g Kohlenhydrate, ~39g Fett (nachgerechnet, deckt sich exakt mit der Rezeptangabe). Mit Schmelzkäse statt Parmesan sind es 839 kcal und 50g Protein – Parmesan ist geschmacklich die klassischere Wahl, Schmelzkäse die stabilere Sauce. Pasta auf 140g reduzieren spart ca. 105 kcal/Portion. Achtung, sehr nah an der bereits vorhandenen Lachs-Zitronen-Pasta mit Skyr-Sauce: gleiche Pasta-Menge, gleicher Fisch, gleiche Zitrone und Petersilie, und die Nährwerte liegen auf allen Achsen innerhalb weniger Prozent (877/54g/77g/38g gegen 865/55g/72g/39g). Der einzige echte Unterschied ist die Sauce – hier cremig-eirig wie Carbonara, dort frisch-säuerlich durch den Skyr.'
+  },
+  {
+    id: 'seed-klassische-spaghetti-carbonara',
+    _v: 1,
+    name: 'Klassische Spaghetti Carbonara',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 889,
+    protein: 39,
+    tags: ['Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Spaghetti, trocken', amount:200, unit:'g'},
+      {name:'Guanciale oder Pancetta (ersatzweise Bacon), gewürfelt', amount:120, unit:'g'},
+      {name:'Eier', amount:2, unit:''},
+      {name:'Eigelb', amount:2, unit:''},
+      {name:'Pecorino Romano, fein gerieben', amount:60, unit:'g'},
+      {name:'Schwarzer Pfeffer, frisch gemahlen', amount:1, unit:'TL'}
+    ],
+    steps: [
+      'Reichlich Salzwasser zum Kochen bringen, Spaghetti nach Packungsanweisung bissfest kochen, dabei eine Tasse Nudelwasser aufbewahren.',
+      'Guanciale in einer kalten Pfanne bei mittlerer Hitze langsam auslassen, bis es knusprig ist und reichlich Fett abgegeben hat (ca. 6-8 Minuten). Kein zusätzliches Öl nötig, kein Salz – Guanciale und Pecorino salzen kräftig.',
+      'Eier, Eigelb, Pecorino und Pfeffer in einer Schüssel kräftig verquirlen, bis eine homogene Masse entsteht.',
+      'Pfanne mit dem Guanciale vom Herd nehmen. Heiße, abgetropfte Pasta direkt in die Pfanne geben, im Guanciale-Fett schwenken.',
+      'Ei-Käse-Masse über die Pasta gießen, sofort zügig durchschwenken und rühren. Die Restwärme von Pasta und Pfanne bindet das Ei zu einer cremigen Sauce. Löffelweise Nudelwasser dazugeben, bis die Konsistenz sämig ist. Wer auf Nummer sicher gehen will, rührt vorher zwei Esslöffel heißes Nudelwasser in die Eimasse – nicht klassisch, aber wirksam gegen Gerinnen.',
+      'Sofort servieren, nach Belieben mit zusätzlichem Pecorino und Pfeffer bestreut.'
+    ],
+    notes: 'Ca. 847-997 kcal pro Portion je nach Speck: Pancetta 847, Bacon 883, echtes Guanciale 997 (Guanciale hat rund 65% Fett und ist damit deutlich fettreicher als Pancetta). Dazu ~39g Protein, ~71g Kohlenhydrate, ~43-61g Fett. Anders als bei den Bacon-Spießen wird das ausgelassene Fett hier nicht weggeschüttet, sondern ist Teil der Sauce – die Rechnung stimmt also so, wie sie dasteht. Technisch ist das Rezept sauber: kalte Pfanne für den Guanciale, keine Sahne, kein Knoblauch, Eimasse off-heat. Zur Einordnung in der Sammlung: das fettreichste Gericht überhaupt und mit 44g Protein je 1000 kcal das schwächste Verhältnis unter den Pasta-Rezepten – die Hähnchen-Zwiebel-Pasta liefert bei 130 kcal weniger 19g mehr Protein bei einem Drittel des Fetts. Als Genussgericht für einen freien Tag gedacht, nicht als Carb-Loading-Abendessen vor dem Spiel.'
+  },
+  {
+    id: 'seed-loaded-fries-hackfleisch-skyr-sauce',
+    _v: 1,
+    name: 'Loaded Fries mit Hackfleisch und Skyr-Sauce',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 682,
+    protein: 51,
+    tags: ['Air Fryer','Proteinreich'],
+    ingredients: [
+      {name:'Kartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Rinderhackfleisch, mager', amount:250, unit:'g'},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Kreuzkümmel, gemahlen', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Käse, gerieben (Gouda oder Cheddar)', amount:100, unit:'g'},
+      {name:'Skyr', amount:100, unit:'g'},
+      {name:'Knoblauchzehe (für die Sauce)', amount:1, unit:''},
+      {name:'Zitrone, Saft davon', amount:0.5, unit:''},
+      {name:'Schnittlauch, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Kartoffelstifte kurz kalt abspülen, um die Oberflächenstärke zu entfernen, dann mit einem Küchentuch gründlich trocken tupfen. Das Trocknen ist dabei genauso wichtig wie das Abspülen – nasse Stifte dämpfen statt zu bräunen. Anschließend mit dem Olivenöl vermengen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Pommes auf einem Blech verteilen, ca. 25-30 Minuten backen, nach der Hälfte wenden.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 190°C vorheizen. Pommes in den Korb geben, ca. 18-20 Minuten backen, nach der Hälfte schütteln, bis knusprig.',
+      'Zwiebel und Knoblauch fein hacken, in einer Pfanne kurz anschwitzen, Rinderhackfleisch dazugeben und krümelig anbraten. Mit Paprikapulver, Kreuzkümmel und Salz würzen.',
+      'Skyr, gepressten Knoblauch, Zitronensaft und Schnittlauch zu einer Sauce verrühren.',
+      'Pommes in einer ofenfesten Form oder direkt im Airfryer-Korb (auf Backpapier) zusammenschichten, Hackfleisch darauf verteilen, mit Käse bestreuen. Nochmal ca. 2-3 Minuten bei 180°C erhitzen, bis der Käse geschmolzen ist. Nicht auf Tellern überbacken – die passen weder in den Korb noch sind sie dafür gedacht.',
+      'Auf zwei Teller verteilen, mit der Skyr-Sauce beträufeln und sofort servieren. Sauce erst auf dem Teller dazugeben, sonst weichen die Pommes sofort durch.'
+    ],
+    notes: 'Ca. 682 kcal pro Portion, ~51g Protein, ~47g Kohlenhydrate, ~30g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Mit 10% statt 5% Fett im Hack sind es ca. 739 kcal. Mit 74g Protein je 1000 kcal überraschend gut für ein Pommes-Gericht – im Vergleich der Comfort-Food-Gerichte der Sammlung klar das beste: klassische Carbonara 889 kcal/39g, Mac and Cheese 960 kcal/45g, Kässpätzle 697 kcal/35g. Wer Lust auf etwas Deftiges hat, fährt hiermit deutlich besser. Nur frisch: Pommes weichen unter dem Hackfleisch schnell durch, zum Vorkochen nicht geeignet.'
+  },
+  {
+    id: 'seed-suesskartoffel-pommes-feta-kraeuter-dip',
+    _v: 1,
+    name: 'Süßkartoffel-Pommes mit Feta-Kräuter-Dip',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 517,
+    protein: 13,
+    tags: ['Vegetarisch','Air Fryer'],
+    ingredients: [
+      {name:'Süßkartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
+      {name:'Stärke (Mais- oder Kartoffelstärke)', amount:1, unit:'EL'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Feta', amount:100, unit:'g'},
+      {name:'Griechischer Joghurt', amount:100, unit:'g'},
+      {name:'Knoblauchzehe', amount:1, unit:''},
+      {name:'Zitrone, Saft davon', amount:0.5, unit:''},
+      {name:'Dill oder Petersilie, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Süßkartoffelstifte mit der Stärke bestreuen und gut vermengen, bis eine dünne Schicht alle Stifte bedeckt.',
+      'Olivenöl, Paprikapulver und Salz dazugeben, gut vermengen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Sticks auf einem Blech verteilen, ca. 25-30 Minuten backen, nach der Hälfte wenden.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 200°C vorheizen. Sticks in den Korb geben (nicht zu eng, ggf. in 2 Durchgängen), ca. 18-20 Minuten backen, nach der Hälfte schütteln. Die letzten Minuten im Blick behalten: Süßkartoffeln enthalten mehr Zucker als normale Kartoffeln und werden an den Spitzen schneller dunkel.',
+      'Feta, Griechischen Joghurt, gepressten Knoblauch, Zitronensaft und Dill oder Petersilie zu einem cremigen Dip pürieren oder mit einer Gabel zerdrücken und verrühren.'
+    ],
+    notes: 'Ca. 481-517 kcal pro Portion je nach Joghurt (griechischer Joghurt mit 10% Fett: 517 kcal, magere Variante: 481 kcal), ~13-14g Protein, ~53g Kohlenhydrate, ~7,5g Ballaststoffe, ~25g Fett (nachgerechnet). Wichtiger Vergleich: Die Pommes sind identisch mit denen aus dem Rezept "Süßkartoffel-Pommes mit Skyr-Dip", nur der Dip unterscheidet sich – und der kostet einiges. Mit Skyr-Dip liegt dasselbe Gericht bei 366 kcal und 12,4g Protein, mit Feta-Dip bei 517 kcal und 13,1g Protein. Das sind 150 kcal mehr für 0,7g mehr Protein. Der Feta-Dip schmeckt kräftiger, aber wenn es um die Nährwerte geht, ist die Skyr-Variante klar überlegen. Mit 25g Protein je 1000 kcal der niedrigste Wert der Sammlung – ausdrücklich eine Beilage, kein Hauptgericht.'
+  },
+  {
+    id: 'seed-chili-cheese-fries',
+    _v: 1,
+    name: 'Chili-Cheese-Fries',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 788,
+    protein: 54,
+    tags: ['Air Fryer','Batch-Cooking','Proteinreich'],
+    ingredients: [
+      {name:'Kartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Rinderhackfleisch, mager', amount:250, unit:'g'},
+      {name:'Zwiebel', amount:1, unit:''},
+      {name:'Knoblauchzehen', amount:2, unit:''},
+      {name:'Kidneybohnen, abgetropft', amount:200, unit:'g'},
+      {name:'Passierte Tomaten', amount:150, unit:'g'},
+      {name:'Kreuzkümmel, gemahlen', amount:1, unit:'TL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Chiliflocken', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Käse, gerieben (Cheddar oder Gouda)', amount:100, unit:'g'}
+    ],
+    steps: [
+      'Kartoffelstifte kurz kalt abspülen und gründlich trocken tupfen, dann mit dem Olivenöl vermengen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Pommes auf einem Blech verteilen, ca. 25-30 Minuten backen, nach der Hälfte wenden.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 190°C vorheizen. Pommes in den Korb geben, ca. 18-20 Minuten backen, nach der Hälfte schütteln, bis knusprig.',
+      'Zwiebel und Knoblauch fein hacken, in einer Pfanne anschwitzen. Rinderhackfleisch dazugeben und krümelig anbraten.',
+      'Kidneybohnen und passierte Tomaten dazugeben, mit Kreuzkümmel, Paprikapulver, Chiliflocken und Salz würzen, ca. 10-12 Minuten köcheln lassen, bis das Chili eindickt. Es sollte eher dick als flüssig sein – ein wässriges Chili weicht die Pommes sofort durch.',
+      'Pommes in einer ofenfesten Form oder direkt im Airfryer-Korb (auf Backpapier) zusammenschichten, Chili darüber geben, mit Käse bestreuen. Nochmal ca. 2-3 Minuten bei 180°C erhitzen, bis der Käse geschmolzen ist. Nicht auf Tellern überbacken. Danach auf zwei Teller verteilen und sofort servieren.'
+    ],
+    notes: 'Ca. 788 kcal pro Portion, ~54g Protein, ~61-74g Kohlenhydrate (je nach Zählweise für Bohnen und Kartoffeln), ~13,6g Ballaststoffe, ~31g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Mit 10% statt 5% Fett im Hack ca. 846 kcal. Mit 13,6g der höchste Ballaststoffwert der ganzen Sammlung – die Kidneybohnen machen den Unterschied. Sehr nah an den Loaded Fries: identische Pommes-Basis, gleiche Hack- und Käsemenge, ähnliche Gewürze. Der Unterschied sind die Bohnen und Tomaten, die 106 kcal, 14g Kohlenhydrate und 7,5g Ballaststoffe ergänzen (Loaded Fries: 682 kcal / 51g Protein / 6g Ballaststoffe). Praktischer Vorteil gegenüber den Loaded Fries: Das Chili lässt sich gut vorkochen und wird über Nacht sogar besser – nur die Pommes müssen frisch gemacht werden.'
+  },
+  {
+    id: 'seed-truffle-fries-parmesan',
+    _v: 1,
+    name: 'Truffle Fries mit Parmesan',
+    category: 'lunch',
+    baseServings: 2,
+    kcal: 403,
+    protein: 13,
+    tags: ['Vegetarisch','Air Fryer','Schnell'],
+    ingredients: [
+      {name:'Kartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Trüffelöl', amount:1.5, unit:'TL'},
+      {name:'Parmesan, fein gerieben', amount:50, unit:'g'},
+      {name:'Petersilie, frisch, gehackt', amount:1, unit:'EL'}
+    ],
+    steps: [
+      'Kartoffelstifte kurz kalt abspülen und gründlich trocken tupfen, dann mit dem Olivenöl und Salz vermengen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Pommes auf einem Blech verteilen, ca. 25-30 Minuten backen, nach der Hälfte wenden.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 190°C vorheizen. Pommes in den Korb geben, ca. 18-20 Minuten backen, nach der Hälfte schütteln, bis knusprig.',
+      'Heiße Pommes in eine Schüssel geben, mit Trüffelöl beträufeln und vorsichtig schwenken. Nicht während des Backens dazugeben – die Aromastoffe sind flüchtig und gehen bei Hitze verloren. Mit einem Teelöffel anfangen und nachdosieren: handelsübliches Trüffelöl ist meist synthetisch aromatisiert und deutlich intensiver, als die Menge vermuten lässt.',
+      'Mit Parmesan und Petersilie bestreuen und sofort servieren.'
+    ],
+    notes: 'Ca. 403 kcal pro Portion, ~13g Protein, ~38-44g Kohlenhydrate (je nach Zählweise), ~5,2g Ballaststoffe, ~20g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Damit ist die Pommes-Familie der Sammlung komplett: gleiche Basis aus 500g Kartoffeln und 1,5 EL Öl (allein 272 kcal/Portion), drei Toppings auf drei Niveaus – Truffle 403 kcal/13g Protein, Loaded Fries 682/51g, Chili-Cheese 788/54g. Als reine Beilage gedacht; sinnvolle Kombinationen aus der Sammlung: mit den Garnelen-Spießen zusammen 643 kcal und 53g Protein, mit dem Cordon Bleu 768 kcal und 61g Protein.'
+  },
+  {
+    id: 'seed-pommes-spiegelei-speck',
+    _v: 1,
+    name: 'Pommes mit Spiegelei und Speck',
+    category: 'breakfast',
+    baseServings: 2,
+    kcal: 658,
+    protein: 28,
+    tags: ['Air Fryer','Schnell'],
+    ingredients: [
+      {name:'Kartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
+      {name:'Olivenöl', amount:1.5, unit:'EL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Bacon (Frühstücksspeck)', amount:100, unit:'g'},
+      {name:'Eier', amount:4, unit:''},
+      {name:'Schnittlauch, frisch, gehackt', amount:1, unit:'EL'},
+      {name:'Pfeffer', amount:0.25, unit:'TL'}
+    ],
+    steps: [
+      'Kartoffelstifte kurz kalt abspülen und gründlich trocken tupfen, dann mit dem Olivenöl und Salz vermengen.',
+      'OFEN-VARIANTE: Auf 200°C (Ober-/Unterhitze) vorheizen. Pommes auf einem Blech verteilen, ca. 25-30 Minuten backen, nach der Hälfte wenden.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 190°C vorheizen. Pommes in den Korb geben, ca. 18-20 Minuten backen, nach der Hälfte schütteln, bis knusprig.',
+      'Bacon in einer Pfanne bei mittlerer Hitze knusprig braten, herausnehmen, beiseitestellen. Das ausgelassene Fett in der Pfanne lassen.',
+      'Eier im Bacon-Fett als Spiegeleier braten, bis das Eiweiß gestockt und das Eigelb noch flüssig ist. Mit Pfeffer würzen. Erst in den letzten drei bis vier Minuten der Pommes-Garzeit anfangen – Spiegeleier mit flüssigem Eigelb warten nicht.',
+      'Pommes auf zwei Teller verteilen, Bacon und Spiegeleier obenauf anrichten. Mit Schnittlauch bestreut servieren.'
+    ],
+    notes: 'Ca. 658 kcal pro Portion, ~28g Protein, ~38-44g Kohlenhydrate, ~41g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Anders als bei den Bacon-Spießen wird das ausgelassene Fett hier weiterverwendet, um die Eier darin zu braten – es geht also nichts verloren und die Rechnung stimmt so. Zum Protein-Hinweis: Der Bacon ist der Bremsklotz, nicht die Menge der Eier. Bacon liefert 40g Protein je 1000 kcal, Eier dagegen 84. Zwei zusätzliche Eier bringen 743 kcal und 35g Protein, halber Bacon 550 kcal und 24g – die Eier sind der bessere Hebel. Mit 41g Fett pro Portion nicht als Frühstück vor dem Sonntagsspiel geeignet, das verzögert die Magenentleerung spürbar. Als Samstags-Brunch oder Abendessen an einem freien Tag dagegen passend.'
+  },
+  {
+    id: 'seed-crispy-salmon-bites',
+    _v: 1,
+    name: 'Crispy Salmon Bites',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 641,
+    protein: 41,
+    tags: ['Air Fryer','Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Lachsfilet, ohne Haut, in ca. 2cm Würfel geschnitten', amount:400, unit:'g'},
+      {name:'Speisestärke', amount:2, unit:'EL'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Paprikapulver', amount:1, unit:'TL'},
+      {name:'Knoblauchpulver', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Cayennepfeffer (optional)', amount:0.3, unit:'TL'},
+      {name:'Mayonnaise', amount:2, unit:'EL'},
+      {name:'Sriracha oder andere scharfe Sauce', amount:1, unit:'EL'},
+      {name:'Honig', amount:1, unit:'TL'},
+      {name:'Limette, Saft davon', amount:0.5, unit:''},
+      {name:'Sesam, geröstet (zum Garnieren)', amount:1, unit:'EL'},
+      {name:'Frühlingszwiebel, in Ringen', amount:1, unit:''}
+    ],
+    steps: [
+      'Lachswürfel gründlich trocken tupfen, mit Olivenöl beträufeln und vermengen. Das Öl zuerst, damit die Stärke später haftet.',
+      'Speisestärke, Paprikapulver, Knoblauchpulver, Salz und Cayennepfeffer vermengen, über den Lachs streuen, vorsichtig wenden, bis alle Würfel gleichmäßig bedeckt sind.',
+      'OFEN-VARIANTE: Auf 220°C (Ober-/Unterhitze) vorheizen. Lachswürfel auf einem mit Backpapier ausgelegten Blech mit Abstand zueinander verteilen, ca. 10-12 Minuten backen.\n\nAIRFRYER-VARIANTE: Heißluftfritteuse auf 200°C vorheizen. Lachswürfel in den Korb geben (nicht zu eng, ggf. in 2 Durchgängen), ca. 8-9 Minuten backen, nach der Hälfte vorsichtig schütteln.\n\nAb der unteren Zeitangabe prüfen: 2cm-Würfel garen schnell durch, und Lachs geht rasch von saftig zu trocken. Beim Wenden möglichst wenig anfassen, sonst bricht die Kruste.',
+      'Mayonnaise, Sriracha, Honig und Limettensaft zu einer Dip-Sauce verrühren.',
+      'Lachs-Bites mit Sesam und Frühlingszwiebel bestreuen, mit der Dip-Sauce servieren.'
+    ],
+    notes: 'Ca. 641 kcal pro Portion, ~41g Protein, ~15g Kohlenhydrate, ~46g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Zwei Korrekturen zur Vorlage: Erstens spart der Tausch von Mayo gegen griechischen Joghurt ca. 82 kcal/Portion, nicht 130 (Mayo halbieren: 51 kcal). Zweitens ist nicht die Mayo der Hauptgrund für den hohen Fettanteil, sondern der Lachs selbst – von 91g Gesamtfett kommen 52g aus den 400g Lachs (57%) und nur 22g aus der Mayo (25%). Bei 200g Lachs pro Portion ist das schlicht eine große Fischportion. Wer wirklich Kalorien sparen will, geht auf 300g Lachs (541 kcal), verliert damit aber 10g Protein – die Mayo-Variante ist der bessere Tausch, weil sie das Protein unangetastet lässt.'
+  },
+  {
+    id: 'seed-garnelen-pasta-skyr-parmesan',
+    _v: 1,
+    name: 'Cremige Garnelen-Pasta mit Skyr-Parmesan-Sauce',
+    category: 'dinner',
+    baseServings: 2,
+    kcal: 782,
+    protein: 65,
+    tags: ['Schnell','Proteinreich'],
+    ingredients: [
+      {name:'Spaghetti oder Linguine, trocken', amount:200, unit:'g'},
+      {name:'Garnelen, roh, geschält', amount:350, unit:'g'},
+      {name:'Olivenöl', amount:1, unit:'EL'},
+      {name:'Knoblauchzehen', amount:3, unit:''},
+      {name:'Butter', amount:20, unit:'g'},
+      {name:'Skyr', amount:200, unit:'g'},
+      {name:'Parmesan, gerieben', amount:40, unit:'g'},
+      {name:'Zitrone, Schale und Saft', amount:1, unit:''},
+      {name:'Chiliflocken', amount:0.5, unit:'TL'},
+      {name:'Salz', amount:0.5, unit:'TL'},
+      {name:'Pfeffer', amount:0.3, unit:'TL'},
+      {name:'Petersilie, frisch, gehackt', amount:2, unit:'EL'}
+    ],
+    steps: [
+      'Pasta nach Packungsanweisung in Salzwasser kochen, dabei eine Tasse Nudelwasser aufbewahren.',
+      'Garnelen trocken tupfen, mit Salz und Pfeffer würzen. Knoblauch fein hacken.',
+      'Olivenöl in einer großen Pfanne erhitzen, Garnelen darin nur 1-2 Minuten pro Seite braten, bis sie gerade rosa sind. Herausnehmen und beiseitestellen. Länger nicht – Garnelen werden schnell gummiartig, und sie ziehen später in der warmen Sauce ohnehin nach.',
+      'Butter in derselben Pfanne schmelzen, Knoblauch und Chiliflocken kurz anschwitzen (nicht bräunen lassen).',
+      'Pfanne vom Herd nehmen und kurz abkühlen lassen. Skyr zuerst in einer Schüssel mit 2-3 EL heißem Nudelwasser glattrühren, dann zusammen mit dem Parmesan in die Pfanne einrühren, bis eine cremige Sauce entsteht. Bei Bedarf mit mehr Nudelwasser verdünnen.',
+      'Pasta und Garnelen in die Sauce geben, vorsichtig vermengen. Abgeriebene Zitronenschale und dann den Saft nach und nach zugeben und abschmecken – auf einmal zugegebene Säure lässt die Skyr-Sauce leicht flocken.',
+      'Mit Petersilie bestreut servieren.'
+    ],
+    notes: 'Ca. 782 kcal pro Portion, ~65g Protein, ~78g Kohlenhydrate, ~24g Fett (nachgerechnet, deckt sich mit der Rezeptangabe). Mit 65g der höchste Proteinwert der gesamten Sammlung, vor den Wraps mit 61g. Und mit 83g Protein je 1000 kcal auch die beste Bilanz aller sechs Pasta-Gerichte – zum Vergleich: Hähnchen-Zwiebel-Pasta 76, klassische Carbonara 44. Zusammen mit 78g Kohlenhydraten bei nur 24g Fett macht das dieses Gericht zur besten Wahl für Samstag vor dem Spiel. Pasta auf 140g reduzieren spart ca. 105 kcal/Portion. Frisch essen: Skyr-Saucen trennen sich beim Aufwärmen, und aufgewärmte Garnelen werden zäh.'
+  },
+  {
+    id: 'seed-loaded-suesskartoffel-vegan',
+    _v: 1,
+    name: 'Fully Loaded Vegan High Protein Süßkartoffel',
+    category: 'dinner',
+    baseServings: 1,
+    kcal: 800,
+    protein: 57,
+    tags: ['Vegetarisch','Air Fryer','Proteinreich'],
+    ingredients: [
+      {name:'Süßkartoffel (mittelgroß, ca. 300g)', amount:1, unit:''},
+      {name:'Veganes Hack', amount:200, unit:'g'},
+      {name:'Tomatenmark', amount:2, unit:'TL'},
+      {name:'Wasser', amount:100, unit:'ml'},
+      {name:'Oregano', amount:1, unit:'TL'},
+      {name:'Knoblauchpulver', amount:1, unit:'TL'},
+      {name:'Zwiebelpulver', amount:1, unit:'TL'},
+      {name:'Salz', amount:1, unit:'Prise'},
+      {name:'Skyr-Alternative, vegan (für die Soße)', amount:150, unit:'g'},
+      {name:'Gewürzgurkenwasser', amount:2, unit:'EL'},
+      {name:'Dill (TK)', amount:1, unit:'EL'},
+      {name:'Petersilie (TK)', amount:1, unit:'EL'},
+      {name:'Knoblauchzehe, gerieben', amount:1, unit:''},
+      {name:'Limette, Saft davon', amount:0.25, unit:''},
+      {name:'Ahornsirup', amount:1, unit:'TL'},
+      {name:'Salz und Pfeffer (für die Soße)', amount:null, unit:''}
+    ],
+    steps: [
+      'Süßkartoffel mehrmals mit einer Gabel einstechen und bei 200°C im Airfryer backen, bis sie komplett weich ist. Bei einer mittelgroßen Süßkartoffel (ca. 300g) dauert das eher 35-45 Minuten als die im Original genannten 20 – mit einem Messer in der dicksten Stelle prüfen, es muss ohne Widerstand hineingleiten. Wer es schneller will: der Länge nach halbieren, mit der Schnittfläche nach oben ca. 20-25 Minuten.',
+      'Währenddessen das Hack in einer Pfanne anbraten, Tomatenmark dazugeben und kurz mitrösten.',
+      'Hitze reduzieren, Wasser und Gewürze dazugeben und einkochen lassen, bis die gewünschte Konsistenz erreicht ist.',
+      'Alle Zutaten für die Joghurtsoße verrühren und zur Seite stellen.',
+      'Süßkartoffel der Länge nach aufschneiden und das Innere mit einer Gabel zerdrücken.',
+      'Mit dem veganen Hack und der Joghurtsoße füllen und warm servieren.'
+    ],
+    notes: 'Rezept für 1 Portion (Portionsregler auf 2 stellen für dein übliches Muster). Nachgerechnet: ca. 800 kcal, ~82g Kohlenhydrate, ~23-25g Fett – das deckt sich mit der Quelle (811 kcal / 79g KH / 21g Fett). Das Protein hängt aber komplett am veganen Hack: mit üblichem Supermarkt-Hack (ca. 16-20g Protein/100g) kommt man auf ~57g, nicht 76g. Die Angabe der Quelle geht nur mit einem ausgewiesenen High-Protein-Hack ab ca. 28g Protein/100g auf. Die Quelle nennt übrigens selbst zwei Werte (76g in den Nährwerten, 80g im Text). Beim Kauf also aufs Etikett schauen – der eingetragene Wert von 57g gilt für normales veganes Hack. Auch 57g sind für ein pflanzliches Gericht sehr gut.'
   }
-  function rezepteSaveItems(cat, items) { var p = {}; p[rezepteKey(cat)] = items; dbSave(p); }
-  function rezeptEsc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function rezeptFormatAmount(n) {
-    if (n === null || n === undefined || n === '') return '';
-    var num = Number(n);
-    if (isNaN(num)) return String(n);
-    return (num % 1 === 0) ? String(num) : String(num).replace('.', ',');
+];
+
+function loadRecipes(){
+  recipes = dbGet('rk-recipes', []) || [];
+  var seededIds = dbGet('rk-seeded-ids', []) || [];
+  let changed = false;
+  SEED_RECIPES.forEach(seed=>{
+    const idx = recipes.findIndex(r=>r.id===seed.id);
+    if(idx === -1){
+      if(!seededIds.includes(seed.id)){
+        recipes.push(seed);
+        seededIds.push(seed.id);
+        changed = true;
+      }
+    } else {
+      const existing = recipes[idx];
+      if((existing._v||1) < (seed._v||1)){
+        recipes[idx] = seed;
+        changed = true;
+      }
+    }
+  });
+  if(changed){
+    saveRecipes();
+    dbSave({'rk-seeded-ids': seededIds});
   }
-  function renderRezeptStructuredCard(cat, item, i) {
-    var metaBits = [];
-    if (item.servings) metaBits.push('<span style="background:var(--surface2);border:1px solid var(--border-med);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--text-2)">' + rezeptEsc(item.servings) + ' Portionen</span>');
-    if (item.kcal) metaBits.push('<span style="background:var(--surface2);border:1px solid var(--border-med);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--text-2)">' + rezeptEsc(item.kcal) + ' kcal</span>');
-    if (item.protein) metaBits.push('<span style="background:var(--surface2);border:1px solid var(--border-med);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--text-2)">' + rezeptEsc(item.protein) + ' g Protein</span>');
-    (item.tags || []).forEach(function(t) {
-      metaBits.push('<span style="background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.35);border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;color:var(--grass)">' + rezeptEsc(t) + '</span>');
+  render();
+}
+
+function saveRecipes(){
+  dbSave({'rk-recipes': recipes});
+}
+
+function showToast(msg){
+  const t = root.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function fmtAmount(n){
+  if(n === null || n === undefined || isNaN(n)) return "";
+  let r = Math.round(n*100)/100;
+  return r % 1 === 0 ? r.toString() : r.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+}
+
+function renderChips(){
+  const row = root.getElementById('chipsRow');
+  const allTags = TAG_OPTIONS;
+  row.innerHTML = allTags.map(tag => `
+    <button class="chip ${activeFilters.has(tag)?'active':''}" data-tag="${tag}">${tag}</button>
+  `).join('');
+  row.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const tag = btn.dataset.tag;
+      if(activeFilters.has(tag)) activeFilters.delete(tag); else activeFilters.add(tag);
+      render();
     });
-    var ingredientsHtml = (item.ingredients || []).map(function(ing) {
-      var amt = rezeptFormatAmount(ing.amount);
-      var unit = ing.unit ? rezeptEsc(ing.unit) : '';
-      var prefix = amt ? (amt + (unit ? ' ' + unit : '')) : '';
-      return '<li>' + (prefix ? '<b>' + prefix + '</b> ' : '') + rezeptEsc(ing.name) + '</li>';
-    }).join('');
-    var stepsHtml = (item.steps || []).map(function(s) {
-      return '<li style="margin-bottom:6px;white-space:pre-line">' + rezeptEsc(s) + '</li>';
-    }).join('');
-    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem;display:flex;flex-direction:column;gap:8px">'
-      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
-      + '<div style="font-size:14px;font-weight:700;color:var(--text);font-family:\'Inter\',sans-serif">' + rezeptEsc(item.title) + '</div>'
-      + '<button onclick="rezepteRemove(\'' + cat + '\',' + i + ')" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;flex-shrink:0" title="Entfernen">×</button>'
-      + '</div>'
-      + (metaBits.length ? '<div style="display:flex;flex-wrap:wrap;gap:6px">' + metaBits.join('') + '</div>' : '')
-      + (ingredientsHtml ? '<div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:4px">Zutaten</div><ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.6">' + ingredientsHtml + '</ul></div>' : '')
-      + (stepsHtml ? '<details><summary style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);cursor:pointer">Zubereitung</summary><ol style="margin:6px 0 0;padding-left:18px;font-size:12px;color:var(--text-2);line-height:1.5">' + stepsHtml + '</ol></details>' : '')
-      + (item.notes ? '<div style="font-size:11px;color:var(--text-3);font-style:italic;line-height:1.5">' + rezeptEsc(item.notes) + '</div>' : '')
-      + (item.source ? '<div style="font-size:10px;color:var(--text-3);text-align:right">Quelle: ' + rezeptEsc(item.source) + '</div>' : '')
-      + '</div>';
+  });
+}
+
+function filteredRecipes(){
+  return recipes.filter(r=>{
+    const matchesSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTags = activeFilters.size === 0 || [...activeFilters].some(t => (r.tags||[]).includes(t));
+    return matchesSearch && matchesTags;
+  });
+}
+
+function render(){
+  renderChips();
+  const area = root.getElementById('mainArea');
+  const list = filteredRecipes();
+  if(recipes.length === 0){
+    area.innerHTML = `
+      <div class="empty">
+        <h2>Noch leer hier</h2>
+        <p>Leg dein erstes Rezept an — Bowl, Batch-Cooking-Portion oder was auch immer bei dir gerade rotiert.</p>
+        <button class="btn-add" id="emptyAddBtn">+ Erstes Rezept anlegen</button>
+      </div>`;
+    root.getElementById('emptyAddBtn').addEventListener('click', openAddModal);
+    return;
   }
-  function renderRezepteList(cat) {
-    var list = document.getElementById('rezepte-list-' + cat);
-    if (!list) return;
-    var items = rezepteGetItems(cat);
-    if (!items.length) {
-      list.innerHTML = '<div style="font-size:12px;color:var(--text-3);font-style:italic;padding:.25rem 0">Noch keine Rezepte – füge unten eins hinzu</div>';
+  if(list.length === 0){
+    area.innerHTML = `<div class="empty"><h2>Nichts gefunden</h2><p>Andere Suche oder Filter probieren.</p></div>`;
+    return;
+  }
+  area.innerHTML = `<div class="grid">${list.map(cardHtml).join('')}</div>`;
+  area.querySelectorAll('.card').forEach(el=>{
+    el.addEventListener('click', ()=> openDetail(el.dataset.id));
+  });
+}
+
+function cardHtml(r){
+  const cat = CATEGORIES.find(c=>c.id===r.category);
+  const catLabel = cat ? cat.label : '';
+  const macroBits = [];
+  if(r.kcal) macroBits.push(r.kcal + ' kcal');
+  if(r.protein) macroBits.push(r.protein + 'g Protein');
+  return `
+    <div class="card" data-id="${r.id}">
+      ${catLabel ? `<span class="tab ${r.category}">${catLabel}</span>` : ''}
+      <div class="card-body">
+        <h3>${escapeHtml(r.name)}</h3>
+        <div class="meta-line">${r.baseServings||2} Portionen${macroBits.length? ' · '+macroBits.join(' · '):''}</div>
+        <div class="pills">${(r.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+/* ---------- Detail view ---------- */
+function openDetail(id){
+  const r = recipes.find(x=>x.id===id);
+  if(!r) return;
+  if(!currentServings[id]) currentServings[id] = r.baseServings || 2;
+  renderDetail(r);
+}
+
+function renderDetail(r){
+  const serv = currentServings[r.id];
+  const factor = serv / (r.baseServings || 1);
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.id = 'detailOverlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-head">
+        <h2>${escapeHtml(r.name)}</h2>
+        <button class="close-x" id="closeDetail">✕</button>
+      </div>
+      <div class="modal-content">
+        <div class="detail-meta">
+          ${(r.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}
+        </div>
+        <div class="servings-control">
+          <span class="label">Portionen</span>
+          <div class="stepper">
+            <button id="servMinus">−</button>
+            <span class="count" id="servCount">${serv}</span>
+            <button id="servPlus">+</button>
+          </div>
+        </div>
+        ${(r.kcal||r.protein) ? `<div class="meta-line" style="margin-bottom:14px;">${r.kcal?r.kcal+' kcal':''}${r.kcal&&r.protein?' · ':''}${r.protein?r.protein+'g Protein':''} <span style="opacity:.6">(pro Basisportion)</span></div>` : ''}
+        <h3 class="section-title">Zutaten</h3>
+        <ul class="ing-list" id="ingList"></ul>
+        ${r.steps && r.steps.length ? `
+        <h3 class="section-title">Zubereitung</h3>
+        <ol class="steps-list">${r.steps.map(s=>`<li>${escapeHtml(s)}</li>`).join('')}</ol>` : ''}
+        ${r.notes ? `<div class="notes-box">${escapeHtml(r.notes)}</div>` : ''}
+        <div class="detail-actions">
+          <button class="btn-secondary" id="shareBtn">Teilen</button>
+          <button class="btn-secondary" id="editBtn">Bearbeiten</button>
+          <button class="btn-danger" id="deleteBtn">Löschen</button>
+        </div>
+      </div>
+    </div>`;
+  root.appendChild(overlay);
+
+  function paintIngredients(){
+    const f = currentServings[r.id] / (r.baseServings || 1);
+    root.getElementById('servCount').textContent = currentServings[r.id];
+    root.getElementById('ingList').innerHTML = (r.ingredients||[]).map(ing => `
+      <li><span>${escapeHtml(ing.name)}</span><span class="amt">${ing.amount!=null? fmtAmount(ing.amount*f) : ''}${ing.unit?(' '+ing.unit):(ing.amount!=null?' Stk':'')}</span></li>
+    `).join('');
+  }
+  paintIngredients();
+
+  root.getElementById('servMinus').addEventListener('click', ()=>{
+    if(currentServings[r.id] > 1){ currentServings[r.id]--; paintIngredients(); }
+  });
+  root.getElementById('servPlus').addEventListener('click', ()=>{
+    currentServings[r.id]++; paintIngredients();
+  });
+  root.getElementById('shareBtn').addEventListener('click', ()=> openShareModal(r));
+  root.getElementById('closeDetail').addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeOverlay(); });
+  root.getElementById('deleteBtn').addEventListener('click', async ()=>{
+    if(confirm(`"${r.name}" wirklich löschen?`)){
+      recipes = recipes.filter(x=>x.id!==r.id);
+      await saveRecipes();
+      closeOverlay();
+      render();
+      showToast("Rezept gelöscht");
+    }
+  });
+  root.getElementById('editBtn').addEventListener('click', ()=>{
+    closeOverlay();
+    openEditModal(r.id);
+  });
+}
+
+function closeOverlay(){
+  const o = root.getElementById('detailOverlay');
+  if(o) o.remove();
+  const f = root.getElementById('formOverlay');
+  if(f) f.remove();
+}
+
+/* ---------- Teilen / Export ---------- */
+const SCHEMA_VERSION = 1;
+
+// Rezept in ein sauberes Objekt fürs Dashboard: interne Felder raus,
+// Mengen optional auf die gerade angezeigte Portionszahl skaliert.
+function recipeToObject(r, servings){
+  const s = servings || r.baseServings || 1;
+  const f = s / (r.baseServings || 1);
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    id: r.id,
+    name: r.name,
+    category: r.category || null,
+    servings: s,
+    nutritionPerServing: {
+      kcal: r.kcal != null ? r.kcal : null,
+      proteinGrams: r.protein != null ? r.protein : null
+    },
+    tags: r.tags || [],
+    ingredients: (r.ingredients||[]).map(i => ({
+      name: i.name,
+      amount: i.amount != null ? Math.round(i.amount * f * 100) / 100 : null,
+      unit: i.unit || null
+    })),
+    steps: r.steps || [],
+    notes: r.notes || null,
+    exportedAt: new Date().toISOString(),
+    source: 'Rezeptkiste'
+  };
+}
+
+function recipeToJSON(r, servings){
+  return JSON.stringify(recipeToObject(r, servings), null, 2);
+}
+
+function recipeToMarkdown(r, servings){
+  const o = recipeToObject(r, servings);
+  const meta = [];
+  if(o.nutritionPerServing.kcal) meta.push(o.nutritionPerServing.kcal + ' kcal');
+  if(o.nutritionPerServing.proteinGrams) meta.push(o.nutritionPerServing.proteinGrams + 'g Protein');
+  const fm = [
+    '---',
+    'title: ' + JSON.stringify(o.name),
+    'servings: ' + o.servings,
+    o.nutritionPerServing.kcal != null ? 'kcal: ' + o.nutritionPerServing.kcal : null,
+    o.nutritionPerServing.proteinGrams != null ? 'protein: ' + o.nutritionPerServing.proteinGrams : null,
+    o.category ? 'category: ' + o.category : null,
+    o.tags.length ? 'tags: [' + o.tags.map(t=>JSON.stringify(t)).join(', ') + ']' : null,
+    '---'
+  ].filter(Boolean).join('\n');
+
+  const ing = o.ingredients.map(i => {
+    const amt = i.amount != null ? (fmtAmount(i.amount) + (i.unit ? ' ' + i.unit : '')) : '';
+    return '- ' + (amt ? amt + ' ' : '') + i.name;
+  }).join('\n');
+
+  const steps = o.steps.map((s,idx) => (idx+1) + '. ' + s.replace(/\n+/g, '\n   ')).join('\n');
+
+  return [
+    fm, '',
+    '# ' + o.name, '',
+    o.servings + ' Portionen' + (meta.length ? ' · ' + meta.join(' · ') + ' pro Portion' : ''), '',
+    '## Zutaten', '', ing, '',
+    steps ? '## Zubereitung\n\n' + steps + '\n' : '',
+    o.notes ? '## Notizen\n\n' + o.notes + '\n' : ''
+  ].join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+}
+
+function recipeToText(r, servings){
+  const o = recipeToObject(r, servings);
+  const meta = [];
+  if(o.nutritionPerServing.kcal) meta.push(o.nutritionPerServing.kcal + ' kcal');
+  if(o.nutritionPerServing.proteinGrams) meta.push(o.nutritionPerServing.proteinGrams + 'g Protein');
+  const lines = [o.name, ''];
+  lines.push(o.servings + ' Portionen' + (meta.length ? ' | ' + meta.join(' | ') : ''));
+  if(o.tags.length) lines.push('Tags: ' + o.tags.join(', '));
+  lines.push('', 'ZUTATEN');
+  o.ingredients.forEach(i => {
+    const amt = i.amount != null ? (fmtAmount(i.amount) + (i.unit ? ' ' + i.unit : '')) : '';
+    lines.push('- ' + (amt ? amt + ' ' : '') + i.name);
+  });
+  if(o.steps.length){
+    lines.push('', 'ZUBEREITUNG');
+    o.steps.forEach((s,idx)=> lines.push((idx+1) + '. ' + s.replace(/\n+/g,' ')));
+  }
+  if(o.notes) lines.push('', 'NOTIZEN', o.notes);
+  return lines.join('\n');
+}
+
+function allRecipesToJSON(){
+  return JSON.stringify({
+    schemaVersion: SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    source: 'Rezeptkiste',
+    count: recipes.length,
+    recipes: recipes.map(r => recipeToObject(r))
+  }, null, 2);
+}
+
+function slugify(s){
+  return (s||'rezept').toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60) || 'rezept';
+}
+
+function downloadText(filename, text){
+  try{
+    const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    showToast('Datei wird heruntergeladen');
+  }catch(e){
+    showToast('Download nicht möglich – Text bitte markieren und kopieren');
+  }
+}
+
+async function copyText(text){
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+      showToast('In die Zwischenablage kopiert');
       return;
     }
-    var html = '';
-    items.forEach(function(item, i) {
-      if (item.kind === 'structured') {
-        html += renderRezeptStructuredCard(cat, item, i);
-        return;
-      }
-      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem;display:flex;flex-direction:column;gap:8px">'
-        + '<div style="display:flex;align-items:center;gap:8px">'
-        + '<input type="text" value="' + String(item.title || '').replace(/"/g, '&quot;') + '" placeholder="Rezeptname"'
-        + ' style="flex:1;min-width:0;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;outline:none;padding:2px 0"'
-        + ' onchange="rezepteSaveTitle(\'' + cat + '\',' + i + ',this.value)">'
-        + '<button onclick="rezepteRemove(\'' + cat + '\',' + i + ')" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;flex-shrink:0" title="Entfernen">×</button>'
-        + '</div>'
-        + '<textarea placeholder="Zutaten & Zubereitung..." style="width:100%;min-height:70px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:6px 8px;color:var(--text-2);font-size:12px;font-family:\'Inter\',sans-serif;resize:vertical;outline:none;box-sizing:border-box"'
-        + ' onchange="rezepteSaveText(\'' + cat + '\',' + i + ',this.value)">' + String(item.text || '').replace(/</g, '&lt;') + '</textarea>'
-        + '</div>';
-    });
-    list.innerHTML = html;
+    throw new Error('no clipboard api');
+  }catch(e){
+    // Fallback für eingebettete Umgebungen ohne Clipboard-API
+    const box = root.getElementById('shareBox');
+    if(box){
+      box.focus(); box.select();
+      let ok = false;
+      try{ ok = document.execCommand('copy'); }catch(err){ ok = false; }
+      showToast(ok ? 'In die Zwischenablage kopiert' : 'Bitte markieren und mit Strg+C kopieren');
+    }else{
+      showToast('Bitte markieren und mit Strg+C kopieren');
+    }
   }
-  window.rezepteSaveTitle = function(cat, idx, val) {
-    var items = rezepteGetItems(cat);
-    if (!items[idx]) return;
-    items[idx].title = val;
-    rezepteSaveItems(cat, items);
-  };
-  window.rezepteSaveText = function(cat, idx, val) {
-    var items = rezepteGetItems(cat);
-    if (!items[idx]) return;
-    items[idx].text = val;
-    rezepteSaveItems(cat, items);
-  };
-  window.rezepteRemove = function(cat, idx) {
-    var items = rezepteGetItems(cat);
-    items.splice(idx, 1);
-    rezepteSaveItems(cat, items);
-    renderRezepteList(cat);
-  };
-  window.rezepteAdd = function(cat) {
-    var items = rezepteGetItems(cat);
-    items.push({ title: '', text: '' });
-    rezepteSaveItems(cat, items);
-    renderRezepteList(cat);
-    var list = document.getElementById('rezepte-list-' + cat);
-    var inputs = list ? list.querySelectorAll('input[type=text]') : [];
-    var last = inputs[inputs.length - 1];
-    if (last) last.focus();
-  };
-  window.loadRezepte = function() {
-    REZEPTE_CATS.forEach(function(cat) { renderRezepteList(cat); });
-  };
-  function rezeptCategoryFromSchema(cat) {
-    var map = {
-      breakfast: 'fruehstueck', fruehstueck: 'fruehstueck', 'frühstück': 'fruehstueck',
-      lunch: 'mittagessen', mittagessen: 'mittagessen', mittag: 'mittagessen',
-      dinner: 'abendessen', abendessen: 'abendessen', abend: 'abendessen',
-      snack: 'snack'
-    };
-    var key = String(cat || '').toLowerCase().trim();
-    return map[key] || 'snack';
-  }
-  function rezepteShowCategory(cat) {
-    var id = 'rezepte-' + cat;
-    var container = document.getElementById('planer-ernaehrung');
-    if (!container) return;
-    var btn = null;
-    container.querySelectorAll('.subnav .sub-tab').forEach(function(b) {
-      if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + id + "'") >= 0) btn = b;
-    });
-    if (btn) showErnaehrungSlot(id, btn);
-  }
-  window.rezeptImportOpen = function() {
-    var ta = document.getElementById('rezept-import-input');
-    var err = document.getElementById('rezept-import-error');
-    if (ta) ta.value = '';
-    if (err) err.textContent = '';
-    document.getElementById('rezept-import-modal').classList.add('is-open');
-  };
-  window.rezeptImportClose = function() {
-    document.getElementById('rezept-import-modal').classList.remove('is-open');
-  };
-  window.rezeptImportSubmit = function() {
-    var ta = document.getElementById('rezept-import-input');
-    var err = document.getElementById('rezept-import-error');
-    if (err) err.textContent = '';
-    var raw = ta ? ta.value.trim() : '';
-    if (!raw) { if (err) err.textContent = 'Bitte JSON einfügen.'; return; }
-    var data;
-    try { data = JSON.parse(raw); } catch (e) { if (err) err.textContent = 'Ungültiges JSON: ' + e.message; return; }
-    if (!data || !data.name) { if (err) err.textContent = 'Feld "name" fehlt im JSON.'; return; }
-    var cat = rezeptCategoryFromSchema(data.category);
-    var nutrition = data.nutritionPerServing || {};
-    var item = {
-      kind: 'structured',
-      title: data.name,
-      servings: data.servings || null,
-      kcal: nutrition.kcal || null,
-      protein: nutrition.proteinGrams || null,
-      tags: Array.isArray(data.tags) ? data.tags : [],
-      ingredients: Array.isArray(data.ingredients) ? data.ingredients.map(function(ing) {
-        return { name: ing && ing.name || '', amount: (ing && ing.amount != null ? ing.amount : null), unit: (ing && ing.unit) || null };
-      }) : [],
-      steps: Array.isArray(data.steps) ? data.steps : [],
-      notes: data.notes || '',
-      source: data.source || ''
-    };
-    var items = rezepteGetItems(cat);
-    items.push(item);
-    rezepteSaveItems(cat, items);
-    renderRezepteList(cat);
-    rezeptImportClose();
-    rezepteShowCategory(cat);
+}
+
+function openShareModal(r){
+  const servings = currentServings[r.id] || r.baseServings || 1;
+  let format = 'json';
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.id = 'shareOverlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Rezept teilen</h2>
+        <button class="close-x" id="closeShare">✕</button>
+      </div>
+      <div class="modal-content">
+        <div class="share-tabs" id="shareTabs">
+          <button class="share-tab active" data-format="json">JSON</button>
+          <button class="share-tab" data-format="markdown">Markdown</button>
+          <button class="share-tab" data-format="text">Text</button>
+        </div>
+        <p class="share-hint" id="shareHint"></p>
+        <textarea class="share-box" id="shareBox" readonly spellcheck="false"></textarea>
+        <div class="share-actions">
+          <button class="btn-copy" id="copyShare">Kopieren</button>
+          <button class="btn-dl" id="dlShare">Als Datei speichern</button>
+        </div>
+        <div class="share-all">
+          Alle ${recipes.length} Rezepte auf einmal:
+          <button id="exportAll">als JSON exportieren</button>
+        </div>
+      </div>
+    </div>`;
+  root.appendChild(overlay);
+
+  const HINTS = {
+    json: 'Zum Einlesen in dein Dashboard. Mengen sind auf ' + servings + ' Portionen skaliert, kcal und Protein gelten pro Portion.',
+    markdown: 'Mit YAML-Frontmatter – passt für statische Seiten (Astro, Next.js, Jekyll) als .md-Datei im Content-Ordner.',
+    text: 'Einfacher Fließtext zum Verschicken per Nachricht oder Mail.'
   };
 
+  function paint(){
+    const text = format === 'json' ? recipeToJSON(r, servings)
+               : format === 'markdown' ? recipeToMarkdown(r, servings)
+               : recipeToText(r, servings);
+    root.getElementById('shareBox').value = text;
+    root.getElementById('shareHint').textContent = HINTS[format];
+    return text;
+  }
+  paint();
+
+  overlay.querySelectorAll('.share-tab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      overlay.querySelectorAll('.share-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      format = btn.dataset.format;
+      paint();
+    });
+  });
+
+  root.getElementById('copyShare').addEventListener('click', ()=> copyText(paint()));
+  root.getElementById('dlShare').addEventListener('click', ()=>{
+    const ext = format === 'json' ? 'json' : format === 'markdown' ? 'md' : 'txt';
+    downloadText(slugify(r.name) + '.' + ext, paint());
+  });
+  root.getElementById('exportAll').addEventListener('click', ()=>{
+    downloadText('rezeptkiste-export.json', allRecipesToJSON());
+  });
+
+  function closeShare(){
+    const o = root.getElementById('shareOverlay');
+    if(o) o.remove();
+  }
+  root.getElementById('closeShare').addEventListener('click', closeShare);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeShare(); });
+}
+
+/* ---------- Add / Edit form ---------- */
+function openAddModal(){
+  editingId = null;
+  openForm({name:'',category:'dinner',baseServings:2,tags:[],kcal:'',protein:'',ingredients:[{name:'',amount:'',unit:''}],steps:[''],notes:''});
+}
+function openEditModal(id){
+  const r = recipes.find(x=>x.id===id);
+  if(!r) return;
+  editingId = id;
+  openForm(JSON.parse(JSON.stringify(r)));
+}
+
+function openForm(data){
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.id = 'formOverlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-head">
+        <h2>${editingId ? 'Rezept bearbeiten' : 'Neues Rezept'}</h2>
+        <button class="close-x" id="closeForm">✕</button>
+      </div>
+      <div class="modal-content">
+        <label>Name</label>
+        <input type="text" id="f_name" value="${escapeHtml(data.name)}" placeholder="z.B. Linsen-Bowl mit Ofengemüse">
+
+        <div class="row2">
+          <div>
+            <label>Kategorie</label>
+            <select id="f_category">
+              ${CATEGORIES.map(c=>`<option value="${c.id}" ${data.category===c.id?'selected':''}>${c.label}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label>Basis-Portionen</label>
+            <input type="number" id="f_servings" min="1" value="${data.baseServings||2}">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label>kcal (pro Portion, optional)</label>
+            <input type="number" id="f_kcal" value="${data.kcal||''}">
+          </div>
+          <div>
+            <label>Protein g (pro Portion, optional)</label>
+            <input type="number" id="f_protein" value="${data.protein||''}">
+          </div>
+        </div>
+
+        <label>Tags</label>
+        <div class="tag-picker" id="tagPicker">
+          ${TAG_OPTIONS.map(t=>`<span class="tag-opt ${data.tags&&data.tags.includes(t)?'active':''}" data-tag="${t}">${t}</span>`).join('')}
+        </div>
+
+        <label>Zutaten</label>
+        <div id="ingRows"></div>
+        <button type="button" class="add-line" id="addIngBtn">+ Zutat hinzufügen</button>
+
+        <label>Zubereitung</label>
+        <div id="stepRows"></div>
+        <button type="button" class="add-line" id="addStepBtn">+ Schritt hinzufügen</button>
+
+        <label>Notizen (optional)</label>
+        <textarea id="f_notes" placeholder="z.B. Reste eignen sich gut fürs Mittag am nächsten Tag">${escapeHtml(data.notes||'')}</textarea>
+
+        <div class="save-bar">
+          <button class="btn-cancel" id="cancelForm">Abbrechen</button>
+          <button class="btn-save" id="saveForm">Speichern</button>
+        </div>
+      </div>
+    </div>`;
+  root.appendChild(overlay);
+
+  let ingredients = data.ingredients && data.ingredients.length ? data.ingredients.slice() : [{name:'',amount:'',unit:''}];
+  let steps = data.steps && data.steps.length ? data.steps.slice() : [''];
+
+  function paintIngRows(){
+    root.getElementById('ingRows').innerHTML = ingredients.map((ing,i)=>`
+      <div class="dyn-row">
+        <input type="text" class="ing-name" data-i="${i}" placeholder="Zutat" value="${escapeHtml(ing.name)}">
+        <input type="number" class="amt-input ing-amt" data-i="${i}" placeholder="Menge" value="${ing.amount!=null?ing.amount:''}">
+        <input type="text" class="unit-input ing-unit" data-i="${i}" placeholder="Einheit" value="${escapeHtml(ing.unit||'')}">
+        <button type="button" class="rm-btn" data-i="${i}">✕</button>
+      </div>`).join('');
+    root.querySelectorAll('.ing-name').forEach(el=>el.addEventListener('input', e=> ingredients[e.target.dataset.i].name = e.target.value));
+    root.querySelectorAll('.ing-amt').forEach(el=>el.addEventListener('input', e=> ingredients[e.target.dataset.i].amount = e.target.value===''?null:parseFloat(e.target.value)));
+    root.querySelectorAll('.ing-unit').forEach(el=>el.addEventListener('input', e=> ingredients[e.target.dataset.i].unit = e.target.value));
+    root.querySelectorAll('#ingRows .rm-btn').forEach(el=>el.addEventListener('click', e=>{
+      ingredients.splice(parseInt(e.target.dataset.i),1);
+      if(ingredients.length===0) ingredients.push({name:'',amount:'',unit:''});
+      paintIngRows();
+    }));
+  }
+  function paintStepRows(){
+    root.getElementById('stepRows').innerHTML = steps.map((s,i)=>`
+      <div class="dyn-row">
+        <input type="text" class="step-input" data-i="${i}" placeholder="Schritt ${i+1}" value="${escapeHtml(s)}">
+        <button type="button" class="rm-btn" data-i="${i}">✕</button>
+      </div>`).join('');
+    root.querySelectorAll('.step-input').forEach(el=>el.addEventListener('input', e=> steps[e.target.dataset.i] = e.target.value));
+    root.querySelectorAll('#stepRows .rm-btn').forEach(el=>el.addEventListener('click', e=>{
+      steps.splice(parseInt(e.target.dataset.i),1);
+      if(steps.length===0) steps.push('');
+      paintStepRows();
+    }));
+  }
+  paintIngRows();
+  paintStepRows();
+
+  root.getElementById('addIngBtn').addEventListener('click', ()=>{ ingredients.push({name:'',amount:'',unit:''}); paintIngRows(); });
+  root.getElementById('addStepBtn').addEventListener('click', ()=>{ steps.push(''); paintStepRows(); });
+
+  let selectedTags = new Set(data.tags||[]);
+  root.querySelectorAll('.tag-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const t = el.dataset.tag;
+      if(selectedTags.has(t)){ selectedTags.delete(t); el.classList.remove('active'); }
+      else{ selectedTags.add(t); el.classList.add('active'); }
+    });
+  });
+
+  root.getElementById('closeForm').addEventListener('click', closeOverlay);
+  root.getElementById('cancelForm').addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeOverlay(); });
+
+  root.getElementById('saveForm').addEventListener('click', async ()=>{
+    const name = root.getElementById('f_name').value.trim();
+    if(!name){ showToast("Bitte einen Namen eingeben"); return; }
+    const cleanIngredients = ingredients.filter(i=>i.name && i.name.trim());
+    const cleanSteps = steps.filter(s=>s && s.trim());
+    const record = {
+      id: editingId || uid(),
+      name,
+      category: root.getElementById('f_category').value,
+      baseServings: parseInt(root.getElementById('f_servings').value) || 2,
+      kcal: root.getElementById('f_kcal').value ? parseInt(root.getElementById('f_kcal').value) : null,
+      protein: root.getElementById('f_protein').value ? parseInt(root.getElementById('f_protein').value) : null,
+      tags: [...selectedTags],
+      ingredients: cleanIngredients,
+      steps: cleanSteps,
+      notes: root.getElementById('f_notes').value.trim()
+    };
+    if(editingId){
+      recipes = recipes.map(r => r.id === editingId ? record : r);
+    }else{
+      recipes.push(record);
+    }
+    await saveRecipes();
+    closeOverlay();
+    render();
+    showToast(editingId ? "Rezept aktualisiert" : "Rezept gespeichert");
+  });
+}
+
+/* ---------- init ---------- */
+root.getElementById('openAddBtn').addEventListener('click', openAddModal);
+root.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e.target.value; render(); });
+
+window.rkLoadRecipes = loadRecipes;
+})();
   // ── 2-WEEK TRAINING CALENDAR ─────────────────────────────────
   var CAL_BUILT = false;
   function buildTpCalendar() {
@@ -3715,7 +6354,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     // Load from Google Sheets first, then populate UI
     dbLoad(function() {
       srLoadNotes();
-      loadRezepte();
+      if (typeof rkLoadRecipes === 'function') rkLoadRecipes();
       // Kalender-Termine (inkl. Overrides/eigene Termine) und Mahlzeiten mit Sheets-Daten neu rendern
       if (typeof planerRenderWeek === 'function') planerRenderWeek();
       lpLoad();
@@ -5107,29 +7746,6 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     snLoad(ni);
     snLoadFahrtzeit(ni);
   })();
-
-  // ══════════════════════════════════════
-  // PLANER – Ernährungs-Sub-Tab Navigation
-  // ══════════════════════════════════════
-  window.showErnaehrungSlot = function(id, btn) {
-    var slot = document.getElementById(id);
-    if (!slot) return;
-    var container = document.getElementById('planer-ernaehrung');
-    if (!container) return;
-    // Deactivate direct-child slot-sections only
-    Array.prototype.forEach.call(container.children, function(child) {
-      if (child.classList && child.classList.contains('slot-section')) {
-        child.classList.remove('active');
-      }
-    });
-    slot.classList.add('active');
-    // Update sub-tab buttons
-    var navGroup = btn.closest('.nav-group');
-    if (navGroup) {
-      navGroup.querySelectorAll('.sub-tab').forEach(function(t){ t.classList.remove('active'); });
-    }
-    btn.classList.add('active');
-  };
 
   // ══════════════════════════════════════
   // HYROX
