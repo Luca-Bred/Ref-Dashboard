@@ -1653,7 +1653,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     <div class="lock-sub">Gib dein Passwort ein, um fortzufahren.</div>
     <div class="lock-input-wrap">
       <input id="lock-input" class="lock-input" type="password"
-             placeholder="••••••••" autocomplete="current-password"
+             placeholder="••••" autocomplete="current-password"
+             inputmode="numeric" pattern="[0-9]*" maxlength="4"
              onkeydown="if(event.key==='Enter')unlockDash()">
       <span class="lock-eye" id="lock-eye" onclick="togglePw()">👁</span>
     </div>
@@ -1664,7 +1665,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
 <script>
 (function(){
-  var PASS_HASH = '825493e9b4d4cdf6328b3e11bb58435e81048b4bd4017b7d6f0dea827768bb2f';
+  var PASS_HASH = 'a2fd53e8b8bb273b6b47b8e0207b92cd66852756f05c1bd99236a7b616318763';
   var SESSION_KEY = 'sr_dash_auth';
   if (sessionStorage.getItem(SESSION_KEY) === PASS_HASH) {
     document.getElementById('lock-screen').classList.add('hidden');
