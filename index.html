@@ -6557,6 +6557,51 @@ window.rkLoadRecipes = loadRecipes;
     return _efState;
   }
   function bcbSaveEF(d) { _efState = d; dbSave({'bcb_ef_v1': d}); }
+  var _entferntState = null;
+  function bcbLoadEntfernt() {
+    if (_entferntState !== null) return _entferntState;
+    var d = dbGet('bcb_entfernt_v1', []);
+    _entferntState = Array.isArray(d) ? d : [];
+    return _entferntState;
+  }
+  function bcbSaveEntfernt(d) { _entferntState = d; dbSave({'bcb_entfernt_v1': d}); }
+
+  // ── Neues BCB-Skill-JSON-Schema (meta/kriterien/tracking) ─────
+  var BCB_RUBRIK_KEYS = ['r1','r21','r22','r3','r41','r42','r51','r52','r6'];
+  function bcbIsNewFormat(a) { return !!(a && typeof a === 'object' && a.meta && a.kriterien); }
+  function bcbGetScore(a) {
+    if (!a || typeof a !== 'object') return null;
+    if (a.totalScore) return a.totalScore;
+    if (a.meta && a.meta.gesamtpunkte != null) return a.meta.gesamtpunkte;
+    return null;
+  }
+  // Liefert die Rubriken immer als Array in fester Reihenfolge (r1, r21, r22, r3, r41, r42, r51, r52, r6)
+  function bcbRubrikArray(a) {
+    if (!a || !a.rubriken) return [];
+    if (Array.isArray(a.rubriken)) return a.rubriken;
+    return BCB_RUBRIK_KEYS.map(function(k){ return a.rubriken[k] || null; });
+  }
+  // Vereinheitlicht A/B/C-Textblöcke aus altem (Freitext) und neuem (Listen) Schema
+  function bcbGetAnalyseBlocks(a) {
+    if (bcbIsNewFormat(a)) {
+      var toList = function(arr) { return (arr||[]).map(function(x){ return '• ' + (x && x.text || ''); }).join('\n'); };
+      return {
+        gesamtbewertung: (a.analyse && a.analyse.gesamtbewertung) || '',
+        positiv: toList(a.analyse && a.analyse.positiv),
+        negativ: toList(a.analyse && a.analyse.entwicklungsfelder),
+        freitext: (a.gesamteindruck && a.gesamteindruck.freitext) || ''
+      };
+    }
+    return {
+      gesamtbewertung: a.gesamtbewertung || '',
+      positiv: a.positiv || '',
+      negativ: a.negativ || '',
+      freitext: ''
+    };
+  }
+  var BCB_STUFE_COLOR = { rot:'var(--red)', orange:'var(--amber)', gelb:'var(--gold)', weiss:'var(--text-3)', gruen:'var(--grass)', dunkelgruen:'var(--grass)' };
+  var BCB_STUFE_LABEL = { rot:'Rot', orange:'Orange', gelb:'Gelb', weiss:'Weiß', gruen:'Grün', dunkelgruen:'Dunkelgrün' };
+  var BCB_TREND_ICON  = { neu:'✦ neu', hoch:'↑', runter:'↓', gleich:'' };
 
   // File input handler
   // Wire up the file input (bcbLoadStore/Render handled by main dbLoad callback)
@@ -6651,8 +6696,8 @@ window.rkLoadRecipes = loadRecipes;
   function bcbScorePill(a) {
     if (!a || a === 'error')      return '<span class="bcb-score-pill bcb-pill-none">— Pkt</span>';
     if (a === 'analyzing')        return '<span class="bcb-score-pill bcb-pill-none">&#x23F3;</span>';
-    if (typeof a === 'object' && a.totalScore) {
-      var s = a.totalScore;
+    var s = bcbGetScore(a);
+    if (typeof a === 'object' && s) {
       var cls = s >= 245 ? 'bcb-pill-high' : s >= 237 ? 'bcb-pill-mid' : 'bcb-pill-low';
       return '<span class="bcb-score-pill ' + cls + '">' + s + ' Pkt</span>';
     }
@@ -6670,7 +6715,7 @@ window.rkLoadRecipes = loadRecipes;
   function bcbUpdateStats() {
     var filtered = bcbFilteredBoegen();
     var n = filtered.length;
-    var scores = filtered.map(function(b){ var a = bcbAnalyses[b.id]; return (a && typeof a === 'object' && a.totalScore) ? a.totalScore : null; }).filter(function(x){ return x !== null; });
+    var scores = filtered.map(function(b){ return bcbGetScore(bcbAnalyses[b.id]); }).filter(function(x){ return x !== null; });
     var schnittEl = document.getElementById('beob-schnitt');
     var anzahlEl  = document.getElementById('beob-anzahl');
     var trendEl   = document.getElementById('beob-trend');
@@ -6741,14 +6786,23 @@ window.rkLoadRecipes = loadRecipes;
     }
 
     if (lp.aspekte.length) {
+      var lpIsNew = !!lp.aspekte[0].stufe;
       lp.aspekte.forEach(function(item, i) {
-        if (item.status === 'removed') return; // hide removed
-        var badge = item.status === 'uncertain'
-          ? ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3)">⚠ Unsicher</span>'
-          : (item.count > 1 ? ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25)">' + item.count + '×</span>' : '');
+        if (item.status === 'removed') return; // hide removed (altes Schema)
+        var badge;
+        if (lpIsNew) {
+          var col = BCB_STUFE_COLOR[item.stufe] || 'var(--grass)';
+          var trendTxt = BCB_TREND_ICON[item.trend] || '';
+          badge = ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:var(--grass-dim);color:'+col+';border:1px solid rgba(46,204,113,0.25)">' + (BCB_STUFE_LABEL[item.stufe]||'') + '</span>'
+            + (trendTxt ? ' <span style="font-size:9px;color:var(--text-3)">' + trendTxt + '</span>' : '');
+        } else {
+          badge = item.status === 'uncertain'
+            ? ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(243,156,18,0.3)">⚠ Unsicher</span>'
+            : (item.count > 1 ? ' <span style="font-size:9px;padding:1px 6px;border-radius:10px;background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25)">' + item.count + '×</span>' : '');
+        }
         html += '<div class="bcb-list-item">'
           + '<div class="bcb-list-num" style="background:var(--grass-dim);color:var(--grass);border:1px solid rgba(46,204,113,0.25)">' + (i+1) + '</div>'
-          + '<div class="bcb-list-text">' + bcbEsc(item.text) + badge + '</div>'
+          + '<div class="bcb-list-text">' + (lpIsNew && item.label ? '<b>' + bcbEsc(item.label) + '</b> – ' : '') + bcbEsc(item.text) + badge + '</div>'
           + '<div class="bcb-list-actions">'
           +   '<button class="bcb-item-btn" onclick="bcbEditLP(' + i + ')" title="Bearbeiten">✎</button>'
           +   '<button class="bcb-item-btn del" onclick="bcbDeleteLP(' + i + ')" title="Löschen">✕</button>'
@@ -6763,18 +6817,41 @@ window.rkLoadRecipes = loadRecipes;
       + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);font-family:\'Inter\',sans-serif;margin-bottom:8px">Entwicklungsfelder</div>';
 
     // ── EF summary sentence ──
+    var efIsNew = ef.length > 0 && !!ef[0].stufe;
     var openEFforSummary = ef.filter(function(e){ return !e.archived && !e.sehrPositiv && !e.isPositive; });
     if (openEFforSummary.length > 0) {
+      var efLabelOf = function(e){ return efIsNew ? (e.label || e.text) : e.text.split(':')[0]; };
       var efSumText = openEFforSummary.length === 1
-        ? 'Aktuell ein offenes Entwicklungsfeld: ' + openEFforSummary[0].text.split(':')[0] + '.'
+        ? 'Aktuell ein offenes Entwicklungsfeld: ' + efLabelOf(openEFforSummary[0]) + '.'
         : 'Aktuell ' + openEFforSummary.length + ' offene Entwicklungsfelder: '
-          + openEFforSummary.map(function(e){ return e.text.split(':')[0]; }).join(', ') + '.';
+          + openEFforSummary.map(efLabelOf).join(', ') + '.';
       html += '<div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.55;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--border)">'
         + bcbEsc(efSumText) + '</div>';
     }
 
     if (ef.length === 0) {
       html += '<div style="font-size:12px;color:var(--text-3);font-style:italic">Keine Entwicklungsfelder aus den Bögen.</div>';
+    } else if (efIsNew) {
+      ef.forEach(function(item, i) {
+        var col = BCB_STUFE_COLOR[item.stufe] || 'var(--amber)';
+        var trendTxt = BCB_TREND_ICON[item.trend] || '';
+        var badge = '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--amber-dim);color:'+col+';border:1px solid rgba(243,156,18,0.3);margin-left:5px">' + (BCB_STUFE_LABEL[item.stufe]||'') + '</span>'
+          + (trendTxt ? ' <span style="font-size:9px;color:var(--text-3)">' + trendTxt + '</span>' : '');
+        html += '<div class="bcb-list-item">'
+          + '<div class="bcb-list-num" style="background:var(--amber-dim);color:'+col+';border:1px solid rgba(243,156,18,0.3)">' + (i+1) + '</div>'
+          + '<div class="bcb-list-text">' + (item.label ? '<b>' + bcbEsc(item.label) + '</b> – ' : '') + bcbEsc(item.text) + badge + '</div>'
+          + '<div class="bcb-list-actions">'
+          + (i > 0 ? '<button class="bcb-item-btn up" onclick="bcbMoveEF(' + i + ',-1)" title="Nach oben">↑</button>' : '')
+          + (i < ef.length-1 ? '<button class="bcb-item-btn dn" onclick="bcbMoveEF(' + i + ',1)" title="Nach unten">↓</button>' : '')
+          + '<button class="bcb-item-btn" onclick="bcbEditEF(' + i + ')" title="Bearbeiten">✎</button>'
+          + '<button class="bcb-item-btn del" onclick="bcbDeleteEF(' + i + ')" title="Löschen">✕</button>'
+          + '</div></div>';
+      });
+      var entfernt = bcbLoadEntfernt();
+      if (entfernt.length > 0) {
+        html += '<div style="font-size:11px;color:var(--text-3);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)">Entfernt: '
+          + bcbEsc(entfernt.map(function(e){ return e.label || e.kriterium; }).join(', ')) + '</div>';
+      }
     } else {
       var activeEF  = ef.filter(function(e){ return !e.archived && !e.sehrPositiv; });
       var posEF     = activeEF.filter(function(e){ return e.isPositive; });
@@ -6843,7 +6920,7 @@ window.rkLoadRecipes = loadRecipes;
 
       RUBRIK_NAMES.forEach(function(label, ni) {
         var entries = allA.map(function(a, ai) {
-          var r = a.rubriken && a.rubriken[ni];
+          var r = bcbRubrikArray(a)[ni];
           if (!r) return null;
           var bl = RUBRIK_BASELINES[ni]||36;
           var bogen = bcbBoegen[ai] ? bcbBoegen[ai].name : 'Bogen '+(ai+1);
@@ -7026,7 +7103,7 @@ window.rkLoadRecipes = loadRecipes;
   }
 
   function bcbBuildAnalysisHtml(a) {
-    var s = a.totalScore;
+    var s = bcbGetScore(a);
     var sCls = s ? (s >= 245 ? 's-high' : s >= 237 ? 's-mid' : 's-low') : '';
     var sLabel = a.gesamtEinordnung
       ? (a.gesamtEinordnung.charAt(0).toUpperCase() + a.gesamtEinordnung.slice(1))
@@ -7043,10 +7120,11 @@ window.rkLoadRecipes = loadRecipes;
 
     // ── Rubrik-Balken (7 Rubriken, mit Abweichungs-Tooltip) ──
     var RUBRIK_BASELINES = [36,36,28,40,28,12,12,20,28];
-    var rubriken = a.rubriken || [];
+    var rubriken = bcbRubrikArray(a);
     if (rubriken.length) {
       html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px">';
       rubriken.forEach(function(r, ni) {
+        if (!r) return;
         var baseline = RUBRIK_BASELINES[ni] || 36;
         var punkte = (r.punkte != null) ? r.punkte : baseline + Math.round((r.wert - 4) * baseline * 0.1);
         var delta  = punkte - baseline;
@@ -7062,7 +7140,7 @@ window.rkLoadRecipes = loadRecipes;
         var abw = r.abweichung || '';
         html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px">'
           + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
-          +   '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);font-family:\'Inter\',sans-serif;flex:1">' + bcbEsc(r.name) + '</span>'
+          +   '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);font-family:\'Inter\',sans-serif;flex:1">' + bcbEsc(r.label || r.name) + '</span>'
           +   deltaHtml
           +   '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:' + col + '">' + punkte + '</span>'
           + '</div>'
@@ -7076,6 +7154,7 @@ window.rkLoadRecipes = loadRecipes;
       });
       // Summe
       var totalPunkte = rubriken.reduce(function(s,r,ni){
+        if (!r) return s;
         var bl = RUBRIK_BASELINES[ni]||36;
         return s + ((r.punkte != null) ? r.punkte : bl + Math.round((r.wert-4)*bl*0.1));
       }, 0);
@@ -7089,14 +7168,16 @@ window.rkLoadRecipes = loadRecipes;
       html += '</div>';
     }
 
-    // ── Sektionen A / B / C ───────────────────────────────────
+    // ── Sektionen A / B / C (+ Freitext beim neuen Schema) ────
+    var blocks = bcbGetAnalyseBlocks(a);
     var secs = [
       { icon: '&#x1F4CA;', title: 'A \u2013 Gesamtbewertung', key: 'gesamtbewertung', open: true },
       { icon: '&#x2705;',  title: 'B \u2013 Positive Aspekte', key: 'positiv', open: true },
-      { icon: '&#x1F4CC;', title: 'C \u2013 Entwicklungsfelder', key: 'negativ', open: false }
+      { icon: '&#x1F4CC;', title: 'C \u2013 Entwicklungsfelder', key: 'negativ', open: false },
+      { icon: '&#x1F4DD;', title: 'Gesamteindruck (Freitext)', key: 'freitext', open: false }
     ];
     secs.forEach(function(sec, si) {
-      var content = a[sec.key];
+      var content = blocks[sec.key];
       if (!content) return;
       html += '<div class="bcb-section' + (sec.open ? '' : ' bcb-collapsed') + '" id="bcbsec_' + si + '">'
         + '<div class="bcb-section-hdr" onclick="bcbToggleSec(\'bcbsec_' + si + '\')">'
@@ -7138,7 +7219,7 @@ window.rkLoadRecipes = loadRecipes;
       +       '&#x2022; Keine Redundanzen zwischen A / B / C'
       +     '</span>'
       +   '</div>'
-      +   '<textarea id="bcbPasteInput" placeholder=\'{"totalScore": 240, "gesamtEinordnung": "erwartungsgemäß", ...}\' '
+      +   '<textarea id="bcbPasteInput" placeholder=\'{"id": "...", "meta": {...}, "rubriken": {...}, "kriterien": {...}, "analyse": {...}, "tracking": {...}}\' '
       +     'style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border-med);border-radius:var(--r-sm);padding:10px 12px;color:var(--text);font-size:11px;font-family:\'JetBrains Mono\',monospace;outline:none;resize:vertical;margin-bottom:10px;line-height:1.5"></textarea>'
       +   '<div id="bcbPasteError" style="font-size:11px;color:var(--red);margin-bottom:8px;display:none">⚠ Ungültiges JSON – bitte nochmal prüfen.</div>'
       +   '<div style="display:flex;gap:8px;justify-content:flex-end">'
@@ -7164,12 +7245,49 @@ window.rkLoadRecipes = loadRecipes;
     bcbAnalyses[id] = parsed;
     bcbSaveStore();
 
+    var isNewFormat = bcbIsNewFormat(parsed);
+
     // ── Store match info in the bogen object ──────────────────
     var bogenIdx = bcbBoegen.findIndex(function(b){ return b.id === id; });
     if (bogenIdx >= 0) {
-      if (parsed.spielpaarung) bcbBoegen[bogenIdx].spielpaarung = parsed.spielpaarung;
-      if (parsed.spieldatum)   bcbBoegen[bogenIdx].spieldatum   = parsed.spieldatum;
+      if (isNewFormat) {
+        var m = parsed.meta || {};
+        if (m.heim && m.gast) bcbBoegen[bogenIdx].spielpaarung = m.heim + ' - ' + m.gast;
+        if (m.datum) bcbBoegen[bogenIdx].spieldatum = m.datum;
+      } else {
+        if (parsed.spielpaarung) bcbBoegen[bogenIdx].spielpaarung = parsed.spielpaarung;
+        if (parsed.spieldatum)   bcbBoegen[bogenIdx].spieldatum   = parsed.spieldatum;
+      }
       try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(bcbBoegen)); } catch(e) {}
+    }
+
+    if (isNewFormat) {
+      // ── Neues Skill-Schema: Tracking-Stand kommt spielübergreifend
+      //    bereits fertig berechnet und wird 1:1 übernommen ──────
+      var lpNew = bcbLoadLP();
+      lpNew.aspekte = (parsed.tracking && Array.isArray(parsed.tracking.leistungsprofil))
+        ? parsed.tracking.leistungsprofil.slice() : [];
+      bcbSaveLP(lpNew);
+
+      var efNew = (parsed.tracking && Array.isArray(parsed.tracking.entwicklungsfelder))
+        ? parsed.tracking.entwicklungsfelder.slice() : [];
+      bcbSaveEF(efNew);
+
+      var entfernt = (parsed.tracking && Array.isArray(parsed.tracking.entfernt))
+        ? parsed.tracking.entfernt : [];
+      bcbSaveEntfernt(entfernt);
+
+      bcbRenderList(); bcbUpdateStats();
+      var dialogNew = document.getElementById('bcbPasteDialog');
+      if (dialogNew) dialogNew.remove();
+      if (bcbActiveBogen === id) {
+        bcbRenderModalAnalysis(id);
+        var btnNew = document.getElementById('bcbAnalyzeBtn');
+        if (btnNew) btnNew.innerHTML = '&#x1F504; Analyse aktualisieren';
+        var statNew = document.getElementById('bcbAnalysisStatus');
+        if (statNew) statNew.textContent = '✓ Geladen';
+      }
+      return;
     }
 
     // ── LEISTUNGSPROFIL – neuer Algorithmus ──────────────────
