@@ -6478,6 +6478,36 @@ window.rkLoadRecipes = loadRecipes;
     var d = (b.date || '').slice(0,10);
     return d >= range.from && d <= range.to;
   }
+  // ── Rubrik-Basispunkte (Faktor × 4) je Saison ──────────────────
+  // bis 2025/26: 1: 36 · 2.1: 36 · 2.2: 28 · 3: 40 · 4.1: 28 · 4.2: 12 · 5.1: 12 · 5.2: 20 · 6: 28
+  // ab 2026/27 (Faktoränderungen): 2.1: 40 · 2.2: 32 · 4.2: 8 (Körpersprache/Präsentation zusammengelegt) · 6: 24
+  var BCB_BASELINES_OLD = [36,36,28,40,28,12,12,20,28];
+  var BCB_BASELINES_2627 = [36,40,32,40,28,8,12,20,24];
+  function bcbBaselines(seasonIdx) { return seasonIdx >= 2 ? BCB_BASELINES_2627 : BCB_BASELINES_OLD; }
+  // Saison-Index eines Datums (YYYY-MM-DD): Saison läuft 01.08.–31.07.
+  function bcbSeasonIdxForDate(dat) {
+    var m = /^(\d{4})-(\d{2})/.exec(bcbNormDate(dat || ''));
+    if (!m) return null;
+    var start = parseInt(m[1],10) - (parseInt(m[2],10) >= 8 ? 0 : 1);
+    return Math.max(0, start - 2024);
+  }
+  function bcbSeasonIdxForAnalysis(a) {
+    var dat = a && (a.spieldatum || (a.meta && a.meta.datum));
+    var idx = bcbSeasonIdxForDate(dat);
+    if (idx != null) return idx;
+    var sa = a && a.meta && a.meta.saison;
+    if (sa && BCB_SEASONS.indexOf(sa) >= 0) return BCB_SEASONS.indexOf(sa);
+    var b = bcbBoegen.find(function(x){ return bcbAnalyses[x.id] === a; });
+    if (b) {
+      idx = bcbSeasonIdxForDate(b.spieldatum);
+      if (idx != null) return idx;
+      if (b.saison && BCB_SEASONS.indexOf(b.saison) >= 0) return BCB_SEASONS.indexOf(b.saison);
+      idx = bcbSeasonIdxForDate((b.date||'').slice(0,10));
+      if (idx != null) return idx;
+    }
+    return bcbSeasonIdx;
+  }
+
   function bcbChangeSeason(dir) {
     var next = bcbSeasonIdx + dir;
     if (next < 0 || next >= BCB_SEASONS.length) return;
@@ -6974,7 +7004,7 @@ window.rkLoadRecipes = loadRecipes;
       '5.2 Stellungsspiel',
       '6. Teamarbeit / Abseits'
     ];
-    var RUBRIK_BASELINES = [36,36,28,40,28,12,12,20,28];
+    var RUBRIK_BASELINES = bcbBaselines(bcbSeasonIdx);
 
     if (allA.length > 0) {
       html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px">'
@@ -7183,7 +7213,7 @@ window.rkLoadRecipes = loadRecipes;
       + '</div>';
 
     // ── Rubrik-Balken (7 Rubriken, mit Abweichungs-Tooltip) ──
-    var RUBRIK_BASELINES = [36,36,28,40,28,12,12,20,28];
+    var RUBRIK_BASELINES = bcbBaselines(bcbSeasonIdxForAnalysis(a));
     var rubriken = bcbRubrikArray(a);
     if (rubriken.length) {
       html += '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px">';
