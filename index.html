@@ -3644,17 +3644,43 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
   var _cache = {};  // lokaler Cache für offline-Betrieb
 
+  var _dbReady = false;   // erst nach dem ersten Laden aus Sheets wird dorthin geschrieben,
+  var _dbPending = {};    // sonst würden unvollständige lokale Daten die Sheets-Daten überschreiben
+
   function dbLoad(callback) {
-    if (!SHEETS_URL) { callback({}); return; }
+    function done(data) {
+      try { callback(data); }
+      finally { dbFlushPending(); }
+    }
+    if (!SHEETS_URL) { _dbReady = true; callback({}); return; }
     fetch(SHEETS_URL)
       .then(function(r){ return r.json(); })
       .then(function(res){
-        if (res.ok && res.data) {
+        if (res && res.ok && res.data) {
           _cache = res.data;
-          callback(res.data);
+          done(res.data);
+        } else {
+          done({});
         }
       })
-      .catch(function(){ callback({}); });
+      .catch(function(){ done({}); });
+  }
+
+  function dbFlushPending() {
+    _dbReady = true;
+    var p = _dbPending; _dbPending = {};
+    // BCB-Bogenliste wurde mit den Sheets-Daten zusammengeführt neu aufgebaut → statt der alten Teilliste senden
+    if (p[BCB_META_KEY] !== undefined && typeof bcbSaveStore === 'function') { delete p[BCB_META_KEY]; bcbSaveStore(); }
+    if (Object.keys(p).length) dbPost(p);
+  }
+
+  function dbPost(payload) {
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); })
+      .then(function(res){ if (!res || res.ok === false) dbSyncWarn(Object.keys(payload)); })
+      .catch(function(){ dbSyncWarn(Object.keys(payload)); });  // offline: Daten bleiben lokal
   }
 
   function dbSave(payload) {
@@ -3664,12 +3690,27 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       localStorage.setItem(k, val);
       _cache[k] = val;
     });
-    // Wenn URL hinterlegt: auch in Sheets speichern
+    // Wenn URL hinterlegt: auch in Sheets speichern (erst nachdem Sheets einmal geladen wurde)
     if (!SHEETS_URL) return;
-    fetch(SHEETS_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    }).catch(function(){});  // still ok if offline
+    if (!_dbReady) { Object.keys(payload).forEach(function(k){ _dbPending[k] = payload[k]; }); return; }
+    dbPost(payload);
+  }
+
+
+  var _syncWarnTimer = null;
+  function dbSyncWarn(keys) {
+    try { console.warn('Sheets-Sync fehlgeschlagen:', keys); } catch(e) {}
+    var el = document.getElementById('db-sync-warn');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'db-sync-warn';
+      el.style.cssText = 'position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);z-index:99999;background:#7a2a2a;color:#fff;padding:.6rem 1rem;border-radius:8px;font-size:.8rem;box-shadow:0 4px 16px rgba(0,0,0,.4);max-width:90vw;text-align:center;';
+      document.body.appendChild(el);
+    }
+    el.textContent = 'Nicht mit Google Sheets synchronisiert \u2013 \u00c4nderungen sind nur auf diesem Ger\u00e4t gespeichert.';
+    el.style.display = 'block';
+    clearTimeout(_syncWarnTimer);
+    _syncWarnTimer = setTimeout(function(){ el.style.display = 'none'; }, 8000);
   }
 
   function dbGet(key, fallback) {
@@ -6359,6 +6400,10 @@ window.rkLoadRecipes = loadRecipes;
       if (dl) dl.textContent = (itd ? 'Heute \u00b7 ' : lbl + ' \u00b7 ') + ng[2] + ' Uhr \u00b7 ' + cty;
       document.querySelectorAll('.next-game-trigger').forEach(function(el){ el.setAttribute('data-idx', ni); });
     })();
+    // BCB sofort aus localStorage anzeigen (Sheets kann einige Sekunden brauchen)
+    bcbLoadStore();
+    bcbRenderList();
+    bcbUpdateStats();
     // Load from Google Sheets first, then populate UI
     dbLoad(function() {
       srLoadNotes();
@@ -6549,22 +6594,41 @@ window.rkLoadRecipes = loadRecipes;
     return tl > tc ? l : c;
   }
 
+  // Gelöschte Bögen (id → Zeitpunkt), damit sie von anderen Geräten/alten Kopien nicht wieder auftauchen
+  var BCB_DEL_KEY = 'bcb_deleted_v1';
+  function bcbStoredList(key) {
+    var out = [];
+    [dbGet(key, []), (function(){ try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; } })()]
+      .forEach(function(l){ if (Array.isArray(l)) out = out.concat(l); });
+    return out;
+  }
+  function bcbDeletedMap() {
+    var map = {};
+    bcbStoredList(BCB_DEL_KEY).forEach(function(d){
+      if (d && d.id && (d.ts||0) >= (map[d.id]||0)) map[d.id] = d.ts || 0;
+    });
+    return map;
+  }
+  function bcbIsDeleted(del, m) { return del[m.id] != null && del[m.id] >= (m.ts||0); }
+  // Alle bekannten Bogen-Metadaten (Sheets + lokal), neuere Version je id gewinnt, ohne gelöschte
+  function bcbMergedMeta() {
+    var del = bcbDeletedMap(), map = {};
+    bcbStoredList(BCB_META_KEY).forEach(function(m) {
+      if (!m || !m.id || bcbIsDeleted(del, m)) return;
+      var old = map[m.id];
+      if (!old || (m.ts||0) > (old.ts||0) || (!old.spieldatum && m.spieldatum)) map[m.id] = m;
+    });
+    return map;
+  }
+
   function bcbLoadStore() {
     _lpState = null; _efState = null;
     var local = [];
     try { local = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) {}
 
-    // Bogen-Metadaten: Sheets + lokale Kopie vereinigen (neuere Version je id gewinnt)
-    var metaMap = {};
-    [dbGet(BCB_META_KEY, []), (function(){ try { return JSON.parse(localStorage.getItem(BCB_META_KEY)) || []; } catch(e) { return []; } })()]
-      .forEach(function(list) {
-        if (!Array.isArray(list)) return;
-        list.forEach(function(m) {
-          if (!m || !m.id) return;
-          var old = metaMap[m.id];
-          if (!old || (m.ts||0) > (old.ts||0) || (!old.spieldatum && m.spieldatum)) metaMap[m.id] = m;
-        });
-      });
+    // Bogen-Metadaten: Sheets + lokale Kopie vereinigen (neuere Version je id gewinnt, gelöschte ausgeschlossen)
+    var del = bcbDeletedMap();
+    var metaMap = bcbMergedMeta();
     var merged = Object.keys(metaMap).map(function(id) {
       var m = metaMap[id];
       var localB = local.find(function(b){ return b.id === m.id; });
@@ -6578,6 +6642,7 @@ window.rkLoadRecipes = loadRecipes;
       };
     });
     local.forEach(function(b) {
+      if (bcbIsDeleted(del, b)) return;
       if (!merged.find(function(m){ return m.id === b.id; })) merged.push(b);
     });
     merged.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
@@ -6607,6 +6672,10 @@ window.rkLoadRecipes = loadRecipes;
     var meta = bcbBoegen.map(function(b){
       return { id: b.id, name: b.name, spielpaarung: b.spielpaarung||'', spieldatum: b.spieldatum||'', saison: b.saison||'', date: b.date, size: b.size||0, ts: b.ts || 0 };
     });
+    // Bereits bekannte Bögen, die in dieser Liste (noch) fehlen, nicht aus Sheets verdrängen
+    var known = bcbMergedMeta();
+    meta.forEach(function(m){ delete known[m.id]; });
+    Object.keys(known).forEach(function(id){ meta.push(known[id]); });
     var p = {}; p[BCB_META_KEY] = meta;
     bcbBoegen.forEach(function(b) {
       var a = bcbAnalyses[b.id];
@@ -7067,6 +7136,9 @@ window.rkLoadRecipes = loadRecipes;
     bcbBoegen = bcbBoegen.filter(function(b){ return b.id !== id; });
     delete bcbAnalyses[id];
     var tomb = {}; tomb[BCB_AKEY + id] = { _deleted: true, _ts: Date.now() };
+    var dl = bcbStoredList(BCB_DEL_KEY).filter(function(d){ return d && d.id && d.id !== id; });
+    dl.push({ id: id, ts: Date.now() });
+    tomb[BCB_DEL_KEY] = dl.slice(-200);
     dbSave(tomb);
     if (bcbBlobUrls[id]) { URL.revokeObjectURL(bcbBlobUrls[id]); delete bcbBlobUrls[id]; }
     bcbSaveStore();
