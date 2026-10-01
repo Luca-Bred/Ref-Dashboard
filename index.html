@@ -6462,16 +6462,21 @@ window.rkLoadRecipes = loadRecipes;
     var startYear = 2024 + idx;
     return { from: startYear+'-08-01', to: (startYear+1)+'-07-31' };
   }
+  function bcbNormDate(dat) {
+    if (dat && dat.indexOf('.') > 0) { var p = dat.split('.'); dat = p[2]+'-'+p[1]+'-'+p[0]; }
+    return dat || '';
+  }
   function bcbBogenInSeason(b, idx) {
     var range = bcbGetSeasonRange(idx);
     var a   = bcbAnalyses[b.id];
-    var dat = (a && typeof a === 'object' && a.spieldatum) ? a.spieldatum
-            : b.spieldatum ? b.spieldatum
-            : (b.date || '').slice(0,10);
-    if (dat && dat.indexOf('.') > 0) {
-      var p = dat.split('.'); dat = p[2]+'-'+p[1]+'-'+p[0];
-    }
-    return dat >= range.from && dat <= range.to;
+    var isObj = a && typeof a === 'object';
+    var dat = bcbNormDate((isObj && (a.spieldatum || (a.meta && a.meta.datum))) || b.spieldatum || '');
+    if (dat) return dat >= range.from && dat <= range.to;
+    // Noch kein Spieldatum bekannt: Saison-Hinweis verwenden (Tab beim Upload / meta.saison)
+    var hint = (isObj && a.meta && a.meta.saison) || b.saison;
+    if (hint) return hint === BCB_SEASONS[idx];
+    var d = (b.date || '').slice(0,10);
+    return d >= range.from && d <= range.to;
   }
   function bcbChangeSeason(dir) {
     var next = bcbSeasonIdx + dir;
@@ -6501,56 +6506,93 @@ window.rkLoadRecipes = loadRecipes;
   var _lpState = null;
   var _efState = null;
 
+  var BCB_AKEY = 'bcb_a_'; // eine Analyse pro Key (Sheets-Zelle max. 50.000 Zeichen)
+
+  // Liest einen Key aus Sheets-Cache UND localStorage und nimmt die neuere Version (_ts)
+  function bcbReadBest(key) {
+    var c = null, l = null;
+    try { if (_cache[key]) c = JSON.parse(_cache[key]); } catch(e) {}
+    try { var v = localStorage.getItem(key); if (v) l = JSON.parse(v); } catch(e) {}
+    if (c == null) return l;
+    if (l == null) return c;
+    var tc = (c && c._ts) || 0, tl = (l && l._ts) || 0;
+    return tl > tc ? l : c;
+  }
+
   function bcbLoadStore() {
     _lpState = null; _efState = null;
-    // Load local PDF store (has base64)
     var local = [];
     try { local = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) {}
 
-    // Load analyses from Sheets
-    var a = dbGet(BCB_ANALYSIS_KEY, {});
-    bcbAnalyses = (a && typeof a === 'object' && !Array.isArray(a)) ? a : {};
-
-    // Load bogen metadata from Sheets (cross-device, no base64)
-    var meta = dbGet(BCB_META_KEY, []);
-    if (!Array.isArray(meta)) meta = [];
-
-    // Merge: start from Sheets meta (cross-device truth), add base64 from local where available
-    var merged = [];
-    meta.forEach(function(m) {
-      var localB = local.find(function(b){ return b.id === m.id; });
-      merged.push({
-        id:           m.id,
-        name:         m.name,
-        spielpaarung: m.spielpaarung || '',
-        spieldatum:   m.spieldatum   || '',
-        date:         m.date,
-        size:         m.size || 0,
-        base64:       localB ? localB.base64 : null  // null = phantom, PDF not on this device
+    // Bogen-Metadaten: Sheets + lokale Kopie vereinigen (neuere Version je id gewinnt)
+    var metaMap = {};
+    [dbGet(BCB_META_KEY, []), (function(){ try { return JSON.parse(localStorage.getItem(BCB_META_KEY)) || []; } catch(e) { return []; } })()]
+      .forEach(function(list) {
+        if (!Array.isArray(list)) return;
+        list.forEach(function(m) {
+          if (!m || !m.id) return;
+          var old = metaMap[m.id];
+          if (!old || (m.ts||0) > (old.ts||0) || (!old.spieldatum && m.spieldatum)) metaMap[m.id] = m;
+        });
       });
+    var merged = Object.keys(metaMap).map(function(id) {
+      var m = metaMap[id];
+      var localB = local.find(function(b){ return b.id === m.id; });
+      return {
+        id: m.id, name: m.name,
+        spielpaarung: m.spielpaarung || (localB && localB.spielpaarung) || '',
+        spieldatum:   m.spieldatum   || (localB && localB.spieldatum)   || '',
+        saison:       m.saison       || (localB && localB.saison)       || '',
+        date: m.date, size: m.size || 0, ts: m.ts || 0,
+        base64: localB ? localB.base64 : null
+      };
     });
-
-    // Add any local-only boegen not yet in Sheets meta (e.g. uploaded but not yet synced)
     local.forEach(function(b) {
-      var inMeta = merged.find(function(m){ return m.id === b.id; });
-      if (!inMeta) merged.push(b);
+      if (!merged.find(function(m){ return m.id === b.id; })) merged.push(b);
     });
-
-    // Sort newest first
     merged.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
     bcbBoegen = merged;
+
+    // Analysen: Altformat (ein Objekt) + neue Einzel-Keys je Bogen
+    var legacy = bcbReadBest(BCB_ANALYSIS_KEY);
+    bcbAnalyses = {};
+    if (legacy && typeof legacy === 'object' && !Array.isArray(legacy)) {
+      Object.keys(legacy).forEach(function(k){ if (k !== '_ts') bcbAnalyses[k] = legacy[k]; });
+    }
+    bcbBoegen.forEach(function(b) {
+      var a = bcbReadBest(BCB_AKEY + b.id);
+      if (a && a._deleted) { delete bcbAnalyses[b.id]; }
+      else if (a) { bcbAnalyses[b.id] = a; }
+    });
   }
 
+  var BCB_WARNED_SIZE = {};
   function bcbSaveStore() {
-    // Save only non-phantom boegen to localStorage (those with base64)
+    // PDFs (Base64) nur lokal
     var withPdf = bcbBoegen.filter(function(b){ return b.base64; });
-    try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(withPdf)); } catch(e) {}
+    try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(withPdf)); }
+    catch(e) { alert('Speicher im Browser ist voll – das PDF konnte nicht lokal gespeichert werden. Bitte alte Bögen (PDF) löschen.'); }
 
-    // Save lightweight meta for all boegen to Sheets (cross-device list)
+    var now = Date.now();
     var meta = bcbBoegen.map(function(b){
-      return { id: b.id, name: b.name, spielpaarung: b.spielpaarung||'', spieldatum: b.spieldatum||'', date: b.date, size: b.size||0 };
+      return { id: b.id, name: b.name, spielpaarung: b.spielpaarung||'', spieldatum: b.spieldatum||'', saison: b.saison||'', date: b.date, size: b.size||0, ts: b.ts || 0 };
     });
-    var p = {}; p[BCB_ANALYSIS_KEY] = bcbAnalyses; p[BCB_META_KEY] = meta;
+    var p = {}; p[BCB_META_KEY] = meta;
+    bcbBoegen.forEach(function(b) {
+      var a = bcbAnalyses[b.id];
+      if (a === undefined) return;
+      var val = (a && typeof a === 'object') ? Object.assign({}, a, { _ts: a._ts || now }) : a;
+      var key = BCB_AKEY + b.id;
+      var ser = JSON.stringify(val);
+      if (_cache[key] !== ser) {
+        if (typeof val === 'object') val._ts = a._ts = now;
+        p[key] = val;
+        if (ser.length > 48000 && !BCB_WARNED_SIZE[key]) {
+          BCB_WARNED_SIZE[key] = true;
+          alert('Achtung: Die Analyse von "' + b.name + '" ist zu groß für Google Sheets (' + ser.length + ' Zeichen) und wird nur lokal gespeichert.');
+        }
+      }
+    });
     dbSave(p);
   }
   function bcbLoadLP() {
@@ -6623,6 +6665,7 @@ window.rkLoadRecipes = loadRecipes;
       inp.addEventListener('change', function(e) {
         var files = Array.from(e.target.files);
         var pending = files.length;
+        var lastUploadId = null;
         if (!pending) return;
         files.forEach(function(file) {
           if (file.type !== 'application/pdf') { pending--; return; }
@@ -6632,21 +6675,29 @@ window.rkLoadRecipes = loadRecipes;
             var fname = file.name.replace(/\.pdf$/i,'');
             // Use sanitized filename as stable ID so analyses survive re-uploads
             var stableId = 'bcb_' + fname.toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0, 40);
-            // If same file already uploaded (with or without PDF), update base64 and revoke old blob
             var existing = bcbBoegen.find(function(b){ return b.id === stableId; });
+            // Gleiche ID, aber andere Datei (z.B. lange gleiche Dateinamen-Präfixe) → eigene ID, nichts überschreiben
+            if (existing && existing.name !== fname) {
+              var h = 0; for (var ci = 0; ci < fname.length; ci++) h = (h * 31 + fname.charCodeAt(ci)) >>> 0;
+              stableId = stableId + '_' + h.toString(36);
+              existing = bcbBoegen.find(function(b){ return b.id === stableId; });
+            }
             if (existing) {
               existing.base64 = b64;
               existing.size   = file.size;
+              existing.ts     = Date.now();
               if (bcbBlobUrls[stableId]) { URL.revokeObjectURL(bcbBlobUrls[stableId]); delete bcbBlobUrls[stableId]; }
             } else {
-              bcbBoegen.unshift({ id: stableId, name: fname, spielpaarung:'', spieldatum:'', date: new Date().toISOString(), base64: b64, size: file.size });
+              // saison = aktuell gewählter Saison-Tab, bis ein Spieldatum aus der Analyse bekannt ist
+              bcbBoegen.unshift({ id: stableId, name: fname, spielpaarung:'', spieldatum:'', saison: BCB_SEASONS[bcbSeasonIdx], date: new Date().toISOString(), base64: b64, size: file.size, ts: Date.now() });
             }
+            lastUploadId = stableId;
             pending--;
             if (pending === 0) {
               bcbSaveStore();
               bcbRenderList();
               bcbUpdateStats();
-              bcbOpenModal(bcbBoegen[0].id);
+              bcbOpenModal(lastUploadId);
             }
           };
           reader.readAsDataURL(file);
@@ -6985,6 +7036,8 @@ window.rkLoadRecipes = loadRecipes;
     if (!confirm('Bogen wirklich l\u00f6schen?')) return;
     bcbBoegen = bcbBoegen.filter(function(b){ return b.id !== id; });
     delete bcbAnalyses[id];
+    var tomb = {}; tomb[BCB_AKEY + id] = { _deleted: true, _ts: Date.now() };
+    dbSave(tomb);
     if (bcbBlobUrls[id]) { URL.revokeObjectURL(bcbBlobUrls[id]); delete bcbBlobUrls[id]; }
     bcbSaveStore();
     // If no boegen left → auto-clear LP and EF for clean slate
@@ -7007,11 +7060,10 @@ window.rkLoadRecipes = loadRecipes;
     bcbSaveEF([]); bcbUpdateBereiche();
   }
   function bcbResetAll() {
-    if (!confirm('Alle Analysen, Leistungsprofil und Entwicklungsfelder zur\u00fccksetzen?\nPDFs bleiben erhalten.')) return;
+    if (!confirm('Alle Analysen, Leistungsprofil und Entwicklungsfelder zur\u00fccksetzen?\nDie hochgeladenen B\u00f6gen (PDFs) bleiben erhalten.')) return;
+    var p = {}; p[BCB_ANALYSIS_KEY] = {};
+    bcbBoegen.forEach(function(b){ p[BCB_AKEY + b.id] = { _deleted: true, _ts: Date.now() }; });
     bcbAnalyses = {};
-    bcbBoegen = [];
-    try { localStorage.removeItem(BCB_STORE_KEY); } catch(e) {}
-    var p = {}; p[BCB_ANALYSIS_KEY] = {}; p[BCB_META_KEY] = [];
     dbSave(p);
     bcbSaveLP({summary:'', aspekte:[]});
     bcbSaveEF([]);
@@ -7255,23 +7307,24 @@ window.rkLoadRecipes = loadRecipes;
     } catch(e) { if(errEl) errEl.style.display=''; return; }
 
     bcbAnalyses[id] = parsed;
-    bcbSaveStore();
 
     var isNewFormat = bcbIsNewFormat(parsed);
 
-    // ── Store match info in the bogen object ──────────────────
+    // ── Spielinfos im Bogen-Objekt ablegen (und mit Sheets synchronisieren) ──
     var bogenIdx = bcbBoegen.findIndex(function(b){ return b.id === id; });
     if (bogenIdx >= 0) {
       if (isNewFormat) {
         var m = parsed.meta || {};
         if (m.heim && m.gast) bcbBoegen[bogenIdx].spielpaarung = m.heim + ' - ' + m.gast;
         if (m.datum) bcbBoegen[bogenIdx].spieldatum = m.datum;
+        if (m.saison) bcbBoegen[bogenIdx].saison = m.saison;
       } else {
         if (parsed.spielpaarung) bcbBoegen[bogenIdx].spielpaarung = parsed.spielpaarung;
         if (parsed.spieldatum)   bcbBoegen[bogenIdx].spieldatum   = parsed.spieldatum;
       }
-      try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(bcbBoegen)); } catch(e) {}
+      bcbBoegen[bogenIdx].ts = Date.now();
     }
+    bcbSaveStore();
 
     if (isNewFormat) {
       // ── Neues Skill-Schema: Tracking-Stand kommt spielübergreifend
