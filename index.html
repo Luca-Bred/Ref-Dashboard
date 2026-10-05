@@ -6412,6 +6412,7 @@ window.rkLoadRecipes = loadRecipes;
     bcbLoadStore();
     bcbRenderList();
     bcbUpdateStats();
+    bcbPdfInit();
     // Load from Google Sheets first, then populate UI
     dbLoad(function() {
       srLoadNotes();
@@ -6574,14 +6575,83 @@ window.rkLoadRecipes = loadRecipes;
     return bcbBoegen.filter(function(b){ return bcbBogenInSeason(b, bcbSeasonIdx); });
   }
 
-  var BCB_STORE_KEY    = 'bcb_boegen_v3';
+  var BCB_STORE_KEY    = 'bcb_boegen_v3';   // Altbestand: PDFs als Base64 in localStorage (wird nach IndexedDB migriert)
+
+  // ── PDF-Speicher: IndexedDB (localStorage ist auf ~5 MB begrenzt) ──
+  var bcbPdfBlobs = {};   // id → Blob (aus IndexedDB geladen)
+  var bcbIdbOk    = false;
+  var _bcbIdb     = null;
+  function bcbIdbOpen() {
+    if (_bcbIdb) return _bcbIdb;
+    _bcbIdb = new Promise(function(resolve, reject) {
+      if (!window.indexedDB) { reject(new Error('no idb')); return; }
+      var rq = indexedDB.open('sr_dash_pdfs', 1);
+      rq.onupgradeneeded = function() { rq.result.createObjectStore('pdfs'); };
+      rq.onsuccess = function() { resolve(rq.result); };
+      rq.onerror = function() { reject(rq.error); };
+    });
+    return _bcbIdb;
+  }
+  function bcbIdbTx(mode, fn) {
+    return bcbIdbOpen().then(function(db) {
+      return new Promise(function(resolve, reject) {
+        var tx = db.transaction('pdfs', mode), out;
+        out = fn(tx.objectStore('pdfs'));
+        tx.oncomplete = function() { resolve(out && out.result !== undefined ? out.result : undefined); };
+        tx.onerror = tx.onabort = function() { reject(tx.error); };
+      });
+    });
+  }
+  function bcbPdfPut(id, blob) { return bcbIdbTx('readwrite', function(st){ return st.put(blob, id); }); }
+  function bcbPdfDel(id)       { return bcbIdbTx('readwrite', function(st){ return st.delete(id); }); }
+  function bcbPdfLoadAll() {
+    return bcbIdbOpen().then(function(db) {
+      return new Promise(function(resolve, reject) {
+        var out = {}, tx = db.transaction('pdfs', 'readonly'), st = tx.objectStore('pdfs');
+        var cur = st.openCursor();
+        cur.onsuccess = function() {
+          var c = cur.result;
+          if (c) { out[c.key] = c.value; c.continue(); }
+        };
+        tx.oncomplete = function() { resolve(out); };
+        tx.onerror = tx.onabort = function() { reject(tx.error); };
+      });
+    });
+  }
+  function bcbB64ToBlob(b64) {
+    var bytes = atob(b64), ab = new Uint8Array(bytes.length);
+    for (var i = 0; i < bytes.length; i++) ab[i] = bytes.charCodeAt(i);
+    return new Blob([ab], { type: 'application/pdf' });
+  }
+  // Start: Altbestand (Base64 in localStorage) nach IndexedDB verschieben, dann alle PDFs laden
+  function bcbPdfInit() {
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e) {}
+    var legacy = [];
+    try { legacy = JSON.parse(localStorage.getItem(BCB_STORE_KEY)) || []; } catch(e) {}
+    return bcbIdbOpen().then(function() {
+      return Promise.all(legacy.filter(function(b){ return b && b.id && b.base64; }).map(function(b) {
+        return bcbPdfPut(b.id, bcbB64ToBlob(b.base64));
+      }));
+    }).then(function() {
+      // erst nach erfolgreichem Schreiben den Altbestand entfernen
+      if (legacy.length) { try { localStorage.removeItem(BCB_STORE_KEY); } catch(e) {} }
+      bcbIdbOk = true;
+      return bcbPdfLoadAll();
+    }).then(function(all) {
+      Object.keys(all).forEach(function(id){ bcbPdfBlobs[id] = all[id]; });
+      bcbLoadStore(); bcbRenderList(); bcbUpdateStats();
+    }).catch(function(e) {
+      bcbIdbOk = false;   // Fallback: wie bisher in localStorage
+      try { console.warn('IndexedDB nicht verfügbar:', e); } catch(x) {}
+    });
+  }
   var BCB_ANALYSIS_KEY = 'bcb_analyses_v3';
   var bcbBoegen        = [];
   var bcbAnalyses      = {};
   var bcbActiveBogen   = null;
   var bcbBlobUrls      = {};
 
-  // PDFs (Base64) stay in localStorage – too big for Sheets
+  // PDFs liegen nur auf dem Gerät (IndexedDB) – zu groß für Sheets
   // Analyses, LP, EF, Bogen-Meta → dbSave/dbGet (Google Sheets = cross-device)
   var BCB_META_KEY = 'bcb_meta_v1'; // lightweight bogen metadata in Sheets (no base64)
 
@@ -6672,9 +6742,11 @@ window.rkLoadRecipes = loadRecipes;
   var BCB_WARNED_SIZE = {};
   function bcbSaveStore() {
     // PDFs (Base64) nur lokal
-    var withPdf = bcbBoegen.filter(function(b){ return b.base64; });
-    try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(withPdf)); }
-    catch(e) { alert('Speicher im Browser ist voll – das PDF konnte nicht lokal gespeichert werden. Bitte alte Bögen (PDF) löschen.'); }
+    if (!bcbIdbOk) {
+      var withPdf = bcbBoegen.filter(function(b){ return b.base64; });
+      try { localStorage.setItem(BCB_STORE_KEY, JSON.stringify(withPdf)); }
+      catch(e) { alert('Speicher im Browser ist voll – das PDF konnte nicht lokal gespeichert werden. Bitte alte Bögen (PDF) löschen.'); }
+    }
 
     var now = Date.now();
     var meta = bcbBoegen.map(function(b){
@@ -6778,7 +6850,7 @@ window.rkLoadRecipes = loadRecipes;
           if (file.type !== 'application/pdf') { pending--; return; }
           var reader = new FileReader();
           reader.onload = function(ev) {
-            var b64   = ev.target.result.split(',')[1];
+            var b64   = bcbIdbOk ? null : ev.target.result.split(',')[1];
             var fname = file.name.replace(/\.pdf$/i,'');
             // Use sanitized filename as stable ID so analyses survive re-uploads
             var stableId = 'bcb_' + fname.toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0, 40);
@@ -6789,14 +6861,21 @@ window.rkLoadRecipes = loadRecipes;
               stableId = stableId + '_' + h.toString(36);
               existing = bcbBoegen.find(function(b){ return b.id === stableId; });
             }
+            if (bcbIdbOk) {
+              var pdfBlob = new Blob([ev.target.result], { type: 'application/pdf' });
+              bcbPdfBlobs[stableId] = pdfBlob;
+              bcbPdfPut(stableId, pdfBlob).catch(function() {
+                alert('Das PDF konnte nicht im Browser gespeichert werden (Speicher voll?). Die Analyse bleibt trotzdem erhalten.');
+              });
+            }
             if (existing) {
-              existing.base64 = b64;
+              if (b64) existing.base64 = b64;
               existing.size   = file.size;
               existing.ts     = Date.now();
               if (bcbBlobUrls[stableId]) { URL.revokeObjectURL(bcbBlobUrls[stableId]); delete bcbBlobUrls[stableId]; }
             } else {
               // saison = aktuell gewählter Saison-Tab, bis ein Spieldatum aus der Analyse bekannt ist
-              bcbBoegen.unshift({ id: stableId, name: fname, spielpaarung:'', spieldatum:'', saison: BCB_SEASONS[bcbSeasonIdx], date: new Date().toISOString(), base64: b64, size: file.size, ts: Date.now() });
+              bcbBoegen.unshift({ id: stableId, name: fname, spielpaarung:'', spieldatum:'', saison: BCB_SEASONS[bcbSeasonIdx], date: new Date().toISOString(), base64: b64 || undefined, size: file.size, ts: Date.now() });
             }
             lastUploadId = stableId;
             pending--;
@@ -6807,7 +6886,7 @@ window.rkLoadRecipes = loadRecipes;
               bcbOpenModal(lastUploadId);
             }
           };
-          reader.readAsDataURL(file);
+          if (bcbIdbOk) reader.readAsArrayBuffer(file); else reader.readAsDataURL(file);
         });
         e.target.value = '';
       });
@@ -6818,10 +6897,9 @@ window.rkLoadRecipes = loadRecipes;
     if (bcbBlobUrls[id]) return bcbBlobUrls[id];
     var b = bcbBoegen.find(function(x){ return x.id === id; });
     if (!b) return '';
-    var bytes = atob(b.base64);
-    var ab = new Uint8Array(bytes.length);
-    for (var i = 0; i < bytes.length; i++) ab[i] = bytes.charCodeAt(i);
-    bcbBlobUrls[id] = URL.createObjectURL(new Blob([ab], { type: 'application/pdf' }));
+    var blob = bcbPdfBlobs[id] || (b.base64 ? bcbB64ToBlob(b.base64) : null);
+    if (!blob) return '';
+    bcbBlobUrls[id] = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
     return bcbBlobUrls[id];
   }
 
@@ -7143,6 +7221,8 @@ window.rkLoadRecipes = loadRecipes;
     if (!confirm('Bogen wirklich l\u00f6schen?')) return;
     bcbBoegen = bcbBoegen.filter(function(b){ return b.id !== id; });
     delete bcbAnalyses[id];
+    delete bcbPdfBlobs[id];
+    if (bcbIdbOk) bcbPdfDel(id).catch(function(){});
     var tomb = {}; tomb[BCB_AKEY + id] = { _deleted: true, _ts: Date.now() };
     var dl = bcbStoredList(BCB_DEL_KEY).filter(function(d){ return d && d.id && d.id !== id; });
     dl.push({ id: id, ts: Date.now() });
