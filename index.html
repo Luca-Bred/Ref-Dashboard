@@ -1721,7 +1721,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 </script>
 
 <header class="site-header" id="site-header" style="background-image:url('img/header.jpg');background-size:cover;background-position:center 25%;background-blend-mode:luminosity;">
-  <!-- Optionales Hintergrundvideo: Datei als img/header.mp4 (und/oder img/header.webm) ablegen, sonst bleibt das Bild -->
+  <!-- Optionale Hintergrundvideos: img/header1.mp4, header2.mp4, header3.mp4 (zufällig im Wechsel), sonst bleibt das Bild -->
   <video class="header-video" id="header-video" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
   <svg class="pitch-overlay" viewBox="0 0 1100 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
     <!-- Center line full height -->
@@ -6489,28 +6489,35 @@ window.rkLoadRecipes = loadRecipes;
     // Load persisted data
   });
 
-  // ── HEADER-VIDEO (optional: img/header.mp4 / img/header.webm) ──
+  // ── HEADER-VIDEO (optional: img/header1.mp4, header2.mp4, header3.mp4 – zufällig im Wechsel) ──
   (function() {
     var v = document.getElementById('header-video');
     if (!v) return;
     var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     var saver  = navigator.connection && navigator.connection.saveData;
     if (reduce || saver) return;   // Bild statt Video
-    var src = document.createElement('source');
-    var canWebm = !!(v.canPlayType && v.canPlayType('video/webm; codecs="vp9"'));
-    src.src  = canWebm ? 'img/header.webm' : 'img/header.mp4';
-    src.type = canWebm ? 'video/webm' : 'video/mp4';
-    var fallback = document.createElement('source');
-    fallback.src  = canWebm ? 'img/header.mp4' : 'img/header.webm';
-    fallback.type = canWebm ? 'video/mp4' : 'video/webm';
-    v.appendChild(src); v.appendChild(fallback);
-    v.preload = 'auto';
+    var files = ['img/header1.mp4', 'img/header2.mp4', 'img/header3.mp4'];
+    var failed = {}, current = null;
+    function available() { return files.filter(function(f){ return !failed[f]; }); }
+    function playNext() {
+      var av = available();
+      if (!av.length) { v.classList.remove('is-playing'); return; }
+      var others = av.filter(function(f){ return f !== current; });
+      var pool = others.length ? others : av;
+      current = pool[Math.floor(Math.random() * pool.length)];
+      v.loop = av.length === 1;   // nur ein Video vorhanden → Endlosschleife
+      v.src = current;
+      var pr = v.play();
+      if (pr && pr.catch) pr.catch(function() {});
+    }
     v.addEventListener('playing', function() { v.classList.add('is-playing'); });
-    v.load();
-    var pr = v.play();
-    if (pr && pr.catch) pr.catch(function() {});
+    v.addEventListener('ended', playNext);
+    v.addEventListener('error', function() { failed[current] = true; playNext(); });
+    v.preload = 'auto';
+    playNext();
     // Tab im Hintergrund → Video anhalten
     document.addEventListener('visibilitychange', function() {
+      if (!v.src) return;
       if (document.hidden) v.pause(); else { var p2 = v.play(); if (p2 && p2.catch) p2.catch(function(){}); }
     });
   })();
