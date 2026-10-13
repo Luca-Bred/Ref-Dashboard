@@ -5947,7 +5947,7 @@ function catIndex(id){
 
 function matchesSearchAndTags(r){
   const matchesSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase());
-  const matchesTags = activeFilters.size === 0 || [...activeFilters].some(t => (r.tags||[]).includes(t));
+  const matchesTags = activeFilters.size === 0 || [...activeFilters].every(t => (r.tags||[]).includes(t));
   return matchesSearch && matchesTags;
 }
 
