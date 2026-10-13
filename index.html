@@ -170,8 +170,8 @@ body {
 .header-inner {
   max-width: min(80vw, 1600px);
   margin: 0 auto;
-  min-height: 180px;
-  padding: 2rem 2rem 1.75rem;
+  min-height: calc(180px + 1cm);   /* Header ca. 1 cm höher (nach unten) */
+  padding: 2rem 2rem calc(1.75rem + 1cm);
   position: relative;
   z-index: 2;
   display: grid;
@@ -925,7 +925,7 @@ body {
   .md-slot { grid-template-columns: 90px 1fr; }
   .md-time-label { font-size: 9px; }
   .top-tab { padding: 7px 14px; font-size: 12px; }
-  .header-inner { max-width: 100%; padding: 1.5rem 1rem 1.25rem; grid-template-columns: 1fr; gap: .75rem; }
+  .header-inner { max-width: 100%; padding: 1.5rem 1rem calc(1.25rem + 1cm); grid-template-columns: 1fr; gap: .75rem; }
   .header-nav { justify-content: flex-start; }
   .header-right { align-items: flex-start; }
   .header-badge { display: none; }
