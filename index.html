@@ -3097,6 +3097,20 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     color:#0a1f0e;
   }
 
+  .chips.cat-chips{margin:18px 0 0;}
+  .chips.tag-chips{margin:12px 0 22px;}
+  .chip .cnt{opacity:.6;font-size:11px;margin-left:4px;}
+  .chip.active .cnt{opacity:.7;}
+  .cat-head{
+    grid-column:1/-1;
+    display:flex;align-items:baseline;gap:10px;
+    margin:10px 0 -4px;
+    font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--grass);
+  }
+  .cat-head:first-child{margin-top:0;}
+  .cat-head span{font-size:12px;font-weight:500;color:var(--text-3);letter-spacing:0;}
+
   /* Grid */
   .grid{
     display:grid;
@@ -3132,6 +3146,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
   .card .tab.dinner{background:var(--blue);color:#fff;}
   .card .tab.breakfast{background:var(--amber);color:#0a0a0a;}
   .card .tab.lunch{background:var(--teal);color:#04140c;}
+  .card .tab.snack{background:var(--purple);color:#fff;}
   .card-body{padding:14px 16px 18px;}
   .card h3{
     font-family:'Barlow Condensed',sans-serif;
@@ -3343,6 +3358,9 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     font-size:12.5px;cursor:pointer;color:var(--text-3);
   }
   .tag-opt.active{background:var(--grass);border-color:var(--grass);color:#0a1f0e;}
+  .tag-add{display:flex;gap:8px;margin-top:10px;}
+  .tag-add input{flex:1;max-width:240px;}
+  .tag-add button{white-space:nowrap;}
   .dyn-row{
     display:flex;gap:8px;margin-bottom:8px;align-items:center;
   }
@@ -3434,7 +3452,8 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     </div>
   </header>
 
-  <div class="chips" id="chipsRow"></div>
+  <div class="chips cat-chips" id="catChipsRow"></div>
+  <div class="chips tag-chips" id="chipsRow"></div>
   <div id="mainArea"><div class="loading">Rezeptkiste wird geöffnet...</div></div>
 </div>
 
@@ -3972,8 +3991,10 @@ const TAG_OPTIONS = ["Bowl","Vegetarisch","Air Fryer","Schnell","Batch-Cooking",
 const CATEGORIES = [
   {id:"breakfast", label:"Frühstück"},
   {id:"lunch", label:"Mittag"},
-  {id:"dinner", label:"Abend"}
+  {id:"dinner", label:"Abend"},
+  {id:"snack", label:"Snack"}
 ];
+let activeCategory = null;   // null = alle
 
 let recipes = [];
 let activeFilters = new Set();
@@ -4320,9 +4341,9 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-suesskartoffel-pommes-skyr-dip',
-    _v: 3,
+    _v: 4,
     name: 'Süßkartoffel-Pommes mit Skyr-Dip',
-    category: 'lunch',
+    category: 'snack',
     baseServings: 2,
     kcal: 349,
     protein: 12,
@@ -4350,9 +4371,9 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-halloumi-fries-honig-chili-dip',
-    _v: 3,
+    _v: 4,
     name: 'Halloumi-Fries mit Honig-Chili-Dip',
-    category: 'lunch',
+    category: 'snack',
     baseServings: 2,
     kcal: 732,
     protein: 39,
@@ -5349,9 +5370,9 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-zucchini-puffer-frischkaese-dip',
-    _v: 1,
+    _v: 2,
     name: 'Zucchini-Puffer mit Frischkäse-Dip',
-    category: 'dinner',
+    category: 'snack',
     baseServings: 2,
     kcal: 501,
     protein: 22,
@@ -5564,9 +5585,9 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-suesskartoffel-pommes-feta-kraeuter-dip',
-    _v: 1,
+    _v: 2,
     name: 'Süßkartoffel-Pommes mit Feta-Kräuter-Dip',
-    category: 'lunch',
+    category: 'snack',
     baseServings: 2,
     kcal: 517,
     protein: 13,
@@ -5593,9 +5614,9 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-chili-cheese-fries',
-    _v: 1,
+    _v: 2,
     name: 'Chili-Cheese-Fries',
-    category: 'dinner',
+    category: 'snack',
     baseServings: 2,
     kcal: 788,
     protein: 54,
@@ -5625,9 +5646,9 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-truffle-fries-parmesan',
-    _v: 1,
+    _v: 2,
     name: 'Truffle Fries mit Parmesan',
-    category: 'lunch',
+    category: 'snack',
     baseServings: 2,
     kcal: 403,
     protein: 13,
@@ -5677,9 +5698,9 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-crispy-salmon-bites',
-    _v: 1,
+    _v: 2,
     name: 'Crispy Salmon Bites',
-    category: 'dinner',
+    category: 'snack',
     baseServings: 2,
     kcal: 641,
     protein: 41,
@@ -5900,11 +5921,50 @@ function fmtAmount(n){
   return r % 1 === 0 ? r.toString() : r.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
 }
 
+function escAttr(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+// Standard-Tags + alle Tags, die in Rezepten vorkommen (eigene Tags erscheinen so automatisch als Filter)
+function allTagList(){
+  const extra = new Set();
+  recipes.forEach(r=>(r.tags||[]).forEach(t=>{ if(t && !TAG_OPTIONS.includes(t)) extra.add(t); }));
+  return TAG_OPTIONS.concat([...extra].sort((a,b)=>a.localeCompare(b,'de')));
+}
+function catIndex(id){
+  const i = CATEGORIES.findIndex(c=>c.id===id);
+  return i === -1 ? CATEGORIES.length : i;
+}
+
+function matchesSearchAndTags(r){
+  const matchesSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const matchesTags = activeFilters.size === 0 || [...activeFilters].some(t => (r.tags||[]).includes(t));
+  return matchesSearch && matchesTags;
+}
+
 function renderChips(){
+  const tags = allTagList();
+  [...activeFilters].forEach(t=>{ if(!tags.includes(t)) activeFilters.delete(t); });
+
+  // Kategorie-Filter (Frühstück / Mittag / Abend / Snack)
+  const base = recipes.filter(matchesSearchAndTags);
+  const catRow = root.getElementById('catChipsRow');
+  catRow.innerHTML =
+    `<button class="chip ${activeCategory===null?'active':''}" data-cat="">Alle<span class="cnt">${base.length}</span></button>` +
+    CATEGORIES.map(c=>{
+      const n = base.filter(r=>r.category===c.id).length;
+      return `<button class="chip ${activeCategory===c.id?'active':''}" data-cat="${c.id}">${c.label}<span class="cnt">${n}</span></button>`;
+    }).join('');
+  catRow.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      activeCategory = btn.dataset.cat || null;
+      render();
+    });
+  });
+
+  // Tag-Filter
   const row = root.getElementById('chipsRow');
-  const allTags = TAG_OPTIONS;
-  row.innerHTML = allTags.map(tag => `
-    <button class="chip ${activeFilters.has(tag)?'active':''}" data-tag="${tag}">${tag}</button>
+  row.innerHTML = tags.map(tag => `
+    <button class="chip ${activeFilters.has(tag)?'active':''}" data-tag="${escAttr(tag)}">${escapeHtml(tag)}</button>
   `).join('');
   row.querySelectorAll('.chip').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -5915,12 +5975,11 @@ function renderChips(){
   });
 }
 
+// vorsortiert nach Kategorie (Frühstück, Mittag, Abend, Snack), darin alphabetisch
 function filteredRecipes(){
-  return recipes.filter(r=>{
-    const matchesSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTags = activeFilters.size === 0 || [...activeFilters].some(t => (r.tags||[]).includes(t));
-    return matchesSearch && matchesTags;
-  });
+  return recipes
+    .filter(r=>matchesSearchAndTags(r) && (activeCategory === null || r.category === activeCategory))
+    .sort((a,b)=> catIndex(a.category) - catIndex(b.category) || a.name.localeCompare(b.name,'de'));
 }
 
 function render(){
@@ -5941,7 +6000,24 @@ function render(){
     area.innerHTML = `<div class="empty"><h2>Nichts gefunden</h2><p>Andere Suche oder Filter probieren.</p></div>`;
     return;
   }
-  area.innerHTML = `<div class="grid">${list.map(cardHtml).join('')}</div>`;
+  let html = '';
+  if(activeCategory === null){
+    // Gruppen mit Überschrift je Kategorie
+    let last = '__none__';
+    list.forEach(r=>{
+      const key = CATEGORIES.some(c=>c.id===r.category) ? r.category : '';
+      if(key !== last){
+        last = key;
+        const c = CATEGORIES.find(x=>x.id===key);
+        const n = list.filter(x=>(CATEGORIES.some(c2=>c2.id===x.category) ? x.category : '') === key).length;
+        html += `<h2 class="cat-head">${c ? c.label : 'Ohne Kategorie'}<span>${n}</span></h2>`;
+      }
+      html += cardHtml(r);
+    });
+  } else {
+    html = list.map(cardHtml).join('');
+  }
+  area.innerHTML = `<div class="grid">${html}</div>`;
   area.querySelectorAll('.card').forEach(el=>{
     el.addEventListener('click', ()=> openDetail(el.dataset.id));
   });
@@ -5959,7 +6035,7 @@ function cardHtml(r){
       <div class="card-body">
         <h3>${escapeHtml(r.name)}</h3>
         <div class="meta-line">${r.baseServings||2} Portionen${macroBits.length? ' · '+macroBits.join(' · '):''}</div>
-        <div class="pills">${(r.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+        <div class="pills">${(r.tags||[]).map(t=>`<span class="pill">${escapeHtml(t)}</span>`).join('')}</div>
       </div>
     </div>`;
 }
@@ -6326,7 +6402,11 @@ function openForm(data){
 
         <label>Tags</label>
         <div class="tag-picker" id="tagPicker">
-          ${TAG_OPTIONS.map(t=>`<span class="tag-opt ${data.tags&&data.tags.includes(t)?'active':''}" data-tag="${t}">${t}</span>`).join('')}
+          ${allTagList().concat((data.tags||[]).filter(t=>!allTagList().includes(t))).map(t=>`<span class="tag-opt ${data.tags&&data.tags.includes(t)?'active':''}" data-tag="${escAttr(t)}">${escapeHtml(t)}</span>`).join('')}
+        </div>
+        <div class="tag-add">
+          <input type="text" id="newTagInput" maxlength="24" placeholder="Eigenen Tag hinzufügen …">
+          <button type="button" class="add-line" id="newTagBtn">+ Tag</button>
         </div>
 
         <label>Zutaten</label>
@@ -6388,13 +6468,36 @@ function openForm(data){
   root.getElementById('addStepBtn').addEventListener('click', ()=>{ steps.push(''); paintStepRows(); });
 
   let selectedTags = new Set(data.tags||[]);
-  root.querySelectorAll('.tag-opt').forEach(el=>{
+  function bindTagOpt(el){
     el.addEventListener('click', ()=>{
       const t = el.dataset.tag;
       if(selectedTags.has(t)){ selectedTags.delete(t); el.classList.remove('active'); }
       else{ selectedTags.add(t); el.classList.add('active'); }
     });
-  });
+  }
+  root.querySelectorAll('.tag-opt').forEach(bindTagOpt);
+  function addCustomTag(){
+    const inp = root.getElementById('newTagInput');
+    const t = inp.value.trim().replace(/\s+/g,' ');
+    if(!t) return;
+    inp.value = '';
+    const picker = root.getElementById('tagPicker');
+    const existing = [...picker.querySelectorAll('.tag-opt')].find(el=>el.dataset.tag.toLowerCase() === t.toLowerCase());
+    if(existing){
+      selectedTags.add(existing.dataset.tag);
+      existing.classList.add('active');
+      return;
+    }
+    const el = document.createElement('span');
+    el.className = 'tag-opt active';
+    el.dataset.tag = t;
+    el.textContent = t;
+    picker.appendChild(el);
+    selectedTags.add(t);
+    bindTagOpt(el);
+  }
+  root.getElementById('newTagBtn').addEventListener('click', addCustomTag);
+  root.getElementById('newTagInput').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addCustomTag(); } });
 
   root.getElementById('closeForm').addEventListener('click', closeOverlay);
   root.getElementById('cancelForm').addEventListener('click', closeOverlay);
