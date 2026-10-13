@@ -1653,6 +1653,17 @@ body.preview-mobile #hyrox-week-grid > div { min-height: 50px !important; paddin
 /* ── Preview-Tablet (Simulation auf Desktop) ─── */
 body.preview-tablet .rsp-3      { grid-template-columns: 1fr 1fr !important; }
 body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
+
+/* Essensplan: Rezept-Symbol klein in der Feldecke */
+.pm-cell{position:relative}
+.pm-bar{position:absolute;top:3px;right:4px;display:flex;align-items:center;gap:1px;z-index:1}
+.pm-btn{background:none;border:none;padding:1px;margin:0;cursor:pointer;line-height:0;color:var(--text-3);font-size:9px;font-family:'Inter',sans-serif}
+.pm-off{opacity:.3}
+.pm-cell:hover .pm-off,.pm-cell:focus-within .pm-off{opacity:.7}
+.pm-on{color:var(--grass)}
+.pm-x{opacity:0;line-height:1;padding:1px 2px}
+.pm-cell:hover .pm-x,.pm-cell:focus-within .pm-x{opacity:.7}
+@media (hover:none){.pm-off{opacity:.55}.pm-x{opacity:.6}}
 </style>
 </head>
 <body>
@@ -9377,34 +9388,38 @@ window.rkOpenRecipe = function(id){
       days.forEach(function(d) {
         var ds = planerFmtDate(d);
         var cellWrap = document.createElement('div');
+        cellWrap.className = 'pm-cell';
         var ta = document.createElement('textarea');
         ta.value = dbGet('sr-meal-date-' + ds + '-' + mealKey, '') || '';
         ta.placeholder = '—';
         ta.style.cssText = 'width:100%;box-sizing:border-box;min-height:44px;background:var(--surface2);'
-          + 'border:1px solid var(--border);border-radius:var(--r-xs);padding:5px 6px;color:var(--text);'
-          + 'font-size:11px;font-family:\'Inter\',sans-serif;resize:vertical;outline:none';
+          + 'border:1px solid var(--border);border-radius:var(--r-xs);padding:5px 18px 5px 6px;color:var(--text);'
+          + 'font-size:11px;font-family:\'Inter\',sans-serif;resize:vertical;outline:none;display:block';
+        // Rezept-Symbol liegt klein in der Ecke des Feldes (kein zusätzlicher Platzbedarf)
         var bar = document.createElement('div');
-        bar.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:2px;min-height:16px';
+        bar.className = 'pm-bar';
         cellWrap.appendChild(ta);
         cellWrap.appendChild(bar);
+
+        var BOOK_SVG = '<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.2c1.9-.5 3.9-.3 6 .9 2.1-1.2 4.1-1.4 6-.9v9c-1.9-.5-3.9-.3-6 .9-2.1-1.2-4.1-1.4-6-.9z"/><path d="M8 4.1v9"/></svg>';
 
         function paintBar() {
           bar.innerHTML = '';
           var rid = planerGetMealRecipe(mealKey, ds);
           var rec = rid ? planerFindRecipe(rid) : null;
-          if (rid && !rec && window.rkGetRecipes && window.rkGetRecipes().length) { rid = ''; }   // Rezept wurde gelöscht
-          var btnCss = 'background:none;border:none;padding:1px 2px;cursor:pointer;font-family:\'Inter\',sans-serif;font-size:10px;';
           if (rec) {
             var open = document.createElement('button');
             open.type = 'button';
-            open.title = rec.name;
-            open.style.cssText = btnCss + 'color:var(--grass);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%';
-            open.textContent = '📖 Rezept öffnen';
+            open.className = 'pm-btn pm-on';
+            open.title = 'Rezept öffnen: ' + rec.name;
+            open.setAttribute('aria-label', 'Rezept öffnen: ' + rec.name);
+            open.innerHTML = BOOK_SVG;
             open.onclick = function() { planerOpenRecipe(rec.id); };
             var x = document.createElement('button');
             x.type = 'button';
+            x.className = 'pm-btn pm-x';
             x.title = 'Verknüpfung zum Rezept entfernen';
-            x.style.cssText = btnCss + 'color:var(--text-3)';
+            x.setAttribute('aria-label', 'Verknüpfung zum Rezept entfernen');
             x.textContent = '✕';
             x.onclick = function() { planerSaveMealRecipe(mealKey, ds, ''); paintBar(); };
             bar.appendChild(open);
@@ -9412,9 +9427,10 @@ window.rkOpenRecipe = function(id){
           } else {
             var pick = document.createElement('button');
             pick.type = 'button';
+            pick.className = 'pm-btn pm-off';
             pick.title = 'Rezept aus der Rezeptsammlung wählen (Text bleibt frei änderbar)';
-            pick.style.cssText = btnCss + 'color:var(--text-3);opacity:.7';
-            pick.textContent = '📖 Rezept wählen';
+            pick.setAttribute('aria-label', 'Rezept wählen');
+            pick.innerHTML = BOOK_SVG;
             pick.onclick = function() {
               planerOpenRecipePicker(pick, function(r) {
                 ta.value = r.name;
