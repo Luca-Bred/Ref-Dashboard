@@ -6536,6 +6536,13 @@ root.getElementById('openAddBtn').addEventListener('click', openAddModal);
 root.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e.target.value; render(); });
 
 window.rkLoadRecipes = loadRecipes;
+// Schnittstelle für den Essensplan (Kalender): Rezepte auflisten / Rezept direkt öffnen
+window.rkGetRecipes = function(){ return recipes.map(function(r){ return {id:r.id, name:r.name, category:r.category||''}; }); };
+window.rkOpenRecipe = function(id){
+  if(!recipes.some(function(r){ return r.id === id; })){ showToast('Rezept nicht mehr vorhanden'); return false; }
+  openDetail(id);
+  return true;
+};
 })();
   // ── 2-WEEK TRAINING CALENDAR ─────────────────────────────────
   var CAL_BUILT = false;
@@ -9253,6 +9260,88 @@ window.rkLoadRecipes = loadRecipes;
     dbSave(p);
   };
 
+  // ── Rezept-Verknüpfung (optional; das Textfeld bleibt freier Text) ──
+  function planerGetMealRecipe(meal, dateStr) {
+    return dbGet('sr-meal-date-' + dateStr + '-' + meal + '-rid', '') || '';
+  }
+  function planerSaveMealRecipe(meal, dateStr, rid) {
+    var p = {}; p['sr-meal-date-' + dateStr + '-' + meal + '-rid'] = rid || '';
+    dbSave(p);
+  }
+  function planerFindRecipe(id) {
+    var list = window.rkGetRecipes ? window.rkGetRecipes() : [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  }
+  // Rezept direkt öffnen: zum Reiter "Ernährung" wechseln und die Detailansicht zeigen
+  window.planerOpenRecipe = function(id) {
+    var tab = Array.prototype.filter.call(document.querySelectorAll('.sub-tab'), function(b) {
+      return /planer-ernaehrung/.test(b.getAttribute('onclick') || '');
+    })[0];
+    if (tab) showSlot('planer-ernaehrung', tab);
+    if (window.rkOpenRecipe) window.rkOpenRecipe(id);
+  };
+
+  var _PLANER_CAT_LABEL = { breakfast: 'Frühstück', lunch: 'Mittag', dinner: 'Abend', snack: 'Snack' };
+  var _planerPicker = null;
+  function planerClosePicker() {
+    if (_planerPicker) { _planerPicker.remove(); _planerPicker = null; }
+    document.removeEventListener('mousedown', _planerPickerOutside, true);
+    document.removeEventListener('keydown', _planerPickerKey, true);
+  }
+  function _planerPickerOutside(e) { if (_planerPicker && !_planerPicker.contains(e.target)) planerClosePicker(); }
+  function _planerPickerKey(e) { if (e.key === 'Escape') planerClosePicker(); }
+  function planerOpenRecipePicker(anchor, onPick) {
+    planerClosePicker();
+    var recipes = window.rkGetRecipes ? window.rkGetRecipes() : [];
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;z-index:9000;width:min(300px,92vw);background:var(--surface);border:1px solid var(--border-med, var(--border));'
+      + 'border-radius:var(--r-sm, 8px);box-shadow:0 12px 32px rgba(0,0,0,.55);padding:8px;font-family:\'Inter\',sans-serif';
+    var inp = document.createElement('input');
+    inp.type = 'text'; inp.placeholder = 'Rezept suchen …';
+    inp.style.cssText = 'width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:6px;'
+      + 'padding:7px 9px;color:var(--text);font-size:13px;outline:none;margin-bottom:6px';
+    var list = document.createElement('div');
+    list.style.cssText = 'max-height:240px;overflow-y:auto';
+    box.appendChild(inp); box.appendChild(list);
+    function paint() {
+      var q = inp.value.trim().toLowerCase();
+      list.innerHTML = '';
+      var hits = recipes.filter(function(r) { return !q || r.name.toLowerCase().indexOf(q) !== -1; })
+        .sort(function(a, b) { return a.name.localeCompare(b.name, 'de'); });
+      if (!recipes.length) { list.innerHTML = '<div style="padding:10px;color:var(--text-3);font-size:12px">Noch keine Rezepte vorhanden.</div>'; return; }
+      if (!hits.length) { list.innerHTML = '<div style="padding:10px;color:var(--text-3);font-size:12px">Kein Rezept gefunden – du kannst das Feld auch frei beschriften.</div>'; return; }
+      hits.forEach(function(r) {
+        var it = document.createElement('button');
+        it.type = 'button';
+        it.style.cssText = 'display:block;width:100%;text-align:left;background:none;border:none;border-radius:6px;padding:7px 8px;cursor:pointer;color:var(--text);font-size:12.5px;font-family:inherit';
+        it.onmouseenter = function() { it.style.background = 'var(--surface2)'; };
+        it.onmouseleave = function() { it.style.background = 'none'; };
+        var nm = document.createElement('div'); nm.textContent = r.name;
+        var ct = document.createElement('div'); ct.textContent = _PLANER_CAT_LABEL[r.category] || '';
+        ct.style.cssText = 'font-size:10px;color:var(--text-3);margin-top:1px';
+        it.appendChild(nm); if (ct.textContent) it.appendChild(ct);
+        it.onclick = function() { planerClosePicker(); onPick(r); };
+        list.appendChild(it);
+      });
+    }
+    inp.oninput = paint;
+    paint();
+    document.body.appendChild(box);
+    var rc = anchor.getBoundingClientRect();
+    var w = box.offsetWidth, h = box.offsetHeight;
+    var left = Math.max(8, Math.min(rc.left, window.innerWidth - w - 8));
+    var top = rc.bottom + 4;
+    if (top + h > window.innerHeight - 8) top = Math.max(8, rc.top - h - 4);
+    box.style.left = left + 'px'; box.style.top = top + 'px';
+    _planerPicker = box;
+    setTimeout(function() {
+      document.addEventListener('mousedown', _planerPickerOutside, true);
+      document.addEventListener('keydown', _planerPickerKey, true);
+      inp.focus();
+    }, 0);
+  }
+
   function planerRenderMealGrid(days) {
     var wrap = document.getElementById('planer-meal-grid');
     if (!wrap) return;
@@ -9287,14 +9376,71 @@ window.rkLoadRecipes = loadRecipes;
 
       days.forEach(function(d) {
         var ds = planerFmtDate(d);
+        var cellWrap = document.createElement('div');
         var ta = document.createElement('textarea');
         ta.value = dbGet('sr-meal-date-' + ds + '-' + mealKey, '') || '';
         ta.placeholder = '—';
         ta.style.cssText = 'width:100%;box-sizing:border-box;min-height:44px;background:var(--surface2);'
           + 'border:1px solid var(--border);border-radius:var(--r-xs);padding:5px 6px;color:var(--text);'
           + 'font-size:11px;font-family:\'Inter\',sans-serif;resize:vertical;outline:none';
-        ta.onchange = (function(dsInner) { return function() { planerSaveMeal(mealKey, dsInner, this.value); }; })(ds);
-        row.appendChild(ta);
+        var bar = document.createElement('div');
+        bar.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:2px;min-height:16px';
+        cellWrap.appendChild(ta);
+        cellWrap.appendChild(bar);
+
+        function paintBar() {
+          bar.innerHTML = '';
+          var rid = planerGetMealRecipe(mealKey, ds);
+          var rec = rid ? planerFindRecipe(rid) : null;
+          if (rid && !rec && window.rkGetRecipes && window.rkGetRecipes().length) { rid = ''; }   // Rezept wurde gelöscht
+          var btnCss = 'background:none;border:none;padding:1px 2px;cursor:pointer;font-family:\'Inter\',sans-serif;font-size:10px;';
+          if (rec) {
+            var open = document.createElement('button');
+            open.type = 'button';
+            open.title = rec.name;
+            open.style.cssText = btnCss + 'color:var(--grass);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%';
+            open.textContent = '📖 Rezept öffnen';
+            open.onclick = function() { planerOpenRecipe(rec.id); };
+            var x = document.createElement('button');
+            x.type = 'button';
+            x.title = 'Verknüpfung zum Rezept entfernen';
+            x.style.cssText = btnCss + 'color:var(--text-3)';
+            x.textContent = '✕';
+            x.onclick = function() { planerSaveMealRecipe(mealKey, ds, ''); paintBar(); };
+            bar.appendChild(open);
+            bar.appendChild(x);
+          } else {
+            var pick = document.createElement('button');
+            pick.type = 'button';
+            pick.title = 'Rezept aus der Rezeptsammlung wählen (Text bleibt frei änderbar)';
+            pick.style.cssText = btnCss + 'color:var(--text-3);opacity:.7';
+            pick.textContent = '📖 Rezept wählen';
+            pick.onclick = function() {
+              planerOpenRecipePicker(pick, function(r) {
+                ta.value = r.name;
+                planerSaveMeal(mealKey, ds, r.name);
+                planerSaveMealRecipe(mealKey, ds, r.id);
+                paintBar();
+              });
+            };
+            bar.appendChild(pick);
+          }
+        }
+
+        ta.onchange = (function(dsInner) { return function() {
+          planerSaveMeal(mealKey, dsInner, this.value);
+          var txt = this.value.trim();
+          if (!txt) {
+            planerSaveMealRecipe(mealKey, dsInner, '');
+          } else if (!planerGetMealRecipe(mealKey, dsInner)) {
+            // Name exakt wie ein Rezept eingetippt → automatisch verknüpfen
+            var hit = (window.rkGetRecipes ? window.rkGetRecipes() : []).find(function(r) { return r.name.toLowerCase() === txt.toLowerCase(); });
+            if (hit) planerSaveMealRecipe(mealKey, dsInner, hit.id);
+          }
+          paintBar();
+        }; })(ds);
+        paintBar();
+        row.appendChild(cellWrap);
       });
       wrap.appendChild(row);
     });
