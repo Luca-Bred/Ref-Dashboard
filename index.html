@@ -1923,6 +1923,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--grass)">To-Do</div>
       </div>
+      <div id="ueb-shop-pins" style="display:flex;flex-direction:column;gap:7px;margin-bottom:.875rem;padding-bottom:.875rem;border-bottom:1px solid var(--border)"></div>
       <div id="ueb-todo-list" style="display:flex;flex-direction:column;gap:9px"></div>
       <button onclick="uebAddTodoItem()" style="margin-top:auto;width:100%;background:none;border:1px dashed var(--border-med);border-radius:var(--r-sm);padding:7px;color:var(--text-3);font-size:11px;font-weight:600;cursor:pointer">+ Aufgabe hinzufügen</button>
     </div>
@@ -6568,6 +6569,10 @@ root.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e
 
 window.rkLoadRecipes = loadRecipes;
 // Schnittstelle für den Essensplan (Kalender): Rezepte auflisten / Rezept direkt öffnen
+window.rkGetRecipe = function(id){
+  const r = recipes.find(function(x){ return x.id === id; });
+  return r ? JSON.parse(JSON.stringify(r)) : null;
+};
 window.rkGetRecipes = function(){ return recipes.map(function(r){ return {id:r.id, name:r.name, category:r.category||''}; }); };
 window.rkOpenRecipe = function(id){
   if(!recipes.some(function(r){ return r.id === id; })){ showToast('Rezept nicht mehr vorhanden'); return false; }
@@ -9298,6 +9303,7 @@ window.rkOpenRecipe = function(id){
   function planerSaveMealRecipe(meal, dateStr, rid) {
     var p = {}; p['sr-meal-date-' + dateStr + '-' + meal + '-rid'] = rid || '';
     dbSave(p);
+    if (window.shopRefresh) window.shopRefresh();
   }
   function planerFindRecipe(id) {
     var list = window.rkGetRecipes ? window.rkGetRecipes() : [];
@@ -9819,6 +9825,7 @@ window.rkOpenRecipe = function(id){
 
   window.uebLoadTodo = function() {
     renderTodoList(uebGetTodoItems());
+    if (window.shopRenderPins) window.shopRenderPins();
   };
 
   window.uebToggleTodoItem = function(idx) {
@@ -9926,6 +9933,21 @@ window.rkOpenRecipe = function(id){
 <div id="dev-indicator"></div>
 
 <!-- Device Preview Switcher -->
+<!-- Einkaufsliste (Popup) -->
+<div id="shop-modal" class="modal-overlay" onclick="if(event.target===this)shopClose()">
+  <div class="modal-box" style="max-width:480px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:1.1rem 1.25rem .75rem;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--grass)">Einkaufsliste</div>
+        <div id="shop-title" style="font-size:18px;font-weight:700;color:var(--text);margin-top:2px">Einkaufswoche KW –</div>
+        <div id="shop-sub" style="font-size:11px;color:var(--text-3);margin-top:2px"></div>
+      </div>
+      <button onclick="shopClose()" title="Schließen" style="background:none;border:none;color:var(--text-3);font-size:22px;line-height:1;cursor:pointer;padding:0 2px">×</button>
+    </div>
+    <div id="shop-body" style="padding:.5rem 1.25rem 1.1rem;max-height:70vh;overflow-y:auto"></div>
+  </div>
+</div>
+
 <div id="dev-switcher">
   <div id="dev-panel">
     <div class="dev-panel-hdr">Ansicht wechseln</div>
@@ -9953,6 +9975,286 @@ window.rkOpenRecipe = function(id){
   </div>
   <button id="dev-toggle" onclick="devTogglePanel()" title="Bildschirmformat">🖥️</button>
 </div>
+
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  EINKAUFSLISTE – je Kalenderwoche, gegliedert nach Wochentag und Rezept.
+//  Die Rezepte kommen automatisch aus dem Essensplan (Planer → Kalender → Mahlzeiten),
+//  die Anzahl je Rezept ist einstellbar. Abgehakte Zutaten verschwinden (je Rezept/Tag einzeln,
+//  geräteübergreifend gespeichert); darunter können eigene Artikel eingetragen werden.
+// ══════════════════════════════════════════════════════════════
+(function() {
+  var MEALS = ['fruehstueck', 'mittag', 'abend'];
+  var MEAL_LABEL = { fruehstueck: 'Frühstück', mittag: 'Mittagessen', abend: 'Abendessen' };
+  var DAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+  var RID_RE = /^sr-meal-date-(\d{4}-\d{2}-\d{2})-(fruehstueck|mittag|abend)-rid$/;
+  var openWeek = null;     // Montag (YYYY-MM-DD) der geöffneten Woche
+  var showDone = false;    // erledigte Zutaten einblenden
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function fmt(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function parse(ds) { var p = ds.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function mondayOf(d) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    return x;
+  }
+  function isoWeek(d) {   // ISO-Kalenderwoche (Montag-basiert)
+    var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var day = t.getUTCDay() || 7;
+    t.setUTCDate(t.getUTCDate() + 4 - day);
+    var y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return { week: Math.ceil(((t - y0) / 86400000 + 1) / 7), year: t.getUTCFullYear() };
+  }
+  function weekId(monday) { var w = isoWeek(parse(monday)); return w.year + '-W' + pad(w.week); }
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML.replace(/"/g, '&quot;'); }
+  function fmtAmount(n) {
+    var r = Math.round(n * 100) / 100;
+    return r % 1 === 0 ? String(r) : r.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+  }
+
+  // ── Daten ──
+  function loadObj(key, fb) { var v = dbGet(key, fb); return (v && typeof v === 'object') ? v : fb; }
+  function doneKey(m)  { return 'shop-done-'  + weekId(m); }
+  function qtyKey(m)   { return 'shop-qty-'   + weekId(m); }
+  function extraKey(m) { return 'shop-extra-' + weekId(m); }
+  function getDone(m)  { var d = loadObj(doneKey(m), {});  return Array.isArray(d) ? {} : d; }
+  function getQty(m)   { var d = loadObj(qtyKey(m), {});   return Array.isArray(d) ? {} : d; }
+  function getExtra(m) { var e = loadObj(extraKey(m), []); return Array.isArray(e) ? e : []; }
+  function save(key, val) { var p = {}; p[key] = val; dbSave(p); }
+
+  function allPlanEntries() {
+    var keys = {};
+    Object.keys(_cache).forEach(function(k) { if (RID_RE.test(k)) keys[k] = 1; });
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && RID_RE.test(k)) keys[k] = 1;
+      }
+    } catch (e) {}
+    var out = [];
+    Object.keys(keys).forEach(function(k) {
+      var rid = dbGet(k, '') || '';
+      if (!rid) return;
+      var m = RID_RE.exec(k);
+      out.push({ date: m[1], meal: m[2], rid: String(rid) });
+    });
+    return out;
+  }
+
+  // Wochenplan → Tage → Rezepte → Zutaten (Mengen mit der eingestellten Anzahl multipliziert)
+  function buildWeek(monday) {
+    var from = monday, to = fmt(new Date(parse(monday).getTime() + 6 * 86400000 + 3600000));
+    var done = getDone(monday), qtys = getQty(monday);
+    var days = {};
+    allPlanEntries().filter(function(e) { return e.date >= from && e.date <= to; })
+      .sort(function(a, b) { return a.date.localeCompare(b.date) || MEALS.indexOf(a.meal) - MEALS.indexOf(b.meal); })
+      .forEach(function(e) {
+        var r = window.rkGetRecipe ? window.rkGetRecipe(e.rid) : null;
+        if (!r) return;
+        var ek = e.date + '|' + e.meal;
+        var qty = Math.max(1, parseInt(qtys[ek], 10) || 1);
+        var byKey = {}, items = [];
+        (r.ingredients || []).forEach(function(ing) {
+          var name = (ing.name || '').trim();
+          if (!name) return;
+          var unit = (ing.unit || '').trim();
+          var k = name.toLowerCase() + '|' + unit.toLowerCase();
+          if (!byKey[k]) { byKey[k] = { key: ek + '|' + k, name: name, unit: unit, amount: null }; items.push(byKey[k]); }
+          if (ing.amount !== null && ing.amount !== undefined && ing.amount !== '' && !isNaN(ing.amount)) byKey[k].amount = (byKey[k].amount || 0) + Number(ing.amount) * qty;
+        });
+        items.forEach(function(it) { it.done = !!done[it.key]; });
+        (days[e.date] = days[e.date] || []).push({ ek: ek, meal: e.meal, recipe: r, qty: qty, items: items });
+      });
+    return Object.keys(days).sort().map(function(d) { return { date: d, entries: days[d] }; });
+  }
+
+  function countOpen(monday) {
+    var open = 0, total = 0;
+    buildWeek(monday).forEach(function(day) { day.entries.forEach(function(en) { en.items.forEach(function(it) { total++; if (!it.done) open++; }); }); });
+    getExtra(monday).forEach(function(x) { total++; if (!x.done) open++; });
+    return { open: open, total: total };
+  }
+
+  function weeksToShow() {
+    var cur = fmt(mondayOf(new Date()));
+    var set = {}; set[cur] = 1;
+    allPlanEntries().forEach(function(e) {
+      var m = fmt(mondayOf(parse(e.date)));
+      if (m >= cur) set[m] = 1;
+    });
+    Object.keys(localStorage).concat(Object.keys(_cache)).forEach(function(k) {
+      var mm = /^shop-extra-(\d{4})-W(\d{2})$/.exec(k);
+      if (!mm) return;
+      var mon = mondayOf(new Date(+mm[1], 0, 4)); mon.setDate(mon.getDate() + (+mm[2] - 1) * 7);
+      var m = fmt(mon);
+      if (m >= cur && getExtra(m).length) set[m] = 1;
+    });
+    return Object.keys(set).sort();
+  }
+
+  // ── Fixierte Zeilen in den To-Dos ──
+  window.shopRenderPins = function() {
+    var box = document.getElementById('ueb-shop-pins');
+    if (!box) return;
+    var html = '';
+    weeksToShow().forEach(function(monday) {
+      var w = isoWeek(parse(monday));
+      var c = countOpen(monday);
+      var badge = !c.total ? 'leer' : (c.open ? c.open + ' offen' : '✓ erledigt');
+      html += '<button type="button" onclick="shopOpen(\'' + monday + '\')" title="Einkaufsliste öffnen" '
+        + 'style="display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:var(--grass-dim, rgba(46,204,113,.1));border:1px solid rgba(46,204,113,.35);border-radius:var(--r-sm);padding:9px 11px;cursor:pointer;color:var(--text);font-family:inherit">'
+        + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--grass)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L21 7H6"/></svg>'
+        + '<span style="flex:1;min-width:0;font-size:12.5px;font-weight:700">Einkaufswoche KW ' + pad(w.week) + '</span>'
+        + '<span style="font-size:10.5px;font-weight:600;color:' + (c.open ? 'var(--grass)' : 'var(--text-3)') + ';white-space:nowrap">' + badge + '</span>'
+        + '</button>';
+    });
+    box.innerHTML = html;
+  };
+  window.shopRefresh = function() {
+    window.shopRenderPins();
+    if (openWeek && document.getElementById('shop-modal').classList.contains('is-open')) paintModal();
+  };
+
+  // ── Popup ──
+  var BTN = 'background:none;border:1px solid var(--border-med);border-radius:6px;color:var(--text-2);cursor:pointer;width:24px;height:24px;line-height:1;font-size:15px;padding:0;font-family:inherit';
+
+  function itemRow(it, keyAttr, onToggle, extraHtml) {
+    var amt = (it.amount !== null && it.amount !== undefined ? fmtAmount(it.amount) : '') + (it.unit ? (it.amount !== null && it.amount !== undefined ? ' ' : '') + it.unit : (it.amount !== null && it.amount !== undefined ? ' Stk' : ''));
+    return '<div style="display:flex;align-items:flex-start;gap:9px;padding:6px 0">'
+      + '<input type="checkbox" ' + (it.done ? 'checked' : '') + ' data-key="' + esc(keyAttr) + '" onchange="' + onToggle + '(this.dataset.key)" style="accent-color:var(--grass);width:16px;height:16px;margin-top:1px;flex-shrink:0;cursor:pointer">'
+      + '<div style="flex:1;min-width:0;font-size:13px;color:' + (it.done ? 'var(--text-3)' : 'var(--text)') + ';text-decoration:' + (it.done ? 'line-through' : 'none') + ';word-break:break-word">' + esc(it.name) + '</div>'
+      + (amt ? '<div style="font-size:12px;color:' + (it.done ? 'var(--text-3)' : 'var(--text-2)') + ';white-space:nowrap;margin-top:1px">' + esc(amt) + '</div>' : '')
+      + (extraHtml || '')
+      + '</div>';
+  }
+
+  function paintModal() {
+    var monday = openWeek;
+    var w = isoWeek(parse(monday));
+    var sun = new Date(parse(monday).getTime() + 6 * 86400000 + 3600000);
+    var d1 = parse(monday);
+    var c = countOpen(monday);
+    document.getElementById('shop-title').textContent = 'Einkaufswoche KW ' + pad(w.week);
+    document.getElementById('shop-sub').textContent = pad(d1.getDate()) + '.' + pad(d1.getMonth() + 1) + '. – ' + pad(sun.getDate()) + '.' + pad(sun.getMonth() + 1) + '.' + sun.getFullYear()
+      + ' · ' + c.open + ' offen' + (c.total - c.open ? ' · ' + (c.total - c.open) + ' erledigt' : '');
+
+    var body = document.getElementById('shop-body');
+    var scrollTop = body.scrollTop;
+    var html = '';
+    var days = buildWeek(monday);
+    var doneCount = 0;
+    if (!days.length) {
+      html += '<div style="padding:16px 2px 6px;text-align:center;color:var(--text-3);font-size:12.5px;line-height:1.6">Noch keine Rezepte für diese Woche.<br>Verknüpfe im Essensplan (Planer → Kalender) ein Rezept – die Zutaten erscheinen dann hier.</div>';
+    }
+    days.forEach(function(day) {
+      var d = parse(day.date);
+      var dayHtml = '';
+      day.entries.forEach(function(en) {
+        en.items.forEach(function(it) { if (it.done) doneCount++; });
+        var vis = en.items.filter(function(it) { return showDone || !it.done; });
+        if (!vis.length) return;
+        dayHtml += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 11px;margin-bottom:8px">'
+          + '<div style="display:flex;align-items:center;gap:8px">'
+          + '<div style="flex:1;min-width:0"><div style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">' + MEAL_LABEL[en.meal] + '</div>'
+          + '<div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.3">' + esc(en.recipe.name) + '</div></div>'
+          + '<div title="Anzahl der Rezepte (Mengen werden vervielfacht)" style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
+          + '<button type="button" data-ek="' + esc(en.ek) + '" onclick="shopQty(this.dataset.ek,-1)" style="' + BTN + (en.qty <= 1 ? ';opacity:.35;cursor:default' : '') + '"' + (en.qty <= 1 ? ' disabled' : '') + '>−</button>'
+          + '<span style="min-width:22px;text-align:center;font-size:12.5px;font-weight:700;color:var(--text)">×' + en.qty + '</span>'
+          + '<button type="button" data-ek="' + esc(en.ek) + '" onclick="shopQty(this.dataset.ek,1)" style="' + BTN + '">+</button>'
+          + '</div></div>'
+          + '<div style="margin-top:4px">' + vis.map(function(it) { return itemRow(it, it.key, 'shopToggle'); }).join('') + '</div>'
+          + '</div>';
+      });
+      if (dayHtml) {
+        html += '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--grass);margin:14px 0 7px">'
+          + DAY_NAMES[d.getDay()] + ' <span style="color:var(--text-3);font-weight:500">' + pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.</span></div>' + dayHtml;
+      }
+    });
+
+    // Freie Eingaben unterhalb der Rezepte
+    var extra = getExtra(monday);
+    extra.forEach(function(x) { if (x.done) doneCount++; });
+    var extraVis = extra.filter(function(x) { return showDone || !x.done; });
+    html += '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--grass);margin:16px 0 7px">Weitere Artikel</div>';
+    html += '<div>' + extraVis.map(function(x) {
+      return itemRow({ name: x.name, amount: null, unit: '', done: !!x.done }, 'x:' + x.id, 'shopToggle',
+        '<button type="button" data-id="' + esc(x.id) + '" onclick="shopRemoveManual(this.dataset.id)" title="Entfernen" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px">×</button>');
+    }).join('') + '</div>';
+    html += '<div style="display:flex;gap:8px;margin-top:6px">'
+      + '<input id="shop-add-input" type="text" placeholder="Artikel hinzufügen …" maxlength="80" style="flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);padding:8px 10px;color:var(--text);font-size:13px;outline:none" onkeydown="if(event.key===\'Enter\'){event.preventDefault();shopAddManual();}">'
+      + '<button type="button" onclick="shopAddManual()" style="background:var(--grass);border:none;color:#0a1f0e;font-weight:700;border-radius:var(--r-xs);padding:0 14px;font-size:13px;cursor:pointer">+</button></div>';
+
+    if (doneCount) {
+      html += '<button type="button" onclick="shopToggleShowDone()" style="display:block;margin:14px auto 0;background:none;border:none;color:var(--text-3);font-size:11px;cursor:pointer;text-decoration:underline">'
+        + (showDone ? 'Erledigte ausblenden' : 'Erledigte anzeigen (' + doneCount + ')') + '</button>';
+    }
+    body.innerHTML = html;
+    body.scrollTop = scrollTop;
+  }
+
+  window.shopOpen = function(monday) {
+    openWeek = monday; showDone = false;
+    paintModal();
+    document.getElementById('shop-modal').classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('shop-body').scrollTop = 0;
+  };
+  window.shopClose = function() {
+    document.getElementById('shop-modal').classList.remove('is-open');
+    document.body.style.overflow = '';
+    openWeek = null;
+    window.shopRenderPins();
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('shop-modal').classList.contains('is-open')) window.shopClose();
+  });
+
+  window.shopToggle = function(key) {
+    if (!openWeek) return;
+    if (key.indexOf('x:') === 0) {
+      var extra = getExtra(openWeek);
+      extra.forEach(function(x) { if ('x:' + x.id === key) x.done = !x.done; });
+      save(extraKey(openWeek), extra);
+    } else {
+      var done = getDone(openWeek);
+      if (done[key]) delete done[key]; else done[key] = true;
+      save(doneKey(openWeek), done);
+    }
+    paintModal();
+  };
+  window.shopToggleShowDone = function() { showDone = !showDone; paintModal(); };
+  window.shopQty = function(ek, delta) {
+    if (!openWeek) return;
+    var q = getQty(openWeek);
+    var cur = Math.max(1, parseInt(q[ek], 10) || 1);
+    var next = Math.max(1, Math.min(20, cur + delta));
+    if (next === 1) delete q[ek]; else q[ek] = next;
+    save(qtyKey(openWeek), q);
+    paintModal();
+  };
+  window.shopAddManual = function() {
+    if (!openWeek) return;
+    var inp = document.getElementById('shop-add-input');
+    var name = inp.value.trim();
+    if (!name) return;
+    var extra = getExtra(openWeek);
+    extra.push({ id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: name, done: false });
+    save(extraKey(openWeek), extra);
+    paintModal();
+    var again = document.getElementById('shop-add-input');
+    if (again) again.focus();
+  };
+  window.shopRemoveManual = function(id) {
+    if (!openWeek) return;
+    save(extraKey(openWeek), getExtra(openWeek).filter(function(x) { return x.id !== id; }));
+    paintModal();
+  };
+
+  window.shopRenderPins();
+})();
+</script>
 
 </body>
 </html>
