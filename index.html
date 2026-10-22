@@ -1654,6 +1654,8 @@ body.preview-mobile #hyrox-week-grid > div { min-height: 50px !important; paddin
 body.preview-tablet .rsp-3      { grid-template-columns: 1fr 1fr !important; }
 body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
 
+/* Rezept-Popup aus dem Planer: Rezeptkiste unsichtbar „aufgeklappt“, nur das Popup ist zu sehen */
+#planer-ernaehrung.rk-popup-only { display: block; height: 0; overflow: visible; visibility: hidden; animation: none; }
 /* Essensplan: Rezept-Symbol klein in der Feldecke */
 .pm-cell{position:relative}
 .pm-bar{position:absolute;top:3px;right:4px;display:flex;align-items:center;gap:1px;z-index:1}
@@ -3233,6 +3235,7 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     display:flex;align-items:center;justify-content:center;
     padding:20px;
     z-index:100;
+    visibility:visible;
   }
   .modal{
     background:var(--surface);
@@ -6575,8 +6578,29 @@ window.rkGetRecipe = function(id){
   return r ? JSON.parse(JSON.stringify(r)) : null;
 };
 window.rkGetRecipes = function(){ return recipes.map(function(r){ return {id:r.id, name:r.name, category:r.category||''}; }); };
-window.rkOpenRecipe = function(id){
-  if(!recipes.some(function(r){ return r.id === id; })){ showToast('Rezept nicht mehr vorhanden'); return false; }
+let rkPopupObserver = null;
+function rkExitPopupMode(){
+  if(rkPopupObserver){ rkPopupObserver.disconnect(); rkPopupObserver = null; }
+  const sec = document.getElementById('planer-ernaehrung');
+  if(sec) sec.classList.remove('rk-popup-only');
+  const app = root.querySelector('.app');
+  if(app) app.style.display = '';
+}
+// popupOnly=true: Rezept als Popup öffnen, ohne den aktuellen Reiter (z. B. Planer → Kalender) zu verlassen
+window.rkOpenRecipe = function(id, popupOnly){
+  if(!recipes.some(function(r){ return r.id === id; })) return false;
+  const sec = document.getElementById('planer-ernaehrung');
+  if(popupOnly && sec && !sec.classList.contains('active')){
+    rkExitPopupMode();
+    sec.classList.add('rk-popup-only');
+    const app = root.querySelector('.app');
+    if(app) app.style.display = 'none';
+    // Popup-Modus beenden, sobald kein Popup (Detail/Bearbeiten/Teilen) mehr offen ist
+    rkPopupObserver = new MutationObserver(function(){
+      if(!root.querySelector('.overlay')) rkExitPopupMode();
+    });
+    rkPopupObserver.observe(root, {childList:true});
+  }
   openDetail(id);
   return true;
 };
@@ -9311,13 +9335,9 @@ window.rkOpenRecipe = function(id){
     for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
     return null;
   }
-  // Rezept direkt öffnen: zum Reiter "Ernährung" wechseln und die Detailansicht zeigen
+  // Rezept direkt öffnen: als Popup über dem Planer (der Reiter bleibt Kalender)
   window.planerOpenRecipe = function(id) {
-    var tab = Array.prototype.filter.call(document.querySelectorAll('.sub-tab'), function(b) {
-      return /planer-ernaehrung/.test(b.getAttribute('onclick') || '');
-    })[0];
-    if (tab) showSlot('planer-ernaehrung', tab);
-    if (window.rkOpenRecipe) window.rkOpenRecipe(id);
+    if (!window.rkOpenRecipe || !window.rkOpenRecipe(id, true)) alert('Dieses Rezept ist nicht mehr vorhanden.');
   };
 
   var _PLANER_CAT_LABEL = { breakfast: 'Frühstück', lunch: 'Mittag', dinner: 'Abend', snack: 'Snack' };
