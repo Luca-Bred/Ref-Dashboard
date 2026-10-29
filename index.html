@@ -3405,6 +3405,15 @@ body.preview-tablet .rsp-meal-4 { grid-template-columns: 1fr 1fr !important; }
     font-size:12.5px;cursor:pointer;color:var(--text-3);
   }
   .tag-opt.active{background:var(--grass);border-color:var(--grass);color:#0a1f0e;}
+  .nutri-box{margin:6px 0 4px;padding:12px 14px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;}
+  .nutri-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .nutri-head .nt{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--grass);font-family:'Barlow Condensed','Inter',sans-serif;}
+  .nutri-head .ns{font-size:11px;color:var(--text-3);}
+  .nutri-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:8px;}
+  .nutri-tile{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;}
+  .nutri-tile .nv{font-size:17px;font-weight:700;color:var(--text);line-height:1.2;}
+  .nutri-tile .nv small{font-size:11px;font-weight:500;color:var(--text-3);margin-left:1px;}
+  .nutri-tile .nl{font-size:9.5px;color:var(--text-3);margin-top:2px;text-transform:uppercase;letter-spacing:.03em;}
   .tag-add{display:flex;gap:8px;margin-top:10px;}
   .tag-add input{flex:1;max-width:240px;}
   .tag-add button{white-space:nowrap;}
@@ -5147,12 +5156,15 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-lachs-blumenkohlreis-lowcarb',
-    _v: 1,
+    _v: 2,
     name: 'Lachs auf Blumenkohlreis mit Sesam-Soja-Dressing',
     category: 'dinner',
     baseServings: 2,
     kcal: 486,
     protein: 40,
+    carbs: 26,
+    fat: 26,
+    fiber: 11,
     tags: ['Bowl','Air Fryer','Schnell','Proteinreich'],
     ingredients: [
       {name:'Lachsfilet', amount:250, unit:'g'},
@@ -5180,12 +5192,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-haehnchen-cordon-bleu-ohne-panade',
-    _v: 1,
+    _v: 2,
     name: 'Hähnchen-Cordon-Bleu ohne Panade',
     category: 'dinner',
     baseServings: 2,
     kcal: 365,
     protein: 48,
+    carbs: 0,
+    fat: 18,
     tags: ['Air Fryer','Schnell','Proteinreich'],
     ingredients: [
       {name:'Hähnchenbrustfilets (je ca. 150g)', amount:2, unit:''},
@@ -5206,12 +5220,15 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-gefuellte-paprika-hack-blumenkohlreis',
-    _v: 1,
+    _v: 2,
     name: 'Gefüllte Paprika mit Hackfleisch und Blumenkohlreis',
     category: 'dinner',
     baseServings: 2,
     kcal: 545,
     protein: 47,
+    carbs: 28,
+    fat: 28,
+    fiber: 8,
     tags: ['Air Fryer','Batch-Cooking','Proteinreich'],
     ingredients: [
       {name:'Große Paprika (je ca. 200g)', amount:2, unit:''},
@@ -5239,12 +5256,13 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-haehnchen-schnitzel-parmesan-mandel',
-    _v: 1,
+    _v: 2,
     name: 'Hähnchen-Schnitzel im Parmesan-Mandel-Mantel',
     category: 'dinner',
     baseServings: 2,
     kcal: 460,
     protein: 49,
+    fat: 27,
     tags: ['Air Fryer','Schnell','Proteinreich'],
     ingredients: [
       {name:'Hähnchenbrustfilet, in 4 flache Schnitzel geschnitten/plattiert', amount:300, unit:'g'},
@@ -5267,12 +5285,13 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-garnelen-zucchini-nudeln-knoblauch-chili',
-    _v: 1,
+    _v: 2,
     name: 'Garnelen-Zucchini-Nudeln mit Knoblauch-Chili-Öl',
     category: 'dinner',
     baseServings: 2,
     kcal: 410,
     protein: 38,
+    fat: 24,
     tags: ['Schnell','Proteinreich'],
     ingredients: [
       {name:'Garnelen, roh, geschält', amount:300, unit:'g'},
@@ -5297,12 +5316,13 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-haehnchen-bacon-spiesse-avocado-dip',
-    _v: 1,
+    _v: 2,
     name: 'Hähnchen-Bacon-Spieße mit Avocado-Dip',
     category: 'dinner',
     baseServings: 2,
     kcal: 540,
     protein: 46,
+    fat: 38,
     tags: ['Air Fryer','Proteinreich'],
     ingredients: [
       {name:'Hähnchenbrustfilet, in Würfel geschnitten', amount:300, unit:'g'},
@@ -5329,12 +5349,13 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-thunfisch-steak-sesamkruste-wasabi-mayo',
-    _v: 1,
+    _v: 2,
     name: 'Thunfisch-Steak mit Sesamkruste und Wasabi-Mayo',
     category: 'dinner',
     baseServings: 2,
     kcal: 480,
     protein: 41,
+    fat: 32,
     tags: ['Schnell','Proteinreich'],
     ingredients: [
       {name:'Thunfisch-Steaks (sushi-tauglich, frisch)', amount:300, unit:'g'},
@@ -5359,12 +5380,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-garnelen-avocado-salat-limette-koriander',
-    _v: 1,
+    _v: 2,
     name: 'Garnelen-Avocado-Salat mit Limette und Koriander',
     category: 'dinner',
     baseServings: 2,
     kcal: 495,
     protein: 34,
+    fat: 33,
+    fiber: 11,
     tags: ['Schnell','Proteinreich'],
     ingredients: [
       {name:'Garnelen, gegart (gekocht oder gebraten)', amount:300, unit:'g'},
@@ -5389,12 +5412,13 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-ofen-feta-cherrytomaten-oliven',
-    _v: 1,
+    _v: 2,
     name: 'Ofen-Feta mit Cherrytomaten und Oliven',
     category: 'dinner',
     baseServings: 2,
     kcal: 429,
     protein: 16,
+    fat: 36,
     tags: ['Vegetarisch','Air Fryer','Schnell','Batch-Cooking'],
     ingredients: [
       {name:'Feta (ganzer Block)', amount:200, unit:'g'},
@@ -5416,12 +5440,13 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-zucchini-puffer-frischkaese-dip',
-    _v: 2,
+    _v: 3,
     name: 'Zucchini-Puffer mit Frischkäse-Dip',
     category: 'snack',
     baseServings: 2,
     kcal: 501,
     protein: 22,
+    fat: 40,
     tags: ['Vegetarisch','Schnell','Batch-Cooking'],
     ingredients: [
       {name:'Zucchini, geraspelt', amount:500, unit:'g'},
@@ -5448,12 +5473,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-lachs-zitronen-pasta-skyr-sauce',
-    _v: 1,
+    _v: 2,
     name: 'Lachs-Zitronen-Pasta mit Skyr-Sauce',
     category: 'dinner',
     baseServings: 2,
     kcal: 877,
     protein: 54,
+    carbs: 77,
+    fat: 38,
     tags: ['Schnell','Proteinreich'],
     ingredients: [
       {name:'Spaghetti oder Penne, trocken', amount:200, unit:'g'},
@@ -5480,12 +5507,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-haehnchen-zwiebel-pasta-kaesesauce',
-    _v: 1,
+    _v: 2,
     name: 'Hähnchen-Zwiebel-Pasta mit Käsesauce',
     category: 'dinner',
     baseServings: 2,
     kcal: 760,
     protein: 58,
+    carbs: 83,
+    fat: 19,
     tags: ['Batch-Cooking','Proteinreich'],
     ingredients: [
       {name:'Spaghetti oder Penne, trocken', amount:200, unit:'g'},
@@ -5511,12 +5540,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-pasta-carbonara-style-ei-zwiebeln',
-    _v: 1,
+    _v: 2,
     name: 'Pasta Carbonara-Style mit Ei und Zwiebeln',
     category: 'dinner',
     baseServings: 2,
     kcal: 675,
     protein: 30,
+    carbs: 77,
+    fat: 26,
     tags: ['Vegetarisch'],
     ingredients: [
       {name:'Spaghetti, trocken', amount:200, unit:'g'},
@@ -5539,12 +5570,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-lachs-pasta-zitrone-ei-sauce',
-    _v: 1,
+    _v: 2,
     name: 'Lachs-Pasta mit Zitrone und Ei-Sauce',
     category: 'dinner',
     baseServings: 2,
     kcal: 865,
     protein: 55,
+    carbs: 72,
+    fat: 39,
     tags: ['Schnell','Proteinreich'],
     ingredients: [
       {name:'Spaghetti, trocken', amount:200, unit:'g'},
@@ -5570,12 +5603,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-klassische-spaghetti-carbonara',
-    _v: 1,
+    _v: 2,
     name: 'Klassische Spaghetti Carbonara',
     category: 'dinner',
     baseServings: 2,
     kcal: 889,
     protein: 39,
+    carbs: 71,
+    fat: 52,
     tags: ['Schnell','Proteinreich'],
     ingredients: [
       {name:'Spaghetti, trocken', amount:200, unit:'g'},
@@ -5597,12 +5632,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-loaded-fries-hackfleisch-skyr-sauce',
-    _v: 1,
+    _v: 2,
     name: 'Loaded Fries mit Hackfleisch und Skyr-Sauce',
     category: 'dinner',
     baseServings: 2,
     kcal: 682,
     protein: 51,
+    carbs: 47,
+    fat: 30,
     tags: ['Air Fryer','Proteinreich'],
     ingredients: [
       {name:'Kartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
@@ -5631,12 +5668,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-suesskartoffel-pommes-feta-kraeuter-dip',
-    _v: 2,
+    _v: 3,
     name: 'Süßkartoffel-Pommes mit Feta-Kräuter-Dip',
     category: 'snack',
     baseServings: 2,
     kcal: 517,
     protein: 13,
+    carbs: 53,
+    fat: 25,
     tags: ['Vegetarisch','Air Fryer'],
     ingredients: [
       {name:'Süßkartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
@@ -5660,12 +5699,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-chili-cheese-fries',
-    _v: 2,
+    _v: 3,
     name: 'Chili-Cheese-Fries',
     category: 'snack',
     baseServings: 2,
     kcal: 788,
     protein: 54,
+    carbs: 68,
+    fat: 31,
     tags: ['Air Fryer','Batch-Cooking','Proteinreich'],
     ingredients: [
       {name:'Kartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
@@ -5692,12 +5733,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-truffle-fries-parmesan',
-    _v: 2,
+    _v: 3,
     name: 'Truffle Fries mit Parmesan',
     category: 'snack',
     baseServings: 2,
     kcal: 403,
     protein: 13,
+    carbs: 41,
+    fat: 20,
     tags: ['Vegetarisch','Air Fryer','Schnell'],
     ingredients: [
       {name:'Kartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
@@ -5717,12 +5760,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-pommes-spiegelei-speck',
-    _v: 1,
+    _v: 2,
     name: 'Pommes mit Spiegelei und Speck',
     category: 'breakfast',
     baseServings: 2,
     kcal: 658,
     protein: 28,
+    carbs: 41,
+    fat: 41,
     tags: ['Air Fryer','Schnell'],
     ingredients: [
       {name:'Kartoffeln, in Stifte geschnitten', amount:500, unit:'g'},
@@ -5744,12 +5789,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-crispy-salmon-bites',
-    _v: 2,
+    _v: 3,
     name: 'Crispy Salmon Bites',
     category: 'snack',
     baseServings: 2,
     kcal: 641,
     protein: 41,
+    carbs: 15,
+    fat: 46,
     tags: ['Air Fryer','Schnell','Proteinreich'],
     ingredients: [
       {name:'Lachsfilet, ohne Haut, in ca. 2cm Würfel geschnitten', amount:400, unit:'g'},
@@ -5777,12 +5824,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-garnelen-pasta-skyr-parmesan',
-    _v: 1,
+    _v: 2,
     name: 'Cremige Garnelen-Pasta mit Skyr-Parmesan-Sauce',
     category: 'dinner',
     baseServings: 2,
     kcal: 782,
     protein: 65,
+    carbs: 78,
+    fat: 24,
     tags: ['Schnell','Proteinreich'],
     ingredients: [
       {name:'Spaghetti oder Linguine, trocken', amount:200, unit:'g'},
@@ -5811,12 +5860,14 @@ const SEED_RECIPES = [
   },
   {
     id: 'seed-loaded-suesskartoffel-vegan',
-    _v: 1,
+    _v: 2,
     name: 'Fully Loaded Vegan High Protein Süßkartoffel',
     category: 'dinner',
     baseServings: 1,
     kcal: 800,
     protein: 57,
+    carbs: 82,
+    fat: 24,
     tags: ['Vegetarisch','Air Fryer','Proteinreich'],
     ingredients: [
       {name:'Süßkartoffel (mittelgroß, ca. 300g)', amount:1, unit:''},
@@ -5937,7 +5988,12 @@ function loadRecipes(){
   SEED_RECIPES.forEach(sd=>{
     const u = map[sd.id];
     if(!u) out.push(sd);
-    else if(!u._deleted) out.push(u);
+    else if(!u._deleted){
+      // Eigene Änderungen bleiben; neu ergänzte Nährwerte der Vorlage (KH/Fett/Ballaststoffe) werden übernommen,
+      // solange sie im gespeicherten Rezept noch nie gepflegt wurden
+      ['carbs','fat','fiber'].forEach(k=>{ if(u[k] === undefined && sd[k] !== undefined) u[k] = sd[k]; });
+      out.push(u);
+    }
   });
   const seedIds = {};
   SEED_RECIPES.forEach(sd=>{ seedIds[sd.id] = 1; });
@@ -6100,6 +6156,23 @@ function openDetail(id){
   renderDetail(r);
 }
 
+// Nährwerte pro Portion (nur gepflegte Werte werden angezeigt)
+function nutritionBoxHtml(r){
+  const has = v => v !== null && v !== undefined && v !== '' && !isNaN(v);
+  const tiles = [
+    [r.kcal,    'kcal', 'Kalorien'],
+    [r.protein, 'g',    'Eiweiß'],
+    [r.carbs,   'g',    'Kohlenhydrate'],
+    [r.fat,     'g',    'Fett'],
+    [r.fiber,   'g',    'Ballaststoffe']
+  ].filter(t => has(t[0]));
+  if(!tiles.length) return '';
+  return `<div class="nutri-box">
+    <div class="nutri-head"><span class="nt">Nährwerte</span><span class="ns">pro Portion · ca.-Werte</span></div>
+    <div class="nutri-grid">${tiles.map(t=>`<div class="nutri-tile"><div class="nv">${t[0]}<small>${t[1]}</small></div><div class="nl">${t[2]}</div></div>`).join('')}</div>
+  </div>`;
+}
+
 function renderDetail(r){
   const serv = currentServings[r.id];
   const factor = serv / (r.baseServings || 1);
@@ -6124,9 +6197,9 @@ function renderDetail(r){
             <button id="servPlus">+</button>
           </div>
         </div>
-        ${(r.kcal||r.protein) ? `<div class="meta-line" style="margin-bottom:14px;">${r.kcal?r.kcal+' kcal':''}${r.kcal&&r.protein?' · ':''}${r.protein?r.protein+'g Protein':''} <span style="opacity:.6">(pro Basisportion)</span></div>` : ''}
         <h3 class="section-title">Zutaten</h3>
         <ul class="ing-list" id="ingList"></ul>
+        ${nutritionBoxHtml(r)}
         ${r.steps && r.steps.length ? `
         <h3 class="section-title">Zubereitung</h3>
         <ol class="steps-list">${r.steps.map(s=>`<li>${escapeHtml(s)}</li>`).join('')}</ol>` : ''}
@@ -6196,7 +6269,10 @@ function recipeToObject(r, servings){
     servings: s,
     nutritionPerServing: {
       kcal: r.kcal != null ? r.kcal : null,
-      proteinGrams: r.protein != null ? r.protein : null
+      proteinGrams: r.protein != null ? r.protein : null,
+      carbsGrams: r.carbs != null ? r.carbs : null,
+      fatGrams: r.fat != null ? r.fat : null,
+      fiberGrams: r.fiber != null ? r.fiber : null
     },
     tags: r.tags || [],
     ingredients: (r.ingredients||[]).map(i => ({
@@ -6220,6 +6296,8 @@ function recipeToMarkdown(r, servings){
   const meta = [];
   if(o.nutritionPerServing.kcal) meta.push(o.nutritionPerServing.kcal + ' kcal');
   if(o.nutritionPerServing.proteinGrams) meta.push(o.nutritionPerServing.proteinGrams + 'g Protein');
+  if(o.nutritionPerServing.carbsGrams != null) meta.push(o.nutritionPerServing.carbsGrams + 'g KH');
+  if(o.nutritionPerServing.fatGrams != null) meta.push(o.nutritionPerServing.fatGrams + 'g Fett');
   const fm = [
     '---',
     'title: ' + JSON.stringify(o.name),
@@ -6253,6 +6331,8 @@ function recipeToText(r, servings){
   const meta = [];
   if(o.nutritionPerServing.kcal) meta.push(o.nutritionPerServing.kcal + ' kcal');
   if(o.nutritionPerServing.proteinGrams) meta.push(o.nutritionPerServing.proteinGrams + 'g Protein');
+  if(o.nutritionPerServing.carbsGrams != null) meta.push(o.nutritionPerServing.carbsGrams + 'g KH');
+  if(o.nutritionPerServing.fatGrams != null) meta.push(o.nutritionPerServing.fatGrams + 'g Fett');
   const lines = [o.name, ''];
   lines.push(o.servings + ' Portionen' + (meta.length ? ' | ' + meta.join(' | ') : ''));
   if(o.tags.length) lines.push('Tags: ' + o.tags.join(', '));
@@ -6399,7 +6479,7 @@ function openShareModal(r){
 /* ---------- Add / Edit form ---------- */
 function openAddModal(){
   editingId = null;
-  openForm({name:'',category:'dinner',baseServings:2,tags:[],kcal:'',protein:'',ingredients:[{name:'',amount:'',unit:''}],steps:[''],notes:''});
+  openForm({name:'',category:'dinner',baseServings:2,tags:[],kcal:'',protein:'',carbs:null,fat:null,fiber:null,ingredients:[{name:'',amount:'',unit:''}],steps:[''],notes:''});
 }
 function openEditModal(id){
   const r = recipes.find(x=>x.id===id);
@@ -6443,6 +6523,21 @@ function openForm(data){
           <div>
             <label>Protein g (pro Portion, optional)</label>
             <input type="number" id="f_protein" value="${data.protein||''}">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label>Kohlenhydrate g (optional)</label>
+            <input type="number" id="f_carbs" value="${data.carbs!=null?data.carbs:''}">
+          </div>
+          <div>
+            <label>Fett g (optional)</label>
+            <input type="number" id="f_fat" value="${data.fat!=null?data.fat:''}">
+          </div>
+          <div>
+            <label>Ballaststoffe g (optional)</label>
+            <input type="number" id="f_fiber" value="${data.fiber!=null?data.fiber:''}">
           </div>
         </div>
 
@@ -6561,6 +6656,9 @@ function openForm(data){
       baseServings: parseInt(root.getElementById('f_servings').value) || 2,
       kcal: root.getElementById('f_kcal').value ? parseInt(root.getElementById('f_kcal').value) : null,
       protein: root.getElementById('f_protein').value ? parseInt(root.getElementById('f_protein').value) : null,
+      carbs: root.getElementById('f_carbs').value !== '' ? parseInt(root.getElementById('f_carbs').value) : null,
+      fat: root.getElementById('f_fat').value !== '' ? parseInt(root.getElementById('f_fat').value) : null,
+      fiber: root.getElementById('f_fiber').value !== '' ? parseInt(root.getElementById('f_fiber').value) : null,
       tags: [...selectedTags],
       ingredients: cleanIngredients,
       steps: cleanSteps,
